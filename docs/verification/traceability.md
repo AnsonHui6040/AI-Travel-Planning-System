@@ -30,9 +30,9 @@
 | C-06 | T12 | 待建立 | 未驗收 |
 | C-07 | T13 | 待建立 | 未驗收 |
 | C-08 | T14、T38 | 待建立 | 未驗收 |
-| C-09 | T03 | 待建立 | 未驗收 |
+| C-09 | T03 | `supabase/tests/01_rls_enabled.test.sql`、`02_trip_permissions.test.sql`（anon 無權限）；伺服器端只用 anon key | 部分 |
 | C-10 | T33 | 待建立 | 未驗收 |
-| C-11 | T03 | 待建立 | 未驗收 |
+| C-11 | T03 | `apps/web/lib/server/guard.test.ts`；`supabase/tests/03_rate_limit.test.sql`；`apps/web/e2e/guard.spec.ts` | 已驗收 |
 | C-12 | T12、T31 | 待建立 | 未驗收 |
 
 ## 第 4 節 程式安全
@@ -52,7 +52,7 @@
 | S-11 | T01 | lockfile 已納入；`.npmrc` `save-exact=true`；`strictDepBuilds: true` | 部分 |
 | S-12 | T01、T02 | `.gitignore` 排除 `.env*`；`.env.example`；pre-commit gitleaks 擋下假 secret；CI gitleaks 擋下 PR #3 | 已驗收 |
 | S-13 | T04 | 待建立 | 未驗收 |
-| S-14 | T02、T03、T14、T16、T18 | T02：test、typecheck、lint、build、依賴方向、gitleaks、依賴漏洞已啟用（PR #2、#3、#4）；main 分支保護已啟用（PR #5 為 blocked）；其餘關卡於 T03、T14、T16、T18 | 部分 |
+| S-14 | T02、T03、T14、T16、T18 | T02：test、typecheck、lint、build、依賴方向、gitleaks、依賴漏洞已啟用（PR #2、#3、#4）；T03：RLS 權限測試已啟用；main 分支保護已啟用（PR #5 為 blocked）；其餘關卡於 T03、T14、T16、T18 | 部分 |
 | S-15 | 每個 Task | PR #1、#2 附 `/security-review` 結果 | 部分 |
 | S-16 | T19、T24 | 待建立 | 未驗收 |
 | S-17 | T19 | 待建立 | 未驗收 |
@@ -77,8 +77,8 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| SH-01 | T03 | 待建立 | 未驗收 |
-| SH-02 | T03、T32 | 待建立 | 未驗收 |
+| SH-01 | T03 | `supabase/tests/02_trip_permissions.test.sql`（Owner、Companion、Viewer；唯讀連結於 T33） | 部分 |
+| SH-02 | T03、T32 | `supabase/tests/02_trip_permissions.test.sql`：trips 與 trip_members 相關各格；其餘資料表於建立時補 | 部分 |
 | SH-03 | T32 | 待建立 | 未驗收 |
 | SH-04 | T09、T34 | 待建立；真機 R6 | 未驗收 |
 | SH-05 | T34、T35 | 待建立；真機 R3 | 未驗收 |
