@@ -1,0 +1,14 @@
+# D25：旅行之間只啟用 Dependabot security updates。
+# open-pull-requests-limit: 0 關閉一般版本更新 PR；security updates 不受此限制。
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0

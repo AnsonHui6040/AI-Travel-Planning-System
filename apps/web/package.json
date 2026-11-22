@@ -1,0 +1,32 @@
+{
+  "name": "@atps/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@atps/ai": "workspace:*",
+    "@atps/core": "workspace:*",
+    "@atps/data-sources": "workspace:*",
+    "@atps/db": "workspace:*",
+    "@atps/memory": "workspace:*",
+    "@atps/offline": "workspace:*",
+    "@atps/regions": "workspace:*",
+    "@atps/schemas": "workspace:*",
+    "@atps/security": "workspace:*",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
+  }
+}

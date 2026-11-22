@@ -1,0 +1,32 @@
+{
+  "name": "ai-travel-planning-system",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:e2e": "pnpm --filter @atps/web test:e2e",
+    "typecheck": "pnpm -r typecheck && tsc -p tsconfig.tooling.json",
+    "lint": "eslint . && pnpm depcruise",
+    "depcruise": "depcruise apps packages --config .dependency-cruiser.cjs",
+    "build": "pnpm -r build",
+    "sync:manifests": "node tooling/sync-package-manifests.cjs",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@next/eslint-plugin-next": "16.4.6",
+    "@types/node": "26.6.6",
+    "@vitest/coverage-v8": "5.1.1",
+    "dependency-cruiser": "18.8.0",
+    "eslint": "10.15.0",
+    "globals": "17.14.0",
+    "husky": "9.1.7",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.73.0",
+    "vitest": "5.1.1"
+  }
+}
