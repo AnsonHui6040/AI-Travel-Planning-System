@@ -1,0 +1,17 @@
+{
+  "name": "@atps/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@atps/core": "workspace:*",
+    "@atps/schemas": "workspace:*"
+  }
+}

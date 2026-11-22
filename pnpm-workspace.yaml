@@ -1,0 +1,7 @@
+packages:
+  - apps/*
+  - packages/*
+
+# S-11：只允許明列的套件執行安裝腳本；未列入而需要執行者會讓安裝失敗
+strictDepBuilds: true
+onlyBuiltDependencies: []
