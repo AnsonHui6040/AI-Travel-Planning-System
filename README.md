@@ -8,10 +8,10 @@
 |---|---|
 | 更新日期 | 2026-11-22 |
 | 目前 Phase | Phase 0：基礎建設 |
-| 已完成 Task | 無（T01 待 PR merge） |
-| 進行中 Task | T01：workspace、工具鏈、依賴方向檢查 |
-| 下一個 Task | T02：GitHub Actions CI 關卡 |
-| 證據 | `docs/verification/T01.md` |
+| 已完成 Task | 無（T01、T02 待 PR merge） |
+| 進行中 Task | T02：GitHub Actions CI 關卡、pre-commit gitleaks、Dependabot |
+| 下一個 Task | T03：Supabase 本機環境、Auth、基本表與 RLS |
+| 證據 | `docs/verification/T01.md`、`docs/verification/T02.md` |
 
 ## 開發
 
