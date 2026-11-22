@@ -1,5 +1,5 @@
 # S-14 CI 必過關卡。job 名稱即 main 分支保護要求的 status check 名稱，改名時須同步更新分支保護。
-# 各關卡由建立其測試的 Task 啟用：RLS 權限測試於 T03，AI 輸出 schema 驗證於 T14，SSRF 於 T16，prompt injection 於 T18。
+# 各關卡由建立其測試的 Task 啟用：RLS 權限測試已於 T03 啟用；AI 輸出 schema 驗證於 T14，SSRF 於 T16，prompt injection 於 T18。
 name: CI
 
 on:
@@ -79,3 +79,19 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: pnpm audit
         run: pnpm audit --audit-level high
+
+  rls:
+    name: RLS 權限測試
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3.2.0
+        with:
+          version: 3.2.0
+      - name: 啟動本機資料庫並套用 migration
+        run: supabase db start
+      - name: pgTAP
+        run: supabase test db
