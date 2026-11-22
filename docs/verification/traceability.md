@@ -52,7 +52,7 @@
 | S-11 | T01 | lockfile 已納入；`.npmrc` `save-exact=true`；`strictDepBuilds: true` | 部分 |
 | S-12 | T01、T02 | `.gitignore` 排除 `.env*`；`.env.example`；pre-commit gitleaks 擋下假 secret；CI gitleaks 擋下 PR #3 | 已驗收 |
 | S-13 | T04 | 待建立 | 未驗收 |
-| S-14 | T02、T03、T14、T16、T18 | T02：test、typecheck、lint、build、依賴方向、gitleaks、依賴漏洞已啟用（PR #2、#3、#4）；main 分支保護待 repo 公開；其餘關卡於 T03、T14、T16、T18 | 部分 |
+| S-14 | T02、T03、T14、T16、T18 | T02：test、typecheck、lint、build、依賴方向、gitleaks、依賴漏洞已啟用（PR #2、#3、#4）；main 分支保護已啟用（PR #5 為 blocked）；其餘關卡於 T03、T14、T16、T18 | 部分 |
 | S-15 | 每個 Task | PR #1、#2 附 `/security-review` 結果 | 部分 |
 | S-16 | T19、T24 | 待建立 | 未驗收 |
 | S-17 | T19 | 待建立 | 未驗收 |
