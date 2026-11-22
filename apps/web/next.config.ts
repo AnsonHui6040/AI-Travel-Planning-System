@@ -1,5 +1,6 @@
 import path from "node:path";
 import type { NextConfig } from "next";
+import { withWorkflow } from "workflow/next";
 import { staticSecurityHeaders } from "./lib/security-headers";
 
 const nextConfig: NextConfig = {
@@ -24,4 +25,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// T05：背景 job 採 Vercel Workflow（docs/decisions/0001-background-jobs.md）
+export default withWorkflow(nextConfig);

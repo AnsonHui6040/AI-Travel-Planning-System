@@ -42,6 +42,7 @@
 | D28 | 可儲存資料 | 名稱、地址、營業時間以官方網站為準；座標使用 Google 經緯度，保存不超過 30 日，到期重新取得；Google 名稱、照片、評分只即時顯示 |
 | D29 | AI 輸入 | AI 只使用自行搜尋取得的資料；prompt 不含任何 Google Maps 內容及其推算結果；以嚴格 schema、輸入驗證與錯誤回報確保品質 |
 | D30 | 即時運行資訊 | ODPT 只接基本ライセンス與 CC 授權資料集；其他營運商由 Verification 以白名單 fetch 讀取官方運行情報頁；沒有來源的路線標示「無即時資料」 |
+| D31 | 背景 job | Vercel Workflow（`docs/decisions/0001-background-jobs.md`） |
 
 ---
 
@@ -621,7 +622,6 @@ Live Operations Mode：即時官方狀態優先於旅前資料；Live Planner �
 
 | 項目 | 決定時機 |
 |---|---|
-| 背景 job 技術：Vercel Workflow 或 Supabase Queues | T05 |
 | AI adapter 是否以 Vercel AI SDK 為基礎，或直接使用三家原生 SDK | T13 開始前 |
 | 第 2.8 節各狀態的進入條件與時點 | T07 開始前，以狀態表確認 |
 | 第 2.10 節「差異重大」的標準 | T10 開始前，以狀態表確認 |

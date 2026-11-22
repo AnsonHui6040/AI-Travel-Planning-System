@@ -7,14 +7,15 @@
     "node": ">=22"
   },
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run && pnpm test:workflow",
     "test:e2e": "pnpm --filter @atps/web test:e2e",
     "typecheck": "pnpm -r typecheck && tsc -p tsconfig.tooling.json",
     "lint": "eslint . && pnpm depcruise",
     "depcruise": "depcruise apps packages --config .dependency-cruiser.cjs",
     "build": "pnpm -r build",
     "sync:manifests": "node tooling/sync-package-manifests.cjs",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:workflow": "vitest run -c apps/web/vitest.workflow.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -27,6 +28,7 @@
     "husky": "9.1.7",
     "typescript": "6.0.3",
     "typescript-eslint": "8.73.0",
-    "vitest": "5.1.1"
+    "vitest": "5.1.1",
+    "workflow": "5.7.1"
   }
 }

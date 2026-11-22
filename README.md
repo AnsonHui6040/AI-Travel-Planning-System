@@ -7,11 +7,11 @@
 | 項目 | 內容 |
 |---|---|
 | 更新日期 | 2026-11-23 |
-| 目前 Phase | Phase 0：基礎建設 |
-| 已完成 Task | T01、T02、T03、T04（PR #1、#2、#6、#7 已 merge） |
+| 目前 Phase | Phase 1：核心領域 |
+| 已完成 Task | T01–T05 |
 | 進行中 Task | 無 |
-| 下一個 Task | T05：背景 job 技術 spike，已選定 Vercel Workflow |
-| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md` |
+| 下一個 Task | T06：全部實體的 Zod schema、migration 與 repository（開始前須確認 AI 填寫欄位的驗證格式與上下限） |
+| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md`、`T05.md`；決策 `docs/decisions/0001-background-jobs.md` |
 
 ## 開發
 

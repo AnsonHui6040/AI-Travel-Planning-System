@@ -33,7 +33,7 @@
 | C-09 | T03 | `supabase/tests/01_rls_enabled.test.sql`、`02_trip_permissions.test.sql`（anon 無權限）；伺服器端只用 anon key | 部分 |
 | C-10 | T33 | 待建立 | 未驗收 |
 | C-11 | T03 | `apps/web/lib/server/guard.test.ts`；`supabase/tests/03_rate_limit.test.sql`；`apps/web/e2e/guard.spec.ts` | 已驗收 |
-| C-12 | T12、T31 | 待建立 | 未驗收 |
+| C-12 | T05、T12、T31 | T05：`apps/web/workflows/spike-long-job.workflow.test.ts` 確認 job 輸入與結果帶發起人編號；解密限制於 T12 | 部分 |
 
 ## 第 4 節 程式安全
 
