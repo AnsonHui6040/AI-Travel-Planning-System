@@ -1,0 +1,14 @@
+**/node_modules
+**/.next
+**/.env
+**/.env.*
+!.env.example
+.git
+.claude
+.husky
+.github
+**/test-results
+**/playwright-report
+**/coverage
+supabase/.temp
+graphify-out

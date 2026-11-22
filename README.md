@@ -8,10 +8,10 @@
 |---|---|
 | 更新日期 | 2026-11-23 |
 | 目前 Phase | Phase 0：基礎建設 |
-| 已完成 Task | 無（T01、T02、T03 待 PR merge） |
-| 進行中 Task | T03：Supabase 本機環境、Auth、基本表、RLS、C-11 |
-| 下一個 Task | T04：Next.js standalone Dockerfile 與 docker-compose |
-| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md` |
+| 已完成 Task | 無（T01–T04 待 PR merge） |
+| 進行中 Task | 無 |
+| 下一個 Task | T05：背景 job 技術 spike（Vercel Workflow 或 Supabase Queues） |
+| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md` |
 
 ## 開發
 

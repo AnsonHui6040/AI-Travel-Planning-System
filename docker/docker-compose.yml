@@ -1,0 +1,22 @@
+# T04：自架執行。於 repo 根目錄：docker compose -f docker/docker-compose.yml up --build
+# Supabase 另以 `supabase start` 或自架 Supabase 提供；環境變數由 env_file 於執行時傳入，不寫入 image
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: atps-web:local
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: ../.env.docker
+        required: false
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/apps/web/.next/cache
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
