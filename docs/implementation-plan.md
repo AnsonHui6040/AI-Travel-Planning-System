@@ -412,9 +412,9 @@ Live Operations Mode：即時官方狀態優先於旅前資料；Live Planner �
 
 | Task | 內容 | 對應 | PASS 標準 |
 |---|---|---|---|
-| T01 | pnpm workspace、第 2.1 節目錄、TypeScript strict、ESLint、Vitest、Playwright、`.env.example`、`.gitignore`、專案 CLAUDE.md、README 狀態段、`docs/verification/traceability.md` | M-01–M-05、S-12 | 四項指令全過；dependency-cruiser 依第 2.2 節依賴表設定，對刻意違規的 import 報錯 |
+| T01 | pnpm workspace、第 2.1 節目錄、TypeScript strict、ESLint、Vitest、Playwright、`.env.example`、`.gitignore`、專案 CLAUDE.md、README 狀態段、`docs/verification/traceability.md`；S-08 的 CSP（每次請求不同的 nonce）、HSTS、frame-ancestors | M-01–M-05、S-08、S-12 | 四項指令全過；dependency-cruiser 依第 2.2 節依賴表設定，對刻意違規的 import 報錯；頁面回應帶 CSP、HSTS 與 `frame-ancestors 'none'`，框架腳本帶該次請求的 nonce，沒有 CSP 違規 |
 | T02 | GitHub Actions 建立 S-14 關卡架構，啟用 test、typecheck、lint、build、依賴方向檢查、gitleaks、依賴漏洞；pre-commit gitleaks；main 分支保護要求 CI 通過；啟用 Dependabot security alerts 與 security updates | S-12、S-14、D25 | 含假 secret 的測試分支被擋下；含 high 漏洞依賴的測試分支被擋下；Dependabot 設定已啟用 |
-| T03 | Supabase CLI 本機環境；Supabase Auth（Google、Email magic link；Apple 預留設定）；使用者、行程、`trip_members`（Owner、Companion、Viewer）基本表；RLS helper 函式；所有表啟用 RLS，policy 依第 6 節權限表；pgTAP 測試框架；CI 啟用 RLS 權限測試關卡 | C-09、D05、SH-01、SH-02、S-14 | `supabase test db` 通過；檢查腳本確認所有表已啟用 RLS；pgTAP 覆蓋第 6 節權限表中已建立資料表的每一格；未登入請求被拒；RLS 關卡在 CI 執行 |
+| T03 | Supabase CLI 本機環境；Supabase Auth（Google、Email magic link；Apple 預留設定）；使用者、行程、`trip_members`（Owner、Companion、Viewer）基本表；RLS helper 函式；所有表啟用 RLS，policy 依第 6 節權限表；pgTAP 測試框架；CI 啟用 RLS 權限測試關卡；Server Actions 與 Route Handlers 共用的登入、Origin 驗證與每位使用者每個端點的速率限制 | C-09、C-11、D05、SH-01、SH-02、S-14 | `supabase test db` 通過；檢查腳本確認所有表已啟用 RLS；pgTAP 覆蓋第 6 節權限表中已建立資料表的每一格；未登入請求被拒；Origin 不符的請求被拒；超過速率限制的請求回應 429；RLS 關卡在 CI 執行 |
 | T04 | Next.js standalone Dockerfile（非 root）、docker-compose、自架說明 | S-13 | `docker build` 成功；容器健康檢查回應 200；image 內搜尋不到 `.env` 與 API key |
 | T05 | 背景 job 技術 spike：比較 Vercel Workflow 與 Supabase Queues 的逾時、重試、取消、進度回報 | — | 決策寫入 `docs/decisions/`；選定方案完成一個長時間示範 job，含失敗重試與取消 |
 
@@ -455,7 +455,7 @@ Live Operations Mode：即時官方狀態優先於旅前資料；Live Planner �
 | Task | 內容 | 對應 | PASS 標準 |
 |---|---|---|---|
 | T23 | 旅行基線：航班、住宿、日期、同行者、體力限制、預算、固定活動、已付款項目、必去與排除地點、交通偏好、攝影需求；三類限制分類；矛盾檢查；確認後產生 Trip Baseline v1 | — | 評估場景 E5；UI 截圖 |
-| T24 | 多 AI 獨立研究：Research A（主要景點與官方資訊）、B（餐飲、咖啡、購物）、C（攝影、日出日落、夜景、季節活動）、D（冷門替代）平行執行；彼此不讀對方結論；只寫入 Candidate List；照片與 place_id 由伺服器依 S-16 補上 | S-03、S-16 | job 輸入不含其他研究結果；缺必填欄位（名稱、地區、類型、推薦原因、停留時間、限制、來源、資料日期）的候選被拒；含圖片網址的輸出被拒；place_id 解析失敗的候選為 Unverified |
+| T24 | 多 AI 獨立研究：Research A（主要景點與官方資訊）、B（餐飲、咖啡、購物）、C（攝影、日出日落、夜景、季節活動）、D（冷門替代）平行執行；彼此不讀對方結論；只寫入 Candidate List；照片與 place_id 由伺服器依 S-16 補上；AI 與網頁內容共用的呈現元件：Markdown sanitize、連結只允許 https 並加上 `rel="noopener noreferrer"` | S-03、S-08、S-16 | job 輸入不含其他研究結果；缺必填欄位（名稱、地區、類型、推薦原因、停留時間、限制、來源、資料日期）的候選被拒；含圖片網址的輸出被拒；place_id 解析失敗的候選為 Unverified；含 script、事件屬性、`javascript:` 連結的 Markdown 呈現後不可執行；非 https 連結被移除；保留的連結帶 `rel="noopener noreferrer"` |
 | T25 | 合併、去重、交叉核查：以 place_id、名稱、位置去重；證據順序；四種核實狀態 | D07 | 去重測試；評估場景 E4 |
 | T26 | 候選篩選：個人價值、獨特性、地理配合、時間成本、交通成本、天氣依賴、時段依賴、替代性；Primary 與 Backup | — | 每個候選八個篩選維度均有評分；每個候選標記 Primary 或 Backup |
 | T27 | 地理分區：由 AI 依自行搜尋的資料與交通估算分群，輸出經 schema 驗證 | D29 | 分區輸出通過 schema 驗證；評估場景 E9；每個主要區域至少有一個 Backup |

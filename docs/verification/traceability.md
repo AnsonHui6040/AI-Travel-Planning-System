@@ -32,7 +32,7 @@
 | C-08 | T14、T38 | 待建立 | 未驗收 |
 | C-09 | T03 | 待建立 | 未驗收 |
 | C-10 | T33 | 待建立 | 未驗收 |
-| C-11 | 未指定 | 待建立 | 未驗收 |
+| C-11 | T03 | 待建立 | 未驗收 |
 | C-12 | T12、T31 | 待建立 | 未驗收 |
 
 ## 第 4 節 程式安全
@@ -46,7 +46,7 @@
 | S-05 | T16 | 待建立 | 未驗收 |
 | S-06 | T14 | 待建立 | 未驗收 |
 | S-07 | T17 | 待建立 | 未驗收 |
-| S-08 | T01；sanitize、CSP、HSTS、frame-ancestors 未指定 | ESLint 禁止 `dangerouslySetInnerHTML` | 部分 |
+| S-08 | T01、T24 | T01：ESLint 禁止 `dangerouslySetInnerHTML`；`apps/web/lib/security-headers.test.ts`（CSP、nonce、HSTS）；`apps/web/e2e/security-headers.spec.ts`（實際回應標頭、腳本 nonce、無 CSP 違規）。T24：Markdown sanitize 與連結限制待建立 | 部分 |
 | S-09 | T21 | 待建立 | 未驗收 |
 | S-10 | T17 | 待建立 | 未驗收 |
 | S-11 | T01 | lockfile 已納入；`.npmrc` `save-exact=true`；`strictDepBuilds: true` | 部分 |
@@ -98,7 +98,4 @@
 
 ## 沒有負責 Task 的規則
 
-| 規則 | 缺口 |
-|---|---|
-| C-11 | Origin 驗證與每位使用者每個端點的速率限制沒有 Task |
-| S-08 | Markdown sanitize、連結 `rel` 與 https 限制、CSP、HSTS、frame-ancestors 沒有 Task |
+無。C-11 於 2026-11-22 分配至 T03；S-08 的安全標頭分配至 T01，Markdown sanitize 與連結限制分配至 T24。

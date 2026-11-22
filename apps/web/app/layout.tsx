@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
@@ -11,7 +12,9 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // S-08：nonce 只能在請求時套用，所有頁面須動態渲染
+  await connection();
   return (
     <html lang="zh-Hant-TW">
       <body>{children}</body>

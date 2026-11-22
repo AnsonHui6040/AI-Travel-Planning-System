@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { staticSecurityHeaders } from "./lib/security-headers";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -14,6 +15,9 @@ const nextConfig: NextConfig = {
     "@atps/offline",
     "@atps/db",
   ],
+  async headers() {
+    return [{ source: "/:path*", headers: [...staticSecurityHeaders] }];
+  },
 };
 
 export default nextConfig;
