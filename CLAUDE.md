@@ -11,6 +11,7 @@
 | 型別檢查 | `pnpm typecheck` |
 | Lint 與依賴方向 | `pnpm lint`（含 `pnpm depcruise`） |
 | Build | `pnpm build` |
+| 資料庫（需 Docker） | `supabase start`；套用 migration `supabase db reset`；pgTAP `supabase test db` |
 | E2E（390 與 1280） | `pnpm test:e2e`，首次執行前 `pnpm --filter @atps/web exec playwright install chromium` |
 
 ## 結構與依賴
@@ -44,3 +45,9 @@
 - `.github/workflows/ci.yml` 的 job 名稱是分支保護要求的 status check 名稱，改名時同步更新分支保護。
 - action 一律以 commit SHA 固定版本，註解標示對應 tag。
 - Dependabot 只開 security updates，一般版本更新 PR 關閉（D25）。
+
+## 資料庫
+
+- 新增資料表必須啟用 RLS，policy 依計畫第 6 節權限表，並在 `supabase/tests/` 加 pgTAP 測試。
+- 權限判斷用 `private` schema 的 helper（security definer、`search_path = ''`）；`private` 不經 PostgREST 公開。
+- E2E 的 `/api/*` 測試需要 `supabase start` 與 `apps/web/.env.local`（範本見 `.env.example`）。
