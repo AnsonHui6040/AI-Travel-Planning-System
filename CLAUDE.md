@@ -37,3 +37,10 @@
 
 - `.env` 與 `.env.*` 不納入版本控制，只提交 `.env.example`（S-12）。
 - AI 與外部 API key 由使用者在設定頁輸入並存入 Vault，不放環境變數（C-02、D15）。
+- pre-commit 以 gitleaks 掃描暫存內容，需先 `brew install gitleaks`；`pnpm install` 會經 `prepare` 啟用 husky。
+
+## CI
+
+- `.github/workflows/ci.yml` 的 job 名稱是分支保護要求的 status check 名稱，改名時同步更新分支保護。
+- action 一律以 commit SHA 固定版本，註解標示對應 tag。
+- Dependabot 只開 security updates，一般版本更新 PR 關閉（D25）。
