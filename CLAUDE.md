@@ -56,3 +56,5 @@
 - 權限判斷用 `private` schema 的 helper（security definer、`search_path = ''`）；`private` 不經 PostgREST 公開。
 - E2E 的 `/api/*` 測試需要 `supabase start` 與 `apps/web/.env.local`（範本見 `.env.example`）。需要登入的 E2E 另需本機的 `SUPABASE_SERVICE_ROLE_KEY`（`supabase status -o env` 的 `SERVICE_ROLE_KEY`）。
 - API key 只經 `save_api_key`、`decrypt_api_key`、`decrypt_job_api_key` 存取（擁有者 `atps_key_keeper`，只授權 service_role）；service role client 只在 `apps/web/lib/server/supabase.ts` 建立。
+- 敏感欄位（全名、電話、電子郵件）只經 `save_sensitive_field`、`set_sensitive_sharing`、`list_trip_sensitive_fields`（session）與 `ai_sensitive_fields`（service_role）存取，擁有者 `atps_pii_keeper`。送往 AI 的 input 一律經 `@atps/security` 的 `buildAiPayload`（S-07）；伺服器 log 一律經 `createLogger`（S-10）。
+- 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。

@@ -237,3 +237,4 @@ export class SupabaseKeyDecryptor implements KeyDecryptor {
     return result.data;
   }
 }
+export { SensitiveFieldFormatError, SupabaseSensitiveFields, type AiSensitiveField, type Sharing, type VisibleSensitiveField } from "./sensitive-fields";

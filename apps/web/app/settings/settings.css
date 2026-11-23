@@ -137,3 +137,39 @@
 .settings table.usage thead th:first-child {
   text-align: left;
 }
+
+/* T17：我的聯絡資料 */
+.settings .toggles {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.settings .toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+}
+
+.settings .toggle input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.settings .shared h2 {
+  font-size: 1.1rem;
+  margin: 2rem 0 0.5rem;
+}
+
+.settings .shared table.usage {
+  margin-top: 0;
+}
+
+.settings .shared table.usage td,
+.settings .shared table.usage thead th {
+  text-align: left;
+  overflow-wrap: anywhere;
+}
