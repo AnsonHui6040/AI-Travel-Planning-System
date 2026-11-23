@@ -80,7 +80,7 @@
 | SH-01 | T03 | `supabase/tests/02_trip_permissions.test.sql`（Owner、Companion、Viewer；唯讀連結於 T33） | 部分 |
 | SH-02 | T03、T32 | `supabase/tests/02_trip_permissions.test.sql`：trips 與 trip_members 相關各格；其餘資料表於建立時補 | 部分 |
 | SH-03 | T32 | 待建立 | 未驗收 |
-| SH-04 | T09、T34 | 待建立；真機 R6 | 未驗收 |
+| SH-04 | T07、T09、T34 | T07：`packages/core/src/states.test.ts`（base version 相同才套用，否則失效）；真機 R6 | 部分 |
 | SH-05 | T34、T35 | 待建立；真機 R3 | 未驗收 |
 | SH-06 | T09、T34 | 待建立；真機 R6 | 未驗收 |
 | SH-07 | T32 | 待建立 | 未驗收 |
