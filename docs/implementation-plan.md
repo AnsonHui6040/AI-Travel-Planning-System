@@ -629,7 +629,6 @@ Live Operations Mode：即時官方狀態優先於旅前資料；Live Planner �
 | 延誤少於 10 分鐘與超過 20 分鐘的分級 | T08 開始前，以狀態表確認 |
 | 各角色步數與 token 上限的預設值 | T14 開始前，以狀態表確認 |
 | 記憶限制衝突取最保守值的具體規則 | T41 開始前，以狀態表確認 |
-| AI 填寫欄位的驗證格式與上下限 | T06 開始前，以狀態表確認 |
 | 交通估算的固定緩衝分鐘數 | T28 開始前，以狀態表確認 |
 | Apple 登入啟用時間 | 取得 Apple Developer Program 帳號後 |
 | Claude plan 附送的 Console API credit 是否涵蓋 Agent SDK 以外的 API 呼叫 | T12 開始前查證 |
