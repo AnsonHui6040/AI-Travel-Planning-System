@@ -22,7 +22,10 @@ insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-00000000000d', 'outsider@example.test', 'authenticated', 'authenticated'),
   ('00000000-0000-0000-0000-00000000000e', 'invitee@example.test', 'authenticated', 'authenticated');
 
-select is((select count(*)::int from public.profiles), 5, '新使用者自動建立 profile');
+-- 只計本測試建立的使用者，避免本機 E2E 留下的使用者影響結果
+select is((select count(*)::int from public.profiles
+  where id between '00000000-0000-0000-0000-00000000000a' and '00000000-0000-0000-0000-00000000000e'), 5,
+  '新使用者自動建立 profile');
 
 -- 未登入
 set local role anon;
