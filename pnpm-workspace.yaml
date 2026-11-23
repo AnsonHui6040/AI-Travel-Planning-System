@@ -9,3 +9,7 @@ allowBuilds:
   "@swc/core": false
   cbor-extract: false
   esbuild: false
+
+# 依賴漏洞修補：GHSA-mrhx-c7xc-m3w5（zod <4.6.6），經 workflow > @workflow/cli > @vercel/cli-auth 間接帶入
+overrides:
+  "zod@<4.6.6": 4.6.7
