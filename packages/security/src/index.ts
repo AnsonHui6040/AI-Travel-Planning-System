@@ -32,3 +32,6 @@ export {
 export { createLogger, redactSensitive, type Logger, type LoggerOptions, type LogLevel, type RedactOptions } from "./logger";
 // 測試用合成資料（outbound payload 快照測試共用）
 export * as payloadFixtures from "./testing/payload-fixtures";
+
+// T18、S-03：不可信資料以資料區塊傳入
+export { composeRoleInput, type ComposeOptions, type DataBlock, type DataKind } from "./untrusted";

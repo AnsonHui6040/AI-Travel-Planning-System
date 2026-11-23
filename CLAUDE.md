@@ -57,4 +57,5 @@
 - E2E 的 `/api/*` 測試需要 `supabase start` 與 `apps/web/.env.local`（範本見 `.env.example`）。需要登入的 E2E 另需本機的 `SUPABASE_SERVICE_ROLE_KEY`（`supabase status -o env` 的 `SERVICE_ROLE_KEY`）。
 - API key 只經 `save_api_key`、`decrypt_api_key`、`decrypt_job_api_key` 存取（擁有者 `atps_key_keeper`，只授權 service_role）；service role client 只在 `apps/web/lib/server/supabase.ts` 建立。
 - 敏感欄位（全名、電話、電子郵件）只經 `save_sensitive_field`、`set_sensitive_sharing`、`list_trip_sensitive_fields`（session）與 `ai_sensitive_fields`（service_role）存取，擁有者 `atps_pii_keeper`。送往 AI 的 input 一律經 `@atps/security` 的 `buildAiPayload`（S-07）；伺服器 log 一律經 `createLogger`（S-10）。
+- 送往 AI 的 input 以 `composeRoleInput` 組成：網頁、搜尋結果、成員自由文字與行程資料放在資料區塊（S-03）。AI 輸出一律經 `handleRoleRun`／`gateRoleOutput` 才寫入，去處只有候選、核實結果、交通估算與待批准提案（S-01）。新增 prompt injection 案例加在 `packages/ai/src/injection/cases.ts`。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。

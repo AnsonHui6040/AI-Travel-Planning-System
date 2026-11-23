@@ -39,9 +39,9 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| S-01 | T09、T18 | T09：`packages/schemas/src/change.test.ts`（提案 schema）、`supabase/tests/05_apply_change.test.sql`（只有 `atps_change_writer` 可寫入正式行程表）；T18 待建立 | 部分 |
+| S-01 | T09、T18 | T09：`packages/schemas/src/change.test.ts`（提案 schema）、`supabase/tests/05_apply_change.test.sql`（只有 `atps_change_writer` 可寫入正式行程表）；T18：`packages/core/src/output-gate.test.ts`（AI 提案只能是需要批准的種類、只能操作已知項目）、回歸測試集 `packages/ai/src/injection/`（21 筆，沒有批准或正式行程寫入） | 已驗收 |
 | S-02 | T06、T14 | T06：`packages/schemas/src/schemas.test.ts`（拒絕未知欄位、格式與上下限）；T14：五個角色的 strict 輸出 schema（`packages/schemas/src/roles.test.ts`）、不符即丟棄並記錄、回傳原因與欄位（`packages/core/src/role-runner.test.ts`）；畫面顯示與重試隨各 job 畫面 | 部分 |
-| S-03 | T18、T24 | 待建立 | 未驗收 |
+| S-03 | T18、T24 | T18：`packages/security/src/untrusted.test.ts`（資料區塊、偽造標記中和）；回歸測試集 `packages/ai/src/injection/`（七類各 3 筆）；網頁與搜尋結果只產生候選並附來源（`researchCandidate` 的 sources 必填）。呈現端 Markdown sanitize 於 T24 | 部分 |
 | S-04 | T14 | `packages/ai/src/roles.test.ts`（五個角色的工具）、`packages/core/src/role-runner.test.ts`（只把內建搜尋交給 AI）、T13 adapter 拒絕清單以外的工具 | 已驗收 |
 | S-05 | T16 | `packages/security/src/allowlisted-fetch.test.ts`（SSRF 測試集：IP 直連、DNS 解析至私有位址、redirect 至白名單外、https 與連接埠限制、大小、時間與內容類型上限、白名單設定檔格式、連線固定到已驗證位址）；`address.test.ts`（私有與保留位址）；連線真實網站於旅前 TBD | 已驗收 |
 | S-06 | T14 | `packages/core/src/role-runner.test.ts`（步數與 token 超過即停止並記錄）；`supabase/tests/09_ai_settings.test.sql`；E2E 設定頁顯示每個角色的用量 | 已驗收 |
@@ -52,7 +52,7 @@
 | S-11 | T01 | lockfile 已納入；`.npmrc` `save-exact=true`；`strictDepBuilds: true` | 部分 |
 | S-12 | T01、T02 | `.gitignore` 排除 `.env*`；`.env.example`；pre-commit gitleaks 擋下假 secret；CI gitleaks 擋下 PR #3 | 已驗收 |
 | S-13 | T04 | `tooling/verify-docker-image.sh`：非 root、無 .env、無 API key | 已驗收 |
-| S-14 | T02、T03、T14、T16、T18 | T02：test、typecheck、lint、build、依賴方向、gitleaks、依賴漏洞已啟用（PR #2、#3、#4）；T03：RLS 權限測試已啟用；main 分支保護已啟用（PR #5 為 blocked）；T14：AI 輸出 schema 驗證測試包含在 test；T16：SSRF 測試集包含在 test，並另列 CI 步驟；prompt injection 回歸測試集於 T18 | 部分 |
+| S-14 | T02、T03、T14、T16、T18 | T02：test、typecheck、lint、build、依賴方向、gitleaks、依賴漏洞已啟用（PR #2、#3、#4）；T03：RLS 權限測試已啟用；main 分支保護已啟用（PR #5 為 blocked）；T14：AI 輸出 schema 驗證測試包含在 test；T16：SSRF 測試集包含在 test，並另列 CI 步驟；T18：prompt injection 回歸測試集包含在 test，並另列 CI 步驟。第 4 節列出的關卡全部啟用 | 已驗收 |
 | S-15 | 每個 Task | PR #1、#2 附 `/security-review` 結果 | 部分 |
 | S-16 | T19、T24 | 待建立 | 未驗收 |
 | S-17 | T17、T19 | T17：payload builder 排除 place_id、地址、座標、當地名稱，三家 outbound 快照驗證；Google 內容的完整排除（名稱來源、評分、照片、路線）於 T19 | 部分 |
