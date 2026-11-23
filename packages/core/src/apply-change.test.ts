@@ -44,6 +44,13 @@ const l1 = {
   operations: [{ op: "schedule_item", itemId: ITEM, date: "2026-12-01", start: "14:15", end: "15:00" }],
 };
 
+const factInvalidated = {
+  changeKind: "approved_fact_invalidated",
+  versionKind: "minor",
+  summary: "臨時休館，標示 At Risk",
+  operations: [{ op: "set_at_risk", itemId: ITEM, atRisk: true }],
+};
+
 function fakeDeps(result: CommitResult = { outcome: "applied", version: { major: 1, minor: 4 }, invalidatedIds: [] }) {
   const calls: Array<[string, unknown]> = [];
   const writer: ChangeWriter = {
@@ -77,13 +84,24 @@ describe("applyChange：唯一寫入函式（S-01）", () => {
     expect(calls).toEqual([]);
   });
 
-  it("L1 自動套用，不需批准者", async () => {
+  it("事實失效標示 At Risk 自動套用，不需批准者", async () => {
     const { deps, calls } = fakeDeps();
-    await applyChange(deps, { proposal: proposal(l1, { proposer_member_id: null, proposer_role: "live_planner" }), actorId: null });
+    await applyChange(deps, {
+      proposal: proposal(factInvalidated, { proposer_member_id: null, proposer_role: "live_planner" }),
+      actorId: null,
+    });
     expect(calls).toEqual([["autoApply", { proposalId: "40000000-0000-4000-8000-000000000001" }]]);
   });
 
-  it("成員批准自動類別時仍記錄批准者", async () => {
+  it("L1 壓縮緩衝沒有使用者確認時拒絕套用（決策 0005）", async () => {
+    const { deps, calls } = fakeDeps();
+    await expect(
+      applyChange(deps, { proposal: proposal(l1, { proposer_member_id: null, proposer_role: "live_planner" }), actorId: null }),
+    ).rejects.toThrow("需成員批准");
+    expect(calls).toEqual([]);
+  });
+
+  it("成員確認 L1 後交給寫入角色", async () => {
     const { deps, calls } = fakeDeps();
     await applyChange(deps, { proposal: proposal(l1), actorId: MEMBER });
     expect(calls[0]?.[0]).toBe("approve");
