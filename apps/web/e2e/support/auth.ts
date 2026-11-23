@@ -127,3 +127,9 @@ export async function saveApiKeyAsAdmin(userId: string, provider: "anthropic" | 
   const result = await adminClient().rpc("save_api_key", { p_owner: userId, p_provider: provider, p_secret: secret, p_tested_at: new Date().toISOString() });
   if (result.error) throw new Error("存入測試 key 失敗");
 }
+
+// 以 service role 直接存入基線草稿（Viewer 檢視測試用）
+export async function saveBaselineAsAdmin(tripId: string, data: Record<string, unknown>): Promise<void> {
+  const result = await adminClient().from("trip_baselines").insert({ trip_id: tripId, version: 1, data });
+  if (result.error) throw new Error("存入測試基線失敗");
+}

@@ -83,6 +83,8 @@ const lodging = z.strictObject({
 });
 const fixedActivity = z.strictObject({
   name: text(LIMITS.nameZh),
+  // T23：地區用於矛盾檢查（例如入住後趕往另一區）；不知道時為 null
+  area: nullable(text(LIMITS.area)),
   date: isoDate,
   start: hhmm,
   end: nullable(hhmm),
@@ -107,6 +109,8 @@ export const tripBaselineData = z
     photography_needs: nullable(text(LIMITS.longText)),
   })
   .refine((b) => b.end_date >= b.start_date, "結束日期不可早於開始日期");
+
+export type TripBaselineData = z.infer<typeof tripBaselineData>;
 
 export const tripBaselineRow = z.strictObject({
   id: uuid,

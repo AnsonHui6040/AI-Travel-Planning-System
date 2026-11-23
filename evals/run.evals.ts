@@ -1,7 +1,16 @@
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, it } from "vitest";
-import { parseRecording, parseScenario, renderReport, replayInvoker, runScenario } from "./src/index";
+import {
+  parseBaselineScenario,
+  parseRecording,
+  parseScenario,
+  renderBaselineReport,
+  renderReport,
+  replayInvoker,
+  runBaselineScenario,
+  runScenario,
+} from "./src/index";
 
 // T15：執行評估並把報告寫入 docs/verification/evals/。
 // 用法：pnpm evals:run（全部場景）；EVAL_SCENARIOS=E6 pnpm evals:run（指定場景）。
@@ -17,9 +26,23 @@ const files = readdirSync(join(import.meta.dirname, "scenarios"))
   .filter((f) => f.endsWith(".json"))
   .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
 
+// T23：基線矛盾檢查場景（確定性規則，不呼叫 AI）
+const baselineFiles = readdirSync(join(import.meta.dirname, "baseline"))
+  .filter((f) => f.endsWith(".json"))
+  .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
+
 it("有要執行的場景", () => {
-  expect(files.length).toBeGreaterThan(0);
+  expect(files.length + baselineFiles.length).toBeGreaterThan(0);
 });
+
+for (const file of baselineFiles) {
+  it(`評估 ${file}`, () => {
+    const report = runBaselineScenario(parseBaselineScenario(read(join(import.meta.dirname, "baseline", file))));
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(join(outDir, `${date}-${report.scenario.id}.md`), renderBaselineReport(report, { date }));
+    expect(report.passed).toBe(true);
+  });
+}
 
 for (const file of files) {
   it(`評估 ${file}`, async () => {

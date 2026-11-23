@@ -1,0 +1,25 @@
+{
+  "id": "E5",
+  "title": "飯店入住 15:00，另一區已付款活動 15:30",
+  "rule": "第 9.3 節 E5：基線階段即標示矛盾",
+  "baseline": {
+    "start_date": "2026-12-01",
+    "end_date": "2026-12-05",
+    "timezone": "Asia/Tokyo",
+    "flights": [
+      { "label": "去程", "departs_at": "2026-12-01T08:50:00+08:00", "arrives_at": "2026-12-01T13:15:00+09:00" },
+      { "label": "回程", "departs_at": "2026-12-05T14:25:00+09:00", "arrives_at": "2026-12-05T17:20:00+08:00" }
+    ],
+    "lodgings": [{ "name": "新宿飯店", "area": "新宿", "check_in": "2026-12-01", "check_out": "2026-12-05", "check_in_time": "15:00" }],
+    "companions": 1,
+    "stamina_note": null,
+    "budget": null,
+    "fixed_activities": [{ "name": "淺草和服體驗", "area": "淺草", "date": "2026-12-01", "start": "15:30", "end": "17:00", "paid": true }],
+    "paid_items": [],
+    "must_visit": [],
+    "excluded": [],
+    "transport_preferences": [],
+    "photography_needs": null
+  },
+  "expect": { "conflicts": ["check_in_too_close"], "confirmable": false }
+}
