@@ -1,4 +1,7 @@
 import type {
+  ApiKeyProvider,
+  ApiKeyStore,
+  KeyDecryptor,
   ChangeWriter,
   CommitResult,
   FeatureFlag,
@@ -194,5 +197,41 @@ export class SupabaseNotificationRepository implements NotificationRepository {
   async markRead(notificationId: string, at: Date): Promise<void> {
     const result = await this.client.from("notifications").update({ read_at: at.toISOString() }).eq("id", notificationId);
     if (result.error) throw new Error("更新 notifications 失敗");
+  }
+}
+
+// T12：API key 的儲存與解密只經資料庫函式，client 須以 service role 建立，只在伺服器使用（C-09）。
+// 錯誤訊息固定，不帶出 key 或資料庫訊息（C-04）。
+export class SupabaseApiKeyStore implements ApiKeyStore {
+  constructor(private readonly client: RpcClient) {}
+
+  async save(input: { ownerId: string; provider: ApiKeyProvider; secret: string; testedAt: Date | null }) {
+    const result = await this.client.rpc("save_api_key", {
+      p_owner: input.ownerId,
+      p_provider: input.provider,
+      p_secret: input.secret,
+      p_tested_at: input.testedAt?.toISOString() ?? null,
+    });
+    if (result.error) throw new Error("儲存 API key 失敗");
+  }
+}
+
+export class SupabaseKeyDecryptor implements KeyDecryptor {
+  constructor(private readonly client: RpcClient) {}
+
+  async forOwner(ownerId: string, provider: ApiKeyProvider): Promise<string | null> {
+    return this.call("decrypt_api_key", { p_owner: ownerId, p_provider: provider });
+  }
+
+  async forJob(jobId: string, provider: ApiKeyProvider): Promise<string | null> {
+    return this.call("decrypt_job_api_key", { p_job_id: jobId, p_provider: provider });
+  }
+
+  private async call(fn: string, args: Record<string, string>): Promise<string | null> {
+    const result = await this.client.rpc(fn, args);
+    if (result.error || (result.data !== null && typeof result.data !== "string")) {
+      throw new Error("讀取 API key 失敗");
+    }
+    return result.data;
   }
 }
