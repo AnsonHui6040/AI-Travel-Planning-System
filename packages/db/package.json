@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@atps/core": "workspace:*",
-    "@atps/schemas": "workspace:*"
+    "@atps/schemas": "workspace:*",
+    "@supabase/supabase-js": "2.119.2"
   }
 }

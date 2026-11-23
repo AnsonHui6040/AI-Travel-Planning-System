@@ -1,0 +1,356 @@
+import { z } from "zod";
+import {
+  LIMITS,
+  currencyCode,
+  hhmm,
+  httpsUrl,
+  ianaTimezone,
+  isoDate,
+  money,
+  moneyAmount,
+  offsetDateTime,
+  score,
+  text,
+  uuid,
+} from "./common";
+import * as E from "./enums";
+
+// 第 2.4 節與第 2.11 節的實體。鍵名與資料庫欄位一致（snake_case），
+// 一致性由 tooling/schema-migration-consistency.test.ts 檢查。所有物件拒絕未知欄位（S-02）。
+
+const nullable = <T extends z.ZodType>(schema: T) => schema.nullable();
+const int = (min: number, max: number) => z.int().min(min).max(max);
+const json = z.json();
+
+export const sourceRef = z.strictObject({
+  url: httpsUrl,
+  fetched_at: offsetDateTime,
+  grade: E.sourceGrade,
+});
+
+export const modelRef = z.strictObject({
+  provider: E.aiProvider,
+  model: text(LIMITS.modelName),
+});
+
+export const availabilitySlot = z
+  .strictObject({
+    date: isoDate.optional(),
+    weekday: int(0, 6).optional(),
+    start: hhmm,
+    end: hhmm,
+  })
+  .refine((slot) => slot.start < slot.end, "結束時間須晚於開始時間");
+
+export const profileRow = z.strictObject({
+  id: uuid,
+  display_name: nullable(text(80)),
+  created_at: offsetDateTime,
+});
+
+export const tripRow = z.strictObject({
+  id: uuid,
+  name: text(120),
+  destination: nullable(text(120)),
+  start_date: nullable(isoDate),
+  end_date: nullable(isoDate),
+  timezone: ianaTimezone,
+  status: E.tripStatus,
+  current_version: int(0, 1_000_000),
+  owner_id: uuid,
+  created_at: offsetDateTime,
+});
+
+export const tripMemberRow = z.strictObject({
+  trip_id: uuid,
+  user_id: uuid,
+  role: z.enum(["owner", "companion", "viewer"]),
+  joined_at: offsetDateTime,
+});
+
+const flight = z.strictObject({
+  label: text(80),
+  departs_at: offsetDateTime,
+  arrives_at: offsetDateTime,
+});
+const lodging = z.strictObject({
+  name: text(LIMITS.nameLocal),
+  area: nullable(text(LIMITS.area)),
+  check_in: isoDate,
+  check_out: isoDate,
+  check_in_time: nullable(hhmm),
+});
+const fixedActivity = z.strictObject({
+  name: text(LIMITS.nameZh),
+  date: isoDate,
+  start: hhmm,
+  end: nullable(hhmm),
+  paid: z.boolean(),
+});
+
+export const tripBaselineData = z
+  .strictObject({
+    start_date: isoDate,
+    end_date: isoDate,
+    timezone: ianaTimezone,
+    flights: z.array(flight).max(20),
+    lodgings: z.array(lodging).max(30),
+    companions: int(0, 20),
+    stamina_note: nullable(text(LIMITS.longText)),
+    budget: nullable(money),
+    fixed_activities: z.array(fixedActivity).max(50),
+    paid_items: z.array(text(LIMITS.nameZh)).max(50),
+    must_visit: z.array(text(LIMITS.nameZh)).max(50),
+    excluded: z.array(text(LIMITS.nameZh)).max(50),
+    transport_preferences: z.array(E.transportMode).max(5),
+    photography_needs: nullable(text(LIMITS.longText)),
+  })
+  .refine((b) => b.end_date >= b.start_date, "結束日期不可早於開始日期");
+
+export const tripBaselineRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  version: int(1, 1000),
+  data: tripBaselineData,
+  confirmed_at: nullable(offsetDateTime),
+  created_at: offsetDateTime,
+});
+
+export const itineraryItemRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  name_zh: text(LIMITS.nameZh),
+  name_local: nullable(text(LIMITS.nameLocal)),
+  place_id: nullable(text(300)),
+  type: E.itemType,
+  address: nullable(text(LIMITS.address)),
+  area: nullable(text(LIMITS.area)),
+  coord_lat: nullable(z.number().min(-90).max(90)),
+  coord_lng: nullable(z.number().min(-180).max(180)),
+  coord_fetched_at: nullable(offsetDateTime),
+  suggested_stay_minutes: int(LIMITS.stayMinutes.min, LIMITS.stayMinutes.max),
+  availability: z.array(availabilitySlot).max(50),
+  reservation_requirement: E.reservationRequirement,
+  reservation_note: nullable(text(LIMITS.shortNote)),
+  constraint_class: E.constraintClass,
+  is_fixed: z.boolean(),
+  priority: int(LIMITS.priority.min, LIMITS.priority.max),
+  weather_dependency: E.level3,
+  candidate_role: E.candidateRole,
+  recommendation_reason: text(LIMITS.longText),
+  constraint_note: nullable(text(LIMITS.longText)),
+  score_personal_value: score,
+  score_uniqueness: score,
+  score_geographic_fit: score,
+  score_time_cost: score,
+  score_transport_cost: score,
+  score_weather_dependency: score,
+  score_time_slot_dependency: score,
+  score_substitutability: score,
+  scheduled_date: nullable(isoDate),
+  scheduled_start: nullable(hhmm),
+  scheduled_end: nullable(hhmm),
+  movable_from: nullable(hhmm),
+  movable_to: nullable(hhmm),
+  verification_status: E.verificationStatus,
+  last_verified_at: nullable(offsetDateTime),
+  sources: z.array(sourceRef).max(20),
+  generated_by: nullable(modelRef),
+  verified_by: nullable(modelRef),
+  lifecycle_status: E.lifecycleStatus,
+  at_risk: z.boolean(),
+  standby: z.boolean(),
+  post_trip_status: nullable(E.postTripStatus),
+  estimated_cost_amount: nullable(moneyAmount),
+  estimated_cost_currency: nullable(currencyCode),
+  actual_cost_amount: nullable(moneyAmount),
+  actual_cost_currency: nullable(currencyCode),
+  payer_id: nullable(uuid),
+  created_at: offsetDateTime,
+});
+
+export const dayRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  date: isoDate,
+  status: E.dayStatus,
+  offline_pack_version: int(0, 1_000_000),
+  created_at: offsetDateTime,
+});
+
+export const mobilityEstimate = z.strictObject({
+  mode: E.transportMode,
+  door_to_door_minutes: int(LIMITS.doorToDoorMinutes.min, LIMITS.doorToDoorMinutes.max),
+  price: nullable(money),
+  walk_minutes: int(LIMITS.walkMinutes.min, LIMITS.walkMinutes.max),
+  transfers: int(LIMITS.transfers.min, LIMITS.transfers.max),
+  luggage_friendliness: E.level3,
+  comfort: E.level3,
+  delay_risk: E.level3,
+});
+
+export const mobilitySegmentRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  from_item_id: uuid,
+  to_item_id: uuid,
+  estimates: z.array(mobilityEstimate).max(5),
+  buffer_minutes: int(LIMITS.bufferMinutes.min, LIMITS.bufferMinutes.max),
+  recommended_mode: nullable(E.transportMode),
+  source_urls: z.array(httpsUrl).max(10),
+  maps_url: nullable(httpsUrl),
+  created_at: offsetDateTime,
+});
+
+export const proposalRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  proposer_member_id: nullable(uuid),
+  proposer_role: nullable(E.aiRole),
+  proposer_provider: nullable(E.aiProvider),
+  proposer_model: nullable(text(LIMITS.modelName)),
+  base_version: int(0, 1_000_000),
+  change: json,
+  impact_scope: json,
+  status: E.proposalStatus,
+  live_branch_id: nullable(uuid),
+  decided_by: nullable(uuid),
+  decided_at: nullable(offsetDateTime),
+  created_at: offsetDateTime,
+});
+
+export const versionRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  major: int(1, 1000),
+  minor: int(0, 1000),
+  kind: E.versionKind,
+  summary: text(500),
+  reason: nullable(text(500)),
+  proposal_id: nullable(uuid),
+  approved_by: nullable(uuid),
+  impact_scope: json,
+  old_arrangement: json,
+  new_arrangement: json,
+  base_version: int(0, 1_000_000),
+  created_at: offsetDateTime,
+});
+
+export const incidentRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  level: E.incidentLevel,
+  snapshot: json,
+  available_minutes: nullable(int(0, 1440)),
+  live_branch_id: uuid,
+  created_by: uuid,
+  created_at: offsetDateTime,
+});
+
+export const actualTimelineRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  item_id: uuid,
+  arrived_at: nullable(offsetDateTime),
+  departed_at: nullable(offsetDateTime),
+  completion: E.completion,
+  recorded_by: uuid,
+  created_at: offsetDateTime,
+});
+
+export const notificationRow = z.strictObject({
+  id: uuid,
+  recipient_id: uuid,
+  trip_id: nullable(uuid),
+  kind: text(50),
+  ref_table: nullable(text(50)),
+  ref_id: nullable(uuid),
+  read_at: nullable(offsetDateTime),
+  created_at: offsetDateTime,
+});
+
+export const memoryRow = z.strictObject({
+  id: uuid,
+  owner_id: uuid,
+  layer: E.memoryLayer,
+  trip_id: nullable(uuid),
+  kind: E.memoryKind,
+  item: text(LIMITS.nameZh),
+  value: text(LIMITS.shortNote),
+  unit: nullable(text(20)),
+  source: E.memorySource,
+  source_proposal_id: nullable(uuid),
+  approved_at: offsetDateTime,
+  last_used_at: nullable(offsetDateTime),
+  created_at: offsetDateTime,
+});
+
+export const apiKeyRecordRow = z.strictObject({
+  id: uuid,
+  owner_id: uuid,
+  provider: E.keyProvider,
+  vault_secret_id: uuid,
+  last4: z.string().length(4),
+  created_at: offsetDateTime,
+  last_tested_at: nullable(offsetDateTime),
+});
+
+export const readonlyLinkRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  token_hash: z.string().regex(/^[0-9a-f]{64}$/),
+  expires_at: offsetDateTime,
+  revoked_at: nullable(offsetDateTime),
+  created_by: uuid,
+  created_at: offsetDateTime,
+});
+
+export const backgroundJobRow = z.strictObject({
+  id: uuid,
+  kind: text(50),
+  initiator_id: uuid,
+  trip_id: nullable(uuid),
+  status: E.jobStatus,
+  workflow_run_id: nullable(text(100)),
+  steps_used: int(0, 1_000_000),
+  tokens_used: int(0, 1_000_000_000),
+  created_at: offsetDateTime,
+  updated_at: offsetDateTime,
+});
+
+export const photoRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  item_id: uuid,
+  source: E.photoSource,
+  license: text(100),
+  author: text(LIMITS.shortNote),
+  source_url: nullable(httpsUrl),
+  storage_path: text(500),
+  uploaded_by: uuid,
+  created_at: offsetDateTime,
+});
+
+// 資料表名稱與 row schema 對照，供一致性測試與 repository 使用
+export const tableSchemas = {
+  profiles: profileRow,
+  trips: tripRow,
+  trip_members: tripMemberRow,
+  trip_baselines: tripBaselineRow,
+  itinerary_items: itineraryItemRow,
+  days: dayRow,
+  mobility_segments: mobilitySegmentRow,
+  proposals: proposalRow,
+  versions: versionRow,
+  incidents: incidentRow,
+  actual_timeline_entries: actualTimelineRow,
+  notifications: notificationRow,
+  memories: memoryRow,
+  api_key_records: apiKeyRecordRow,
+  readonly_links: readonlyLinkRow,
+  background_jobs: backgroundJobRow,
+  photos: photoRow,
+} as const;
+
+export type TableName = keyof typeof tableSchemas;
+export type Row<T extends TableName> = z.infer<(typeof tableSchemas)[T]>;

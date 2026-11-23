@@ -23,21 +23,21 @@ module.exports = {
       name: "m01-no-external-in-core",
       severity: "error",
       comment: "M-01：packages/core 不得 import 任何外部套件",
-      from: { path: "^packages/core/" },
+      from: { path: "^packages/core/", pathNot: "\\.test\\.ts$" },
       to: { path: "node_modules" },
     },
     {
       name: "m01-no-builtins-in-core",
       severity: "error",
       comment: "M-01：packages/core 不得使用 Node 內建模組，時間與 I/O 經由 port",
-      from: { path: "^packages/core/" },
+      from: { path: "^packages/core/", pathNot: "\\.test\\.ts$" },
       to: { dependencyTypes: ["core"] },
     },
     {
       name: "m01-schemas-only-zod",
       severity: "error",
       comment: "M-01：packages/schemas 只可 import zod",
-      from: { path: "^packages/schemas/" },
+      from: { path: "^packages/schemas/", pathNot: "\\.test\\.ts$" },
       to: {
         path: "node_modules",
         // pnpm 實際路徑為 node_modules/.pnpm/zod@x/node_modules/zod/，同樣含此字串
@@ -48,7 +48,7 @@ module.exports = {
       name: "m01-no-builtins-in-schemas",
       severity: "error",
       comment: "M-01：packages/schemas 不得使用 Node 內建模組",
-      from: { path: "^packages/schemas/" },
+      from: { path: "^packages/schemas/", pathNot: "\\.test\\.ts$" },
       to: { dependencyTypes: ["core"] },
     },
     ...m05Rules,

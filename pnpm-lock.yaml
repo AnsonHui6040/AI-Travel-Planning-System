@@ -11,6 +11,9 @@ importers:
 
   .:
     devDependencies:
+      '@atps/schemas':
+        specifier: workspace:*
+        version: link:packages/schemas
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.15.0)
@@ -156,6 +159,9 @@ importers:
       '@atps/schemas':
         specifier: workspace:*
         version: link:../schemas
+      '@supabase/supabase-js':
+        specifier: 2.119.2
+        version: 2.119.2
 
   packages/memory:
     dependencies:
@@ -184,7 +190,11 @@ importers:
         specifier: workspace:*
         version: link:../schemas
 
-  packages/schemas: {}
+  packages/schemas:
+    dependencies:
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
 
   packages/security:
     dependencies:
