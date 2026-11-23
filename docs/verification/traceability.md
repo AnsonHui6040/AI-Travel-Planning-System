@@ -29,7 +29,7 @@
 | C-05 | T12 | `08_api_keys.test.sql`：A 沒有 key 時 A 的 job 不借用 B 的；Server Action 忽略表單傳入的擁有者；功能降級於各功能 Task | 已驗收 |
 | C-06 | T11、T12 | T12 實作 `api_key`；`plan_oauth` 以 T11 的 `CredentialProvider`（`available: false`）預留 | 已驗收 |
 | C-07 | T13 | `packages/ai/src/providers.contract.test.ts`：只連官方 HTTPS 端點、逾時分類、限流後以退避重試成功；資料源 adapter（T19、T22）沿用相同設定 | 已驗收 |
-| C-08 | T14、T38 | 待建立 | 未驗收 |
+| C-08 | T14、T38 | T14：`packages/core/src/role-runner.test.ts`（故障時不自動切換，回傳下一順位）；詢問畫面於 T24 起的 job 畫面與 T38 | 部分 |
 | C-09 | T03 | `supabase/tests/01_rls_enabled.test.sql`、`02_trip_permissions.test.sql`（anon 無權限）；伺服器端只用 anon key | 部分 |
 | C-10 | T33 | 待建立 | 未驗收 |
 | C-11 | T03 | `apps/web/lib/server/guard.test.ts`；`supabase/tests/03_rate_limit.test.sql`；`apps/web/e2e/guard.spec.ts` | 已驗收 |
@@ -40,11 +40,11 @@
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
 | S-01 | T09、T18 | T09：`packages/schemas/src/change.test.ts`（提案 schema）、`supabase/tests/05_apply_change.test.sql`（只有 `atps_change_writer` 可寫入正式行程表）；T18 待建立 | 部分 |
-| S-02 | T06、T14 | T06：`packages/schemas/src/schemas.test.ts`（拒絕未知欄位、格式與上下限）；丟棄與記錄於 T14 | 部分 |
+| S-02 | T06、T14 | T06：`packages/schemas/src/schemas.test.ts`（拒絕未知欄位、格式與上下限）；T14：五個角色的 strict 輸出 schema（`packages/schemas/src/roles.test.ts`）、不符即丟棄並記錄、回傳原因與欄位（`packages/core/src/role-runner.test.ts`）；畫面顯示與重試隨各 job 畫面 | 部分 |
 | S-03 | T18、T24 | 待建立 | 未驗收 |
-| S-04 | T14 | 待建立 | 未驗收 |
+| S-04 | T14 | `packages/ai/src/roles.test.ts`（五個角色的工具）、`packages/core/src/role-runner.test.ts`（只把內建搜尋交給 AI）、T13 adapter 拒絕清單以外的工具 | 已驗收 |
 | S-05 | T16 | 待建立 | 未驗收 |
-| S-06 | T14 | 待建立 | 未驗收 |
+| S-06 | T14 | `packages/core/src/role-runner.test.ts`（步數與 token 超過即停止並記錄）；`supabase/tests/09_ai_settings.test.sql`；E2E 設定頁顯示每個角色的用量 | 已驗收 |
 | S-07 | T17 | 待建立 | 未驗收 |
 | S-08 | T01、T24 | T01：ESLint 禁止 `dangerouslySetInnerHTML`；`apps/web/lib/security-headers.test.ts`（CSP、nonce、HSTS）；`apps/web/e2e/security-headers.spec.ts`（實際回應標頭、腳本 nonce、無 CSP 違規）。T24：Markdown sanitize 與連結限制待建立 | 部分 |
 | S-09 | T21 | 待建立 | 未驗收 |

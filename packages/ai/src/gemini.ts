@@ -84,6 +84,28 @@ export function createGeminiAdapter(options: ProviderOptions = {}): ProviderAdap
   };
 }
 
+const MAX_MODELS = 200;
+
+// 決策 0006：列出可產生內容的模型，去掉 models/ 前綴
+export async function listGeminiModels(apiKey: string, options: ProviderOptions = {}): Promise<string[]> {
+  const timeoutMs = options.timeoutMs ?? KEY_TEST_TIMEOUT_MS;
+  try {
+    return await withTimeoutKind(timeoutMs, async () => {
+      const ids: string[] = [];
+      const pager = await client(options, apiKey, { timeoutMs }).models.list({ config: { pageSize: 100 } });
+      for await (const model of pager) {
+        if (model.name && (model.supportedActions ?? []).includes("generateContent")) {
+          ids.push(model.name.replace(/^models\//, ""));
+        }
+        if (ids.length >= MAX_MODELS) break;
+      }
+      return ids;
+    });
+  } catch (error) {
+    throw toProviderError(ID, error);
+  }
+}
+
 // C-03：列出模型（不消耗 token）確認 key 可用
 export function createGeminiKeyTester(options: ProviderOptions = {}): KeyTester {
   return {

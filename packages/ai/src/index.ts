@@ -1,42 +1,11 @@
-import {
-  checkCredentialProvider,
-  checkProviderAdapter,
-  checkRoleSpec,
-  createRegistry,
-  type CredentialProvider,
-  type KeyTester,
-  type ProviderAdapter,
-  type Registry,
-  type RoleSpec,
-} from "@atps/core";
-import { createAnthropicAdapter, createAnthropicKeyTester } from "./anthropic";
-import { createGeminiAdapter, createGeminiKeyTester } from "./gemini";
-import { createOpenAIAdapter, createOpenAIKeyTester } from "./openai";
+import type { AiProvider, KeyTester, ProviderAdapter, Registry } from "@atps/core";
+import { createAnthropicAdapter, createAnthropicKeyTester, listAnthropicModels } from "./anthropic";
+import { createGeminiAdapter, createGeminiKeyTester, listGeminiModels } from "./gemini";
+import { createOpenAIAdapter, createOpenAIKeyTester, listOpenAIModels } from "./openai";
+import { createProviderRegistry } from "./registries";
 import type { ProviderOptions } from "./shared";
 
-// 第 2.3 節 AI provider、角色、認證方式三個註冊表。新增實作只需註冊並通過契約（第 7.2 節）
-
-export function createProviderRegistry(): Registry<ProviderAdapter> {
-  return createRegistry<ProviderAdapter>({ kind: "ProviderAdapter", idOf: (a) => a.id, check: checkProviderAdapter });
-}
-
-export function createRoleRegistry(): Registry<RoleSpec> {
-  return createRegistry<RoleSpec>({ kind: "RoleSpec", idOf: (r) => r.id, check: checkRoleSpec });
-}
-
-export interface CredentialRegistry extends Registry<CredentialProvider> {
-  // 目前可用的認證方式；plan_oauth 第一版不列入
-  available(): CredentialProvider[];
-}
-
-export function createCredentialRegistry(): CredentialRegistry {
-  const registry = createRegistry<CredentialProvider>({
-    kind: "CredentialProvider",
-    idOf: (c) => c.kind,
-    check: checkCredentialProvider,
-  });
-  return { ...registry, available: () => registry.list().filter((c) => c.available) };
-}
+export { createCredentialRegistry, createProviderRegistry, createRoleRegistry, type CredentialRegistry } from "./registries";
 
 // T13：三家 provider adapter 與儲存前測試呼叫
 export { createAnthropicAdapter, createAnthropicKeyTester } from "./anthropic";
@@ -45,6 +14,9 @@ export { createOpenAIAdapter, createOpenAIKeyTester } from "./openai";
 export { ProviderError, classifyProviderError } from "./errors";
 export { extractJson, stripInjectedNulls, toProviderSchema, type SchemaDialect } from "./schema";
 export type { ProviderOptions } from "./shared";
+
+// T14：五個 RoleSpec
+export { defaultRoles, roleSpec } from "./roles";
 
 export function defaultProviders(options: ProviderOptions = {}): Registry<ProviderAdapter> {
   const registry = createProviderRegistry();
@@ -56,4 +28,23 @@ export function defaultProviders(options: ProviderOptions = {}): Registry<Provid
 
 export function defaultKeyTesters(options: ProviderOptions = {}): KeyTester[] {
   return [createAnthropicKeyTester(options), createGeminiKeyTester(options), createOpenAIKeyTester(options)];
+}
+
+// 角色設定使用的供應商代碼（aiProvider）與 adapter id 對照
+const ADAPTER_IDS: Record<AiProvider, string> = { anthropic: "anthropic", google: "gemini", openai: "openai" };
+
+export function adapterFor(registry: Registry<ProviderAdapter>, provider: AiProvider): ProviderAdapter {
+  return registry.require(ADAPTER_IDS[provider]);
+}
+
+// 決策 0006：以使用者本人的 key 列出可用模型
+export async function listModels(provider: AiProvider, apiKey: string, options: ProviderOptions = {}): Promise<string[]> {
+  switch (provider) {
+    case "anthropic":
+      return listAnthropicModels(apiKey, options);
+    case "google":
+      return listGeminiModels(apiKey, options);
+    case "openai":
+      return listOpenAIModels(apiKey, options);
+  }
 }

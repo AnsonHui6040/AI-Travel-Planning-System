@@ -137,16 +137,25 @@ export interface MemoryScope {
 }
 
 // 與 Zod schema 的 safeParse 相容，角色可直接傳入 packages/schemas 的 schema
+export interface OutputIssue {
+  path: readonly PropertyKey[];
+  message: string;
+}
+
 export interface OutputValidator {
-  safeParse(value: unknown): { success: boolean };
+  safeParse(value: unknown): { success: boolean; error?: { issues: readonly OutputIssue[] } };
 }
 
 export const ROLE_LIMITS = { maxSteps: 100, maxTokens: 1_000_000 } as const;
 
 export interface RoleSpec {
   id: string;
+  // 角色的系統提示
+  instructions: string;
   tools: readonly RoleTool[];
   output: OutputValidator;
+  // 送給 AI 的結構化輸出格式；回傳後仍以 output 嚴格驗證（S-02）
+  outputJsonSchema: Record<string, unknown>;
   // S-06：超過即停止並記錄
   maxSteps: number;
   maxTokens: number;
@@ -163,6 +172,10 @@ export function checkRoleSpec(role: RoleSpec): string[] {
   const issues = checkId(role.id);
   issues.push(...checkList("工具", role.tools, ROLE_TOOLS));
   if (typeof role.output?.safeParse !== "function") issues.push("缺少輸出 schema");
+  if (typeof role.instructions !== "string" || role.instructions.trim().length === 0) issues.push("缺少系統提示");
+  if (typeof role.outputJsonSchema !== "object" || role.outputJsonSchema === null || role.outputJsonSchema.type !== "object") {
+    issues.push("輸出 JSON Schema 必須是物件");
+  }
   issues.push(...checkLimit("步數上限", role.maxSteps, ROLE_LIMITS.maxSteps));
   issues.push(...checkLimit("token 上限", role.maxTokens, ROLE_LIMITS.maxTokens));
   issues.push(...checkList("資料範圍", role.dataScope, DATA_SCOPES));

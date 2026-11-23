@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { listOwnApiKeys } from "../../../lib/server/api-keys";
 import { ApiKeyForms } from "./api-key-forms";
-import "./settings.css";
+import "../settings.css";
 
 export const metadata: Metadata = { title: "API key" };
 export const dynamic = "force-dynamic";

@@ -64,6 +64,22 @@ export function createOpenAIAdapter(options: ProviderOptions = {}): ProviderAdap
   };
 }
 
+const MAX_MODELS = 200;
+
+// 決策 0006：列出可用模型供設定頁選擇
+export async function listOpenAIModels(apiKey: string, options: ProviderOptions = {}): Promise<string[]> {
+  try {
+    const ids: string[] = [];
+    for await (const model of client(options, apiKey, { timeoutMs: options.timeoutMs ?? KEY_TEST_TIMEOUT_MS }).models.list()) {
+      ids.push(model.id);
+      if (ids.length >= MAX_MODELS) break;
+    }
+    return ids;
+  } catch (error) {
+    throw toProviderError(ID, error);
+  }
+}
+
 // C-03：列出模型（不消耗 token）確認 key 可用
 export function createOpenAIKeyTester(options: ProviderOptions = {}): KeyTester {
   return {
