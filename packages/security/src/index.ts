@@ -35,3 +35,7 @@ export * as payloadFixtures from "./testing/payload-fixtures";
 
 // T18、S-03：不可信資料以資料區塊傳入
 export { composeRoleInput, type ComposeOptions, type DataBlock, type DataKind } from "./untrusted";
+
+// T21、S-09：照片移除 EXIF 與中繼資料
+export { MAX_PHOTO_BYTES, containsLocationMetadata, sanitizeImage, type ImageMime, type SanitizeResult } from "./image";
+export * as imageFixtures from "./testing/image-fixtures";

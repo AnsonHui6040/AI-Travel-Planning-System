@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: path.join(import.meta.dirname, "../.."),
   poweredByHeader: false,
+  // T21：照片上傳上限 5 MB（S-09），加上表單欄位
+  experimental: { serverActions: { bodySizeLimit: "6mb" } },
   transpilePackages: [
     "@atps/schemas",
     "@atps/core",

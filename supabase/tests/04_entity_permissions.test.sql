@@ -66,7 +66,7 @@ select lives_ok($$insert into public.incidents (trip_id, level, snapshot, create
 select lives_ok($$insert into public.actual_timeline_entries (trip_id, item_id, completion, recorded_by)
   values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'completed', '00000000-0000-0000-0000-0000000000b2')$$, 'C：記錄活動完成');
 select lives_ok($$insert into public.photos (trip_id, item_id, source, license, author, storage_path, uploaded_by)
-  values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'user_upload', '本人拍攝', '使用者', 'photos/a.jpg', '00000000-0000-0000-0000-0000000000b2')$$, 'C：上傳照片');
+  values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'user_upload', '本人拍攝', '使用者', '20000000-0000-0000-0000-000000000001/20000000-0000-0000-0000-0000000000a1.jpg', '00000000-0000-0000-0000-0000000000b2')$$, 'C：上傳照片');
 select throws_ok($$insert into public.readonly_links (trip_id, token_hash, expires_at, created_by)
   values ('20000000-0000-0000-0000-000000000001', repeat('b', 64), now() + interval '1 day', '00000000-0000-0000-0000-0000000000b2')$$, '42501', null, 'C：不可建立唯讀連結');
 select is((select count(*)::int from public.notifications), 1, 'C：看得到自己的通知');
@@ -92,7 +92,7 @@ select throws_ok($$insert into public.incidents (trip_id, level, snapshot, creat
 select throws_ok($$insert into public.actual_timeline_entries (trip_id, item_id, completion, recorded_by)
   values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'completed', '00000000-0000-0000-0000-0000000000b3')$$, '42501', null, 'V：不可記錄活動完成');
 select throws_ok($$insert into public.photos (trip_id, item_id, source, license, author, storage_path, uploaded_by)
-  values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'user_upload', '本人拍攝', '使用者', 'photos/b.jpg', '00000000-0000-0000-0000-0000000000b3')$$, '42501', null, 'V：不可上傳照片');
+  values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'user_upload', '本人拍攝', '使用者', '20000000-0000-0000-0000-000000000001/20000000-0000-0000-0000-0000000000a2.jpg', '00000000-0000-0000-0000-0000000000b3')$$, '42501', null, 'V：不可上傳照片');
 select is((select count(*)::int from public.notifications), 0, 'V：看不到他人的通知');
 select is((select count(*)::int from public.memories), 0, 'V：看不到他人的記憶');
 select is((select count(*)::int from public.api_key_records), 0, 'V：看不到他人的 API key 紀錄');

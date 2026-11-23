@@ -59,4 +59,5 @@
 - 敏感欄位（全名、電話、電子郵件）只經 `save_sensitive_field`、`set_sensitive_sharing`、`list_trip_sensitive_fields`（session）與 `ai_sensitive_fields`（service_role）存取，擁有者 `atps_pii_keeper`。送往 AI 的 input 一律經 `@atps/security` 的 `buildAiPayload`（S-07）；伺服器 log 一律經 `createLogger`（S-10）。
 - 送往 AI 的 input 以 `composeRoleInput` 組成：網頁、搜尋結果、成員自由文字與行程資料放在資料區塊（S-03）。AI 輸出一律經 `handleRoleRun`／`gateRoleOutput` 才寫入，去處只有候選、核實結果、交通估算與待批准提案（S-01）。新增 prompt injection 案例加在 `packages/ai/src/injection/cases.ts`。
 - Google Maps 內容只保存 place_id 與 30 日內的座標（D28）；名稱、地址、評分、照片只即時顯示。逾期座標由 pg_cron 每日清除（`private.purge_expired_coordinates`）。導航只用 `directionsUrl`（Maps URLs，不含 key）。
+- 照片只經伺服器 `sanitizeImage` 移除 EXIF 後以 service role 寫入 bucket `trip-photos`（使用者沒有 Storage 寫入權）；顯示經同源 `/api/photos/…`（S-09）。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。

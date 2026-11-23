@@ -47,7 +47,7 @@
 | S-06 | T14 | `packages/core/src/role-runner.test.ts`（步數與 token 超過即停止並記錄）；`supabase/tests/09_ai_settings.test.sql`；E2E 設定頁顯示每個角色的用量 | 已驗收 |
 | S-07 | T17 | `supabase/tests/10_sensitive_fields.test.sql`（Vault 加密、沒有明文欄位、AI 用函式只回傳開啟「提供給 AI」的欄位且只授權 service_role）；`packages/security/src/payload.test.ts`（allowlist builder）；`packages/ai/src/outbound-payload.test.ts`（三家 outbound payload 快照：開關關閉時不含欄位值） | 已驗收 |
 | S-08 | T01、T24 | T01：ESLint 禁止 `dangerouslySetInnerHTML`；`apps/web/lib/security-headers.test.ts`（CSP、nonce、HSTS）；`apps/web/e2e/security-headers.spec.ts`（實際回應標頭、腳本 nonce、無 CSP 違規）。T24：Markdown sanitize 與連結限制待建立 | 部分 |
-| S-09 | T21 | 待建立 | 未驗收 |
+| S-09 | T21 | `packages/security/src/image.test.ts`（JPEG、PNG、WebP 移除 EXIF 與中繼資料、限制類型與大小）；`supabase/tests/12_photos.test.sql`（使用者不可直接寫入 Storage）；E2E `apps/web/e2e/photos.spec.ts`（上傳含 GPS 的照片後儲存的檔案沒有 EXIF） | 已驗收 |
 | S-10 | T12、T17 | T12：`redactSecrets`；T17：`redactSensitive`、`createLogger`（`packages/security/src/logger.test.ts`），Server Action 失敗時經遮罩 log；AI 請求紀錄（`ai_usage`）只記錄用量，不含內容；資料庫與 repository 的錯誤訊息不含值 | 已驗收 |
 | S-11 | T01 | lockfile 已納入；`.npmrc` `save-exact=true`；`strictDepBuilds: true` | 部分 |
 | S-12 | T01、T02 | `.gitignore` 排除 `.env*`；`.env.example`；pre-commit gitleaks 擋下假 secret；CI gitleaks 擋下 PR #3 | 已驗收 |
