@@ -11,6 +11,9 @@ importers:
 
   .:
     devDependencies:
+      '@atps/core':
+        specifier: workspace:*
+        version: link:packages/core
       '@atps/schemas':
         specifier: workspace:*
         version: link:packages/schemas

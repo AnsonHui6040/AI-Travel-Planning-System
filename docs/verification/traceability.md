@@ -15,7 +15,7 @@
 | M-01 | T01 | `tooling/dependency-rules.test.ts`：M-01 兩個案例 | 已驗收 |
 | M-02 | T01 | `tooling/dependency-rules.test.ts`：M-02 案例 | 已驗收 |
 | M-03 | T01、T02 | `pnpm lint` 執行 depcruise；CI job「test、typecheck、lint、build、依賴方向」執行 depcruise（PR #2） | 已驗收 |
-| M-04 | T06、T09 | T06：`packages/core/src/ports.ts`、`packages/db/src/repositories.test.ts`；`applyChange` 只經 port 寫入於 T09 | 部分 |
+| M-04 | T06、T09 | T06：`packages/core/src/ports.ts`、`packages/db/src/repositories.test.ts`；T09：`applyChange` 只經 `ChangeWriter` port 寫入（`packages/core/src/apply-change.test.ts`、`packages/db/src/change-writer.test.ts`） | 已驗收 |
 | M-05 | T01 | `tooling/dependency-rules.test.ts`：M-05 五個案例與全庫檢查 | 已驗收 |
 
 ## 第 3 節 連接安全
@@ -39,7 +39,7 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| S-01 | T09、T18 | 待建立 | 未驗收 |
+| S-01 | T09、T18 | T09：`packages/schemas/src/change.test.ts`（提案 schema）、`supabase/tests/05_apply_change.test.sql`（只有 `atps_change_writer` 可寫入正式行程表）；T18 待建立 | 部分 |
 | S-02 | T06、T14 | T06：`packages/schemas/src/schemas.test.ts`（拒絕未知欄位、格式與上下限）；丟棄與記錄於 T14 | 部分 |
 | S-03 | T18、T24 | 待建立 | 未驗收 |
 | S-04 | T14 | 待建立 | 未驗收 |
@@ -80,9 +80,9 @@
 | SH-01 | T03 | `supabase/tests/02_trip_permissions.test.sql`（Owner、Companion、Viewer；唯讀連結於 T33） | 部分 |
 | SH-02 | T03、T32 | `supabase/tests/02_trip_permissions.test.sql`：trips 與 trip_members 相關各格；其餘資料表於建立時補 | 部分 |
 | SH-03 | T32 | 待建立 | 未驗收 |
-| SH-04 | T07、T09、T34 | T07：`packages/core/src/states.test.ts`（base version 相同才套用，否則失效）；真機 R6 | 部分 |
+| SH-04 | T07、T09、T34 | T07：`packages/core/src/states.test.ts`；T09：`supabase/tests/05_apply_change.test.sql`（同一 base version 的第二個提案批准時失效）；T34 兩個瀏覽器 E2E、真機 R6 待建立 | 部分 |
 | SH-05 | T34、T35 | 待建立；真機 R3 | 未驗收 |
-| SH-06 | T09、T34 | 待建立；真機 R6 | 未驗收 |
+| SH-06 | T09、T34 | T09：`supabase/tests/05_apply_change.test.sql`（批准、否決、失效通知成員，未讀可依成員查詢，通知表經 Realtime 推送）、`packages/db/src/change-writer.test.ts`；T34 E2E、真機 R6 待建立 | 部分 |
 | SH-07 | T32 | 待建立 | 未驗收 |
 | SH-08 | T33 | 待建立 | 未驗收 |
 
