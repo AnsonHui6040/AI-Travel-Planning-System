@@ -21,7 +21,7 @@
 - 依賴表只在 `tooling/package-graph.cjs` 修改，改完執行 `pnpm sync:manifests`。dependency-cruiser 規則由同一份表產生。
 - 每個套件只經 `src/index.ts` 對外公開（`exports` 只開放 `.`）。`apps/web` 不得 import 套件內部檔案（M-02）。
 - `packages/core` 不得 import 任何外部套件或 Node 內建模組；`packages/schemas` 只可 import zod（M-01）。
-- 伺服器對外 fetch 一律經 `@atps/security` 的 `createAllowlistedFetch`；網域只在 `packages/security/src/fetch-allowlist.json` 經 PR 加入（S-05）。`@atps/security` 使用 Node 內建模組，只可在伺服器端 import。
+- 伺服器對外 fetch 一律經 `@atps/security` 的 `createAllowlistedFetch`；網域只在 `packages/security/src/fetch-allowlist.json` 經 PR 加入（S-05）。地區 pack 的 `officialSiteAllowlist` 必須與設定檔一致（`region-allowlist.test.ts`），新增官方來源前先以瀏覽器確認網址。`@atps/security` 使用 Node 內建模組，只可在伺服器端 import。
 - TypeScript 6 的 `types` 預設為空；套件要用 Node 型別時在該套件 `tsconfig.json` 設 `"types": ["node"]`。
 
 ## 工作流程

@@ -43,7 +43,7 @@
 | S-02 | T06、T14 | T06：`packages/schemas/src/schemas.test.ts`（拒絕未知欄位、格式與上下限）；T14：五個角色的 strict 輸出 schema（`packages/schemas/src/roles.test.ts`）、不符即丟棄並記錄、回傳原因與欄位（`packages/core/src/role-runner.test.ts`）；畫面顯示與重試隨各 job 畫面 | 部分 |
 | S-03 | T18、T24 | T18：`packages/security/src/untrusted.test.ts`（資料區塊、偽造標記中和）；回歸測試集 `packages/ai/src/injection/`（七類各 3 筆）；網頁與搜尋結果只產生候選並附來源（`researchCandidate` 的 sources 必填）。呈現端 Markdown sanitize 於 T24 | 部分 |
 | S-04 | T14 | `packages/ai/src/roles.test.ts`（五個角色的工具）、`packages/core/src/role-runner.test.ts`（只把內建搜尋交給 AI）、T13 adapter 拒絕清單以外的工具 | 已驗收 |
-| S-05 | T16 | `packages/security/src/allowlisted-fetch.test.ts`（SSRF 測試集：IP 直連、DNS 解析至私有位址、redirect 至白名單外、https 與連接埠限制、大小、時間與內容類型上限、白名單設定檔格式、連線固定到已驗證位址）；`address.test.ts`（私有與保留位址）；連線真實網站於旅前 TBD | 已驗收 |
+| S-05 | T16 | `packages/security/src/allowlisted-fetch.test.ts`（SSRF 測試集：IP 直連、DNS 解析至私有位址、redirect 至白名單外、https 與連接埠限制、大小、時間與內容類型上限、白名單設定檔格式、連線固定到已驗證位址）；`address.test.ts`（私有與保留位址）；T20：日本 pack 的 12 個官方主機加入設定檔，`packages/data-sources/src/region-allowlist.test.ts` 確認地區白名單與設定檔一致；連線真實網站於旅前 TBD | 已驗收 |
 | S-06 | T14 | `packages/core/src/role-runner.test.ts`（步數與 token 超過即停止並記錄）；`supabase/tests/09_ai_settings.test.sql`；E2E 設定頁顯示每個角色的用量 | 已驗收 |
 | S-07 | T17 | `supabase/tests/10_sensitive_fields.test.sql`（Vault 加密、沒有明文欄位、AI 用函式只回傳開啟「提供給 AI」的欄位且只授權 service_role）；`packages/security/src/payload.test.ts`（allowlist builder）；`packages/ai/src/outbound-payload.test.ts`（三家 outbound payload 快照：開關關閉時不含欄位值） | 已驗收 |
 | S-08 | T01、T24 | T01：ESLint 禁止 `dangerouslySetInnerHTML`；`apps/web/lib/security-headers.test.ts`（CSP、nonce、HSTS）；`apps/web/e2e/security-headers.spec.ts`（實際回應標頭、腳本 nonce、無 CSP 違規）。T24：Markdown sanitize 與連結限制待建立 | 部分 |

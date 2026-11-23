@@ -1,3 +1,16 @@
 {
-  "hosts": []
+  "hosts": [
+    "subway.osakametro.co.jp",
+    "trafficinfo.westjr.co.jp",
+    "traininfo.jr-central.co.jp",
+    "traininfo.jreast.co.jp",
+    "unkou.keikyu.co.jp",
+    "www.hankyu.co.jp",
+    "www.jma.go.jp",
+    "www.jrkyushu.co.jp",
+    "www.keisei.co.jp",
+    "www.tokyometro.jp",
+    "www.traffic.nankai.co.jp",
+    "www3.jrhokkaido.co.jp"
+  ]
 }
