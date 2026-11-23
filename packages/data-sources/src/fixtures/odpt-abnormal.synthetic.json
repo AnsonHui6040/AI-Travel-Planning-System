@@ -1,0 +1,69 @@
+[
+  {
+    "@id": "urn:uuid:00000000-0000-4000-8000-000000000101",
+    "@type": "odpt:TrainInformation",
+    "dc:date": "2026-11-24T08:10:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_TrainInformation.jsonld",
+    "dct:valid": "2026-11-24T08:15:00+09:00",
+    "owl:sameAs": "odpt.TrainInformation:Toei.Asakusa",
+    "odpt:railway": "odpt.Railway:Toei.Asakusa",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:timeOfOrigin": "2026-11-24T07:52:00+09:00",
+    "odpt:trainInformationStatus": { "ja": "運転見合わせ" },
+    "odpt:trainInformationCause": { "ja": "人身事故" },
+    "odpt:resumeEstimate": "2026-11-24T09:00:00+09:00",
+    "odpt:trainInformationText": { "ja": "人身事故の影響で、浅草線は全線で運転を見合わせています。" }
+  },
+  {
+    "@id": "urn:uuid:00000000-0000-4000-8000-000000000102",
+    "@type": "odpt:TrainInformation",
+    "dc:date": "2026-11-24T08:10:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_TrainInformation.jsonld",
+    "dct:valid": "2026-11-24T08:15:00+09:00",
+    "owl:sameAs": "odpt.TrainInformation:Toei.Mita",
+    "odpt:railway": "odpt.Railway:Toei.Mita",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:timeOfOrigin": "2026-11-24T08:01:00+09:00",
+    "odpt:trainInformationStatus": { "ja": "遅延" },
+    "odpt:trainInformationText": { "ja": "信号確認の影響で、三田線に遅れが出ています。" }
+  },
+  {
+    "@id": "urn:uuid:00000000-0000-4000-8000-000000000103",
+    "@type": "odpt:TrainInformation",
+    "dc:date": "2026-11-24T08:10:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_TrainInformation.jsonld",
+    "dct:valid": "2026-11-24T08:15:00+09:00",
+    "owl:sameAs": "odpt.TrainInformation:Toei.Oedo",
+    "odpt:railway": "odpt.Railway:Toei.Oedo",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:timeOfOrigin": "2026-11-24T08:05:00+09:00",
+    "odpt:trainInformationStatus": { "ja": "直通運転中止" },
+    "odpt:trainInformationText": { "ja": "他社線との直通運転を中止しています。" }
+  },
+  {
+    "@id": "urn:uuid:00000000-0000-4000-8000-000000000104",
+    "@type": "odpt:TrainInformation",
+    "dc:date": "2026-11-24T08:10:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_TrainInformation.jsonld",
+    "dct:valid": "2026-11-24T08:15:00+09:00",
+    "owl:sameAs": "odpt.TrainInformation:Toei.Arakawa",
+    "odpt:railway": "odpt.Railway:Toei.Arakawa",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:timeOfOrigin": "2026-11-24T08:05:00+09:00",
+    "odpt:trainInformationStatus": { "ja": "お知らせ" },
+    "odpt:trainInformationText": { "ja": "一部の停留場で工事を行っています。" }
+  },
+  {
+    "@id": "urn:uuid:00000000-0000-4000-8000-000000000105",
+    "@type": "odpt:TrainInformation",
+    "dc:date": "2026-11-24T08:10:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_TrainInformation.jsonld",
+    "dct:valid": "2026-11-24T08:15:00+09:00",
+    "owl:sameAs": "odpt.TrainInformation:Toei.Shinjuku",
+    "odpt:railway": "odpt.Railway:Toei.Shinjuku",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:timeOfOrigin": "2026-11-24T08:05:00+09:00",
+    "odpt:trainInformationStatus": { "ja": "平常運転" },
+    "odpt:trainInformationText": { "ja": "平常どおり運転しています。" }
+  }
+]

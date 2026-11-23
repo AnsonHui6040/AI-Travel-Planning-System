@@ -1,6 +1,6 @@
 import "server-only";
 import { defaultKeyTesters } from "@atps/ai";
-import { createGoogleMapsKeyTester } from "@atps/data-sources";
+import { createGoogleMapsKeyTester, createOdptKeyTester } from "@atps/data-sources";
 import { createKeyTesterRegistry, type ApiKeyProvider } from "@atps/core";
 import { SupabaseApiKeyStore, SupabaseKeyDecryptor } from "@atps/db";
 import type { ApiKeyActionDeps } from "./api-keys-core";
@@ -10,6 +10,7 @@ import { createSupabaseServerClient, createSupabaseServiceClient, supabaseGuardD
 export const keyTesters = createKeyTesterRegistry();
 for (const tester of defaultKeyTesters()) keyTesters.register(tester);
 keyTesters.register(createGoogleMapsKeyTester());
+keyTesters.register(createOdptKeyTester());
 
 export async function apiKeyDeps(): Promise<ApiKeyActionDeps> {
   const guard = await supabaseGuardDeps();

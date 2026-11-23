@@ -1,0 +1,23 @@
+[
+  {
+    "controlDatetime": "2026-11-23T11:23:29Z",
+    "reportDatetime": "2026-11-23T20:23:00+09:00",
+    "infoType": "発表",
+    "publishingOffice": "気象庁",
+    "headlineText": "注意報を解除します。",
+    "warning": {
+      "class10Items": [
+        { "areaCode": "130010", "kinds": [{ "status": "発表警報・注意報はなし" }] },
+        { "areaCode": "130020", "kinds": [{ "status": "発表警報・注意報はなし" }] },
+        { "areaCode": "130030", "kinds": [{ "code": "10", "status": "解除" }] },
+        { "areaCode": "130040", "kinds": [{ "status": "発表警報・注意報はなし" }] }
+      ],
+      "class20Items": [
+        { "areaCode": "1310100", "kinds": [{ "status": "発表警報・注意報はなし" }] },
+        { "areaCode": "1310200", "kinds": [{ "status": "発表警報・注意報はなし" }] },
+        { "areaCode": "1310300", "kinds": [{ "status": "発表警報・注意報はなし" }] }
+      ]
+    },
+    "dataTypeCode": "VPWW61"
+  }
+]

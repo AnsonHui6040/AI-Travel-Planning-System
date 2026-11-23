@@ -44,3 +44,17 @@ export {
   type PhotoRef,
   type ResolveResult,
 } from "./google-maps";
+
+// T22：即時資料（C-03、D13、D30）
+export { LiveDataError, MAX_RESPONSE_BYTES, type LiveFetchOptions } from "./live-http";
+export { createOpenMeteoAdapter, createOpenMeteoClient, type ForecastRequest, type HourlyWeather, type WeatherForecast } from "./open-meteo";
+export {
+  JMA_WARNING_CODES,
+  createJmaWarningAdapter,
+  createJmaWarningClient,
+  type JmaAreaWarnings,
+  type JmaOptions,
+  type JmaWarning,
+  type JmaWarningResult,
+} from "./jma-warnings";
+export { acceptOfficialTransitReport, classifyOdptStatus, createOdptAdapter, createOdptClient, createOdptKeyTester } from "./odpt";

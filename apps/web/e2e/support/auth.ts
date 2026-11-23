@@ -121,3 +121,9 @@ export async function downloadStoredPhoto(tripId: string): Promise<Buffer> {
   if (file.error) throw new Error("下載照片失敗");
   return Buffer.from(await file.data.arrayBuffer());
 }
+
+// 以伺服器的 save_api_key 直接存入 key（E2E 不連外部 API，所以略過儲存前測試呼叫）
+export async function saveApiKeyAsAdmin(userId: string, provider: "anthropic" | "google_ai" | "openai" | "google_maps" | "odpt", secret: string): Promise<void> {
+  const result = await adminClient().rpc("save_api_key", { p_owner: userId, p_provider: provider, p_secret: secret, p_tested_at: new Date().toISOString() });
+  if (result.error) throw new Error("存入測試 key 失敗");
+}
