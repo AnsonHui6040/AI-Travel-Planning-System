@@ -19,21 +19,22 @@ test("儲存後只顯示末四碼，完整 key 不出現在頁面；可刪除", 
     await expect(page.getByLabel(name)).toBeVisible();
   }
 
-  const openai = page.getByRole("group", { name: "OpenAI" });
-  await openai.getByLabel("OpenAI").fill(KEY);
-  await openai.getByRole("button", { name: "儲存" }).click();
+  // 用 ODPT：它的儲存前測試呼叫在 T22 加入，E2E 不連外部 API
+  const odptGroup = page.getByRole("group", { name: "ODPT" });
+  await odptGroup.getByLabel("ODPT").fill(KEY);
+  await odptGroup.getByRole("button", { name: "儲存" }).click();
 
-  await expect(openai.getByText("••••9876")).toBeVisible();
+  await expect(odptGroup.getByText("••••9876")).toBeVisible();
   await expect(page.getByRole("status")).toContainText("已儲存");
   expect(await page.content()).not.toContain(KEY);
-  await expect(openai.getByLabel("OpenAI")).toHaveValue("");
+  await expect(odptGroup.getByLabel("ODPT")).toHaveValue("");
 
   await page.reload();
-  await expect(openai.getByText("••••9876")).toBeVisible();
+  await expect(odptGroup.getByText("••••9876")).toBeVisible();
   expect(await page.content()).not.toContain(KEY);
 
-  await openai.getByRole("button", { name: "刪除" }).click();
-  await expect(openai.getByText("尚未設定")).toBeVisible();
+  await odptGroup.getByRole("button", { name: "刪除" }).click();
+  await expect(odptGroup.getByText("尚未設定")).toBeVisible();
 });
 
 test("格式錯誤的 key 不儲存，錯誤訊息不含輸入內容", async ({ page, context, baseURL }) => {

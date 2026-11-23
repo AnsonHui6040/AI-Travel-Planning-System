@@ -24,11 +24,11 @@
 |---|---|---|---|
 | C-01 | T13、T19 | 待建立 | 未驗收 |
 | C-02 | T12 | `supabase/tests/08_api_keys.test.sql`（Vault 密文、只限 service_role 解密）；`apps/web/lib/server/api-keys-core.test.ts`（只解密 session 本人的 key）；E2E 只顯示末四碼 | 已驗收 |
-| C-03 | T12、T13、T19、T22 | T12：儲存前測試呼叫的掛鉤，失敗時不儲存（`packages/core/src/api-keys.test.ts`）；各供應商的測試呼叫於 T13、T19、T22 | 部分 |
+| C-03 | T12、T13、T19、T22 | T12：儲存前測試呼叫的掛鉤，失敗時不儲存（`packages/core/src/api-keys.test.ts`）；T13：三家 AI 的測試呼叫（`packages/ai/src/providers.contract.test.ts`）；Google Maps、ODPT 於 T19、T22 | 部分 |
 | C-04 | T12、T17 | T12：固定錯誤訊息（pgTAP、單元測試）、E2E 頁面不含完整 key、`tooling/scan-client-bundle.cjs`（CI build 後執行）；log 遮罩於 T17；Docker image 於 T04 已驗證不含 `.env` | 已驗收 |
 | C-05 | T12 | `08_api_keys.test.sql`：A 沒有 key 時 A 的 job 不借用 B 的；Server Action 忽略表單傳入的擁有者；功能降級於各功能 Task | 已驗收 |
 | C-06 | T11、T12 | T12 實作 `api_key`；`plan_oauth` 以 T11 的 `CredentialProvider`（`available: false`）預留 | 已驗收 |
-| C-07 | T13 | 待建立 | 未驗收 |
+| C-07 | T13 | `packages/ai/src/providers.contract.test.ts`：只連官方 HTTPS 端點、逾時分類、限流後以退避重試成功；資料源 adapter（T19、T22）沿用相同設定 | 已驗收 |
 | C-08 | T14、T38 | 待建立 | 未驗收 |
 | C-09 | T03 | `supabase/tests/01_rls_enabled.test.sql`、`02_trip_permissions.test.sql`（anon 無權限）；伺服器端只用 anon key | 部分 |
 | C-10 | T33 | 待建立 | 未驗收 |
