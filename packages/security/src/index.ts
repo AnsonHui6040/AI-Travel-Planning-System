@@ -24,3 +24,19 @@ export function redactSecrets(text: string, secrets: readonly string[]): string 
   for (const pattern of KNOWN_PATTERNS) result = result.replace(pattern, MASK);
   return result;
 }
+
+// T16、S-05：白名單 fetch（只供伺服器端使用）
+export { isPublicAddress } from "./address";
+export {
+  DEFAULT_FETCH_LIMITS,
+  FETCH_ALLOWLIST,
+  createAllowlistedFetch,
+  type AllowlistedFetchOptions,
+  type FetchBlockReason,
+  type FetchLimits,
+  type FetchResult,
+  type FetchTransport,
+  type ResolveHost,
+  type TransportResponse,
+} from "./allowlisted-fetch";
+export { nodeResolve, nodeTransport, pinnedLookup } from "./node-transport";
