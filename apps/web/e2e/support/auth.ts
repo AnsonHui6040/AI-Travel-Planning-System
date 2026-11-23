@@ -82,3 +82,42 @@ export async function setDisplayName(userId: string, displayName: string): Promi
   const result = await adminClient().from("profiles").update({ display_name: displayName }).eq("id", userId);
   if (result.error) throw new Error("設定顯示名稱失敗");
 }
+
+export async function createItem(tripId: string, item: { name_zh: string; name_local?: string | null; address?: string | null }): Promise<string> {
+  const result = await adminClient()
+    .from("itinerary_items")
+    .insert({
+      trip_id: tripId,
+      name_zh: item.name_zh,
+      name_local: item.name_local ?? null,
+      address: item.address ?? null,
+      type: "attraction",
+      suggested_stay_minutes: 60,
+      recommendation_reason: "測試",
+      priority: 3,
+      weather_dependency: "low",
+      score_personal_value: 3,
+      score_uniqueness: 3,
+      score_geographic_fit: 3,
+      score_time_cost: 3,
+      score_transport_cost: 3,
+      score_weather_dependency: 3,
+      score_time_slot_dependency: 3,
+      score_substitutability: 3,
+    })
+    .select("id")
+    .single();
+  if (result.error) throw new Error("建立測試項目失敗");
+  return String(result.data.id);
+}
+
+// 下載 Storage 物件（檢查上傳結果用）
+export async function downloadStoredPhoto(tripId: string): Promise<Buffer> {
+  const admin = adminClient();
+  const list = await admin.storage.from("trip-photos").list(tripId);
+  const name = list.data?.[0]?.name;
+  if (list.error || !name) throw new Error("找不到上傳的照片");
+  const file = await admin.storage.from("trip-photos").download(`${tripId}/${name}`);
+  if (file.error) throw new Error("下載照片失敗");
+  return Buffer.from(await file.data.arrayBuffer());
+}
