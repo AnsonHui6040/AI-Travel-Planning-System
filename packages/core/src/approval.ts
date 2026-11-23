@@ -1,18 +1,8 @@
 // 第 2.6 節批准規則、Incident 分級、重算範圍。分級邊界見 docs/decisions/0004-delay-levels.md。
 
-export type ChangeKind =
-  | "new_candidate"
-  | "candidate_verification_update"
-  | "fact_correction"
-  | "approved_fact_invalidated"
-  | "reschedule_after_invalidation"
-  | "incident_L1"
-  | "incident_L2"
-  | "incident_L3"
-  | "incident_L4"
-  | "major_version"
-  | "minor_non_incident"
-  | "add_candidate_to_gap";
+import type { ChangeKind } from "@atps/schemas";
+
+export type { ChangeKind };
 
 export interface ApprovalRule {
   apply: "auto" | "approval";
