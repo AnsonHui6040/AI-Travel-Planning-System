@@ -77,7 +77,7 @@ select throws_ok($$update public.itinerary_items set scheduled_start = '09:00'$$
 select throws_ok($$insert into public.versions (trip_id, major, minor, kind, summary, impact_scope, old_arrangement, new_arrangement, base_version)
   values ('21000000-0000-0000-0000-000000000001', 9, 0, 'major', 'x', '{}', '{}', '{}', 1)$$, '42501', null, 'C：不可直接寫入版本');
 select throws_ok($$update public.versions set summary = 'x'$$, '42501', null, 'C：不可修改 Change Log');
-select is(public.__affected($q$update public.trips set current_version = 99$q$), 0, 'C：不可修改目前版本');
+select throws_ok($q$update public.trips set current_version = 99$q$, '42501', null, 'C：不可修改目前版本（T23 起沒有 trips 的 UPDATE 權限）');
 select throws_ok($$update public.proposals set status = 'applied'$$, '42501', null, 'C：不可直接改提案狀態');
 select throws_ok($$update public.days set status = 'approved'$$, '42501', null, 'C：不可直接改每日狀態');
 select throws_ok($$insert into public.notifications (recipient_id, kind) values ('00000000-0000-0000-0000-0000000000c1', 'x')$$,

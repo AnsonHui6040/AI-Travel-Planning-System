@@ -61,4 +61,6 @@
 - Google Maps 內容只保存 place_id 與 30 日內的座標（D28）；名稱、地址、評分、照片只即時顯示。逾期座標由 pg_cron 每日清除（`private.purge_expired_coordinates`）。導航只用 `directionsUrl`（Maps URLs，不含 key）。
 - 照片只經伺服器 `sanitizeImage` 移除 EXIF 後以 service role 寫入 bucket `trip-photos`（使用者沒有 Storage 寫入權）；顯示經同源 `/api/photos/…`（S-09）。
 - 即時資料（T22）：天氣用 Open-Meteo（座標只送小數第二位）；氣象廳警報讀 `bosai/warning/data/r8/`（舊的 `data/warning/` 已停止更新）；ODPT 只接 `JAPAN_ODPT_TRAIN_STATUS` 列出的基本ライセンス與 CC 資料集。路線狀態以 core 的 `routeLiveView` 顯示（沒有來源為「無即時資料」），異常營運以 `transitAtRiskChanges` 產生 At Risk 提案；官方運行情報頁的核實結果經 `acceptOfficialTransitReport`。
+- 旅行基線（T23）只經 `save_trip_baseline`、`confirm_trip_baseline`（擁有者 `atps_baseline_writer`）寫入；確認前 Server Action 以 core 的 `checkBaseline` 重新檢查，有矛盾不確認。authenticated 沒有 `trips` 的 UPDATE。確定性的評估場景放 `evals/baseline/`。
+- React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。
