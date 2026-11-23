@@ -12,8 +12,10 @@ import type {
   Notifier,
   Proposal,
   ProposalRepository,
+  RestoreResult,
+  VersionRestorer,
 } from "@atps/core";
-import { commitResult, tableSchemas, type TableName } from "@atps/schemas";
+import { commitResult, restoreResult, tableSchemas, type TableName } from "@atps/schemas";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // M-04：core port 的 Supabase 實作。client 以請求者本人的 session 建立，存取受 RLS 限制（C-09）。
@@ -134,6 +136,21 @@ export class SupabaseChangeWriter implements ChangeWriter {
   async reject(input: { proposalId: string; actorId: string }): Promise<void> {
     const result = await this.client.rpc("reject_proposal", { p_proposal_id: input.proposalId });
     if (result.error) throw new Error("否決提案失敗");
+  }
+}
+
+// T10A：復原舊版本。權限、base version 與寫入都在資料庫函式內以寫入角色完成，復原者取自 session。
+export class SupabaseVersionRestorer implements VersionRestorer {
+  constructor(private readonly client: RpcClient) {}
+
+  async restore(input: { versionId: string; baseVersion: number }): Promise<RestoreResult> {
+    const result = await this.client.rpc("restore_version", {
+      p_version_id: input.versionId,
+      p_base_version: input.baseVersion,
+    });
+    if (result.error) throw new Error("復原版本失敗");
+    const parsed = restoreResult.parse(result.data);
+    return { version: { major: parsed.major, minor: parsed.minor }, versionId: parsed.version_id };
   }
 }
 

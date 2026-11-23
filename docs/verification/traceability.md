@@ -80,7 +80,7 @@
 | SH-01 | T03 | `supabase/tests/02_trip_permissions.test.sql`（Owner、Companion、Viewer；唯讀連結於 T33） | 部分 |
 | SH-02 | T03、T32 | `supabase/tests/02_trip_permissions.test.sql`：trips 與 trip_members 相關各格；其餘資料表於建立時補 | 部分 |
 | SH-03 | T32 | 待建立 | 未驗收 |
-| SH-04 | T07、T09、T34 | T07：`packages/core/src/states.test.ts`；T09：`supabase/tests/05_apply_change.test.sql`（同一 base version 的第二個提案批准時失效）；T34 兩個瀏覽器 E2E、真機 R6 待建立 | 部分 |
+| SH-04 | T07、T09、T10A、T34 | T07：`packages/core/src/states.test.ts`；T09：`supabase/tests/05_apply_change.test.sql`（同一 base version 的第二個提案批准時失效）；T10A：`supabase/tests/06_restore_version.test.sql`（base version 不符時復原失敗、復原前的提案批准時失效）；T34 兩個瀏覽器 E2E、真機 R6 待建立 | 部分 |
 | SH-05 | T34、T35 | 待建立；真機 R3 | 未驗收 |
 | SH-06 | T09、T34 | T09：`supabase/tests/05_apply_change.test.sql`（批准、否決、失效通知成員，未讀可依成員查詢，通知表經 Realtime 推送）、`packages/db/src/change-writer.test.ts`；T34 E2E、真機 R6 待建立 | 部分 |
 | SH-07 | T32 | 待建立 | 未驗收 |
