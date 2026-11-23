@@ -13,6 +13,7 @@
 | Build | `pnpm build` |
 | 資料庫（需 Docker） | `supabase start`；套用 migration `supabase db reset`；pgTAP `supabase test db` |
 | E2E（390 與 1280） | `pnpm test:e2e`，首次執行前 `pnpm --filter @atps/web exec playwright install chromium` |
+| AI 評估（錄製回應，報告寫入 `docs/verification/evals/`） | `pnpm evals:run`；指定場景 `EVAL_SCENARIOS=E6 pnpm evals:run` |
 
 ## 結構與依賴
 

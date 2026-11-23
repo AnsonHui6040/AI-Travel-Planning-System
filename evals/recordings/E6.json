@@ -1,0 +1,40 @@
+{
+  "scenario": "E6",
+  "note": "依 live_planner 輸出 schema 撰寫的合成回應，用於在 CI 驗證 runner 與判定器；真 AI 結果另以真 key 執行",
+  "responses": [
+    {
+      "proposals": [
+        {
+          "changeKind": "minor_non_incident",
+          "versionKind": "minor",
+          "summary": "取消 16:00 咖啡時段，該時段留空休息",
+          "operations": [
+            { "op": "schedule_item", "itemId": "e6000000-0000-4000-8000-000000000004", "date": null, "start": null, "end": null }
+          ]
+        },
+        {
+          "changeKind": "minor_non_incident",
+          "versionKind": "minor",
+          "summary": "取消咖啡時段，改去附近的藏前甜點店",
+          "operations": [
+            { "op": "schedule_item", "itemId": "e6000000-0000-4000-8000-000000000004", "date": null, "start": null, "end": null },
+            { "op": "schedule_item", "itemId": "e6000000-0000-4000-8000-000000000007", "date": "2026-12-03", "start": "16:00", "end": "17:00" }
+          ]
+        }
+      ]
+    },
+    {
+      "proposals": [
+        {
+          "changeKind": "minor_non_incident",
+          "versionKind": "minor",
+          "summary": "取消咖啡時段，16:15 起改去藏前甜點店",
+          "operations": [
+            { "op": "schedule_item", "itemId": "e6000000-0000-4000-8000-000000000004", "date": null, "start": null, "end": null },
+            { "op": "schedule_item", "itemId": "e6000000-0000-4000-8000-000000000007", "date": "2026-12-03", "start": "16:15", "end": "17:00" }
+          ]
+        }
+      ]
+    }
+  ]
+}

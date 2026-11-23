@@ -96,6 +96,22 @@
 | F-04 | T11 | `Importer` 介面，`ImportedBooking.constraintClass` 固定為 `hard_constraint`；feature flag `booking_import` | 已驗收 |
 | F-05 | T11 | `supabase/tests/07_feature_flags.test.sql`（預設關閉、只讀）；`isFeatureEnabled` 與 `SupabaseFeatureFlagReader` 測試 | 已驗收 |
 
+## 第 9.3 節 AI 評估場景
+
+runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；第 9.1 節的合格條件是以真 AI 連續執行 5 次全部通過。
+
+| 場景 | 場景檔 | 錄製回應 | 真 AI 5 次 | 狀態 |
+|---|---|---|---|---|
+| E1 | 待建立 | 無 | TBD | 未驗收 |
+| E2 | 待建立 | 無 | TBD | 未驗收 |
+| E3 | 待建立 | 無 | TBD | 未驗收 |
+| E4 | 待建立 | 無 | TBD | 未驗收 |
+| E5 | 待建立 | 無 | TBD | 未驗收 |
+| E6 | `evals/scenarios/E6.json` | PASS（`docs/verification/evals/2026-11-23-E6.md`） | TBD | 部分 |
+| E7 | 待建立 | 無 | TBD | 未驗收 |
+| E8 | 待建立 | 無 | TBD | 未驗收 |
+| E9 | 待建立 | 無 | TBD | 未驗收 |
+
 ## 沒有負責 Task 的規則
 
 無。C-11 於 2026-11-22 分配至 T03；S-08 的安全標頭分配至 T01，Markdown sanitize 與連結限制分配至 T24。
