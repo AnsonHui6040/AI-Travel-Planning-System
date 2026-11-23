@@ -1,7 +1,7 @@
 -- T09：applyChange 的寫入角色、版本檢查（SH-04）、即時分支、通知與未讀（SH-06）
 -- O = Owner、C = Companion、V = Viewer、X = 非成員
 begin;
-select plan(45);
+select plan(46);
 
 create function public.__affected(sql text) returns integer
 language plpgsql security invoker as $f$
@@ -58,9 +58,11 @@ insert into public.proposals (id, trip_id, proposer_member_id, proposer_role, ba
   ('41000000-0000-0000-0000-000000000008', '21000000-0000-0000-0000-000000000001', null, 'live_planner', 4,
     '{"changeKind":"minor_non_incident","versionKind":"minor","summary":"需批准卻要求自動套用","operations":[{"op":"set_at_risk","itemId":"31000000-0000-0000-0000-000000000001","atRisk":false}]}', '{}', null),
   ('41000000-0000-0000-0000-000000000009', '21000000-0000-0000-0000-000000000001', null, 'live_planner', 4,
-    '{"changeKind":"incident_L1","versionKind":"minor","summary":"延誤 15 分鐘，壓縮緩衝","operations":[{"op":"schedule_item","itemId":"31000000-0000-0000-0000-000000000001","date":"2026-12-01","start":"14:15","end":"15:30"}]}', '{}', null),
+    '{"changeKind":"approved_fact_invalidated","versionKind":"minor","summary":"臨時休館，標示 At Risk","operations":[{"op":"set_at_risk","itemId":"31000000-0000-0000-0000-000000000001","atRisk":true}]}', '{}', null),
   ('41000000-0000-0000-0000-00000000000a', '21000000-0000-0000-0000-000000000001', null, 'live_planner', 5,
-    '{"changeKind":"incident_L1","versionKind":"minor","summary":"未知操作","operations":[{"op":"drop_trip","itemId":"31000000-0000-0000-0000-000000000001"}]}', '{}', null);
+    '{"changeKind":"approved_fact_invalidated","versionKind":"minor","summary":"未知操作","operations":[{"op":"drop_trip","itemId":"31000000-0000-0000-0000-000000000001"}]}', '{}', null),
+  ('41000000-0000-0000-0000-00000000000b', '21000000-0000-0000-0000-000000000001', null, 'live_planner', 5,
+    '{"changeKind":"incident_L1","versionKind":"minor","summary":"延誤 15 分鐘，壓縮緩衝","operations":[{"op":"schedule_item","itemId":"31000000-0000-0000-0000-000000000001","date":"2026-12-01","start":"14:15","end":"15:30"}]}', '{}', null);
 
 -- 寫入角色 -------------------------------------------------------------
 select has_role('atps_change_writer', 'applyChange 使用的寫入角色存在');
@@ -164,7 +166,9 @@ select throws_ok($$select private.commit_proposal('41000000-0000-0000-0000-00000
 select throws_ok($$select public.auto_apply_proposal('41000000-0000-0000-0000-000000000008')$$, '42501', null,
   '需批准的變更不可自動套用（D10）');
 select is(public.auto_apply_proposal('41000000-0000-0000-0000-000000000009'),
-  '{"outcome":"applied","major":2,"minor":1,"invalidated_ids":[]}'::jsonb, 'L1 自動套用，版本 v2.1');
+  '{"outcome":"applied","major":2,"minor":1,"invalidated_ids":[]}'::jsonb, '事實失效標示 At Risk 自動套用，版本 v2.1');
+select throws_ok($$select public.auto_apply_proposal('41000000-0000-0000-0000-00000000000b')$$, '42501', null,
+  'L1 壓縮緩衝不可自動套用（決策 0005）');
 select throws_ok($$select public.auto_apply_proposal('41000000-0000-0000-0000-00000000000a')$$, '22023', null, '未知操作被拒');
 reset role;
 select is((select approved_by from public.versions where trip_id = '21000000-0000-0000-0000-000000000001' and major = 2 and minor = 1),

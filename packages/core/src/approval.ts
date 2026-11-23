@@ -23,14 +23,14 @@ const rule = (apply: ApprovalRule["apply"], flags: Partial<Omit<ApprovalRule, "a
 
 const needsApproval = rule("approval", { notify: true, log: true });
 
-// D10：只有 L1 壓縮緩衝自動套用；事實更正影響已批准或已鎖定行程時另依第 2.10 節（T10）
+// D10、決策 0005：行程與事實資料的改動一律需使用者確認；只有不改動行程內容的三類自動
 const APPROVAL_RULES: Record<ChangeKind, ApprovalRule> = {
   new_candidate: rule("auto"),
   candidate_verification_update: rule("auto"),
-  fact_correction: rule("auto", { log: true }),
+  fact_correction: needsApproval,
   approved_fact_invalidated: rule("auto", { notify: true, log: true, markAtRisk: true }),
   reschedule_after_invalidation: needsApproval,
-  incident_L1: rule("auto", { notify: true, log: true }),
+  incident_L1: needsApproval,
   incident_L2: needsApproval,
   incident_L3: needsApproval,
   incident_L4: needsApproval,

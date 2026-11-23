@@ -12,10 +12,10 @@ describe("第 2.6 節批准規則", () => {
   it.each([
     ["new_candidate", { apply: "auto", notify: false, log: false, markAtRisk: false, prompt: false }],
     ["candidate_verification_update", { apply: "auto", notify: false, log: false, markAtRisk: false, prompt: false }],
-    ["fact_correction", { apply: "auto", notify: false, log: true, markAtRisk: false, prompt: false }],
+    ["fact_correction", { apply: "approval", notify: true, log: true, markAtRisk: false, prompt: false }],
     ["approved_fact_invalidated", { apply: "auto", notify: true, log: true, markAtRisk: true, prompt: false }],
     ["reschedule_after_invalidation", { apply: "approval", notify: true, log: true, markAtRisk: false, prompt: false }],
-    ["incident_L1", { apply: "auto", notify: true, log: true, markAtRisk: false, prompt: false }],
+    ["incident_L1", { apply: "approval", notify: true, log: true, markAtRisk: false, prompt: false }],
     ["incident_L2", { apply: "approval", notify: true, log: true, markAtRisk: false, prompt: false }],
     ["incident_L3", { apply: "approval", notify: true, log: true, markAtRisk: false, prompt: false }],
     ["incident_L4", { apply: "approval", notify: true, log: true, markAtRisk: false, prompt: false }],
@@ -26,11 +26,11 @@ describe("第 2.6 節批准規則", () => {
     expect(approvalRule(kind)).toEqual(expected);
   });
 
-  it("只有 L1 一種 Incident 自動套用（D10）", () => {
+  it("Incident 一律需確認（決策 0005）", () => {
     const auto = (["incident_L1", "incident_L2", "incident_L3", "incident_L4"] as const).filter(
       (k) => approvalRule(k).apply === "auto",
     );
-    expect(auto).toEqual(["incident_L1"]);
+    expect(auto).toEqual([]);
   });
 });
 

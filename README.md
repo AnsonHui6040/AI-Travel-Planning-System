@@ -8,10 +8,10 @@
 |---|---|
 | 更新日期 | 2026-11-23 |
 | 目前 Phase | Phase 1：核心領域 |
-| 已完成 Task | T01–T09 |
+| 已完成 Task | T01–T10 |
 | 進行中 Task | 無 |
-| 下一個 Task | T10：第 2.10 節衝突處理（開始前確認「差異重大」標準） |
-| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md`、`T05.md`、`T06.md`、`T07.md`、`T08.md`、`T09.md`；決策 `docs/decisions/0001`–`0004` |
+| 下一個 Task | T10A：復原任何舊版本 |
+| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md`、`T05.md`、`T06.md`、`T07.md`、`T08.md`、`T09.md`、`T10.md`；決策 `docs/decisions/0001`–`0005` |
 
 ## 開發
 
