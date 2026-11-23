@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  featureFlagRow,
   hhmm,
   httpsUrl,
   ianaTimezone,
@@ -212,5 +213,24 @@ describe("旅行基線", () => {
     expect(tripBaselineData.safeParse(baseline).error?.issues).toBeUndefined();
     expect(ok(tripBaselineData, { ...baseline, timezone: "JST" })).toBe(false);
     expect(ok(tripBaselineData, { ...baseline, end_date: "2026-11-30" })).toBe(false);
+  });
+});
+
+describe("feature flag（F-05）", () => {
+  const flag = {
+    key: "expense_ledger",
+    enabled: false,
+    description: "預算與記帳",
+    updated_at: "2026-11-23T08:00:00+00:00",
+  };
+
+  it("key 為小寫英文、數字與底線", () => {
+    expect(featureFlagRow.safeParse(flag).error?.issues).toBeUndefined();
+    expect(ok(featureFlagRow, { ...flag, key: "Expense Ledger" })).toBe(false);
+    expect(ok(featureFlagRow, { ...flag, key: "" })).toBe(false);
+  });
+
+  it("enabled 只接受布林值", () => {
+    expect(ok(featureFlagRow, { ...flag, enabled: "true" })).toBe(false);
   });
 });

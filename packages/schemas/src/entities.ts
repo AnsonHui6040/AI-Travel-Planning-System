@@ -333,6 +333,14 @@ export const photoRow = z.strictObject({
   created_at: offsetDateTime,
 });
 
+// F-05：功能開關。新功能預設關閉，只能經 migration 修改
+export const featureFlagRow = z.strictObject({
+  key: z.string().regex(/^[a-z][a-z0-9_]{0,62}$/),
+  enabled: z.boolean(),
+  description: text(LIMITS.shortNote),
+  updated_at: offsetDateTime,
+});
+
 // 資料表名稱與 row schema 對照，供一致性測試與 repository 使用
 export const tableSchemas = {
   profiles: profileRow,
@@ -352,6 +360,7 @@ export const tableSchemas = {
   readonly_links: readonlyLinkRow,
   background_jobs: backgroundJobRow,
   photos: photoRow,
+  feature_flags: featureFlagRow,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;

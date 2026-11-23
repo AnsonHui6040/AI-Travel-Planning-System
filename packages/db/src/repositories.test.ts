@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  SupabaseFeatureFlagReader,
   SupabaseItineraryRepository,
   SupabaseMemoryReader,
   SupabaseNotifier,
@@ -11,7 +12,7 @@ import {
 function fakeClient(result: { data: unknown; error: { message: string } | null }) {
   const calls: Array<[string, ...unknown[]]> = [];
   const builder: Record<string, unknown> = {};
-  for (const method of ["select", "eq", "order", "insert", "single", "maybeSingle"]) {
+  for (const method of ["select", "eq", "in", "order", "insert", "single", "maybeSingle"]) {
     builder[method] = (...args: unknown[]) => {
       calls.push([method, ...args]);
       return builder;
@@ -136,10 +137,54 @@ describe("ProposalRepository", () => {
 });
 
 describe("MemoryReader 與 Notifier", () => {
-  it("只讀取指定擁有者的記憶", async () => {
+  it("只讀取指定擁有者、且在角色記憶範圍內的記憶（MEM-11）", async () => {
     const { client, calls } = fakeClient({ data: [], error: null });
-    await new SupabaseMemoryReader(client).listForOwner("44444444-4444-4444-8444-444444444444");
-    expect(calls).toContainEqual(["eq", "owner_id", "44444444-4444-4444-8444-444444444444"]);
+    await new SupabaseMemoryReader(client).read({
+      ownerIds: ["44444444-4444-4444-8444-444444444444"],
+      tripId: null,
+      scope: { layers: ["personal"], kinds: ["constraint"] },
+    });
+    expect(calls).toContainEqual(["in", "owner_id", ["44444444-4444-4444-8444-444444444444"]]);
+    expect(calls).toContainEqual(["in", "layer", ["personal"]]);
+    expect(calls).toContainEqual(["in", "kind", ["constraint"]]);
+  });
+
+  it("記憶範圍為空或沒有擁有者時不查詢資料庫", async () => {
+    const { client, calls } = fakeClient({ data: [], error: null });
+    const reader = new SupabaseMemoryReader(client);
+    await expect(
+      reader.read({ ownerIds: ["44444444-4444-4444-8444-444444444444"], tripId: null, scope: { layers: [], kinds: [] } }),
+    ).resolves.toEqual([]);
+    await expect(
+      reader.read({ ownerIds: [], tripId: null, scope: { layers: ["personal"], kinds: ["constraint"] } }),
+    ).resolves.toEqual([]);
+    expect(calls).toEqual([]);
+  });
+
+  it("查詢結果再依記憶範圍過濾，資料庫多回傳的列不送出", async () => {
+    const row = {
+      id: "55555555-5555-4555-8555-555555555555",
+      owner_id: "44444444-4444-4444-8444-444444444444",
+      layer: "personal",
+      trip_id: null,
+      kind: "preference",
+      item: "喜歡寺廟",
+      value: "高",
+      unit: null,
+      source: "manual",
+      source_proposal_id: null,
+      approved_at: "2026-11-23T08:00:00+00:00",
+      last_used_at: null,
+      created_at: "2026-11-23T08:00:00+00:00",
+    };
+    const { client } = fakeClient({ data: [row], error: null });
+    await expect(
+      new SupabaseMemoryReader(client).read({
+        ownerIds: [row.owner_id],
+        tripId: null,
+        scope: { layers: ["personal"], kinds: ["constraint"] },
+      }),
+    ).resolves.toEqual([]);
   });
 
   it("通知寫入收件者與關聯物件", async () => {
@@ -153,5 +198,23 @@ describe("MemoryReader 與 Notifier", () => {
     });
     const insert = calls.find(([m]) => m === "insert");
     expect(insert?.[1]).toMatchObject({ recipient_id: "44444444-4444-4444-8444-444444444444", kind: "proposal_applied" });
+  });
+});
+
+describe("FeatureFlagReader（F-05）", () => {
+  it("讀取全部 feature flag 並以 schema 驗證", async () => {
+    const { client, calls } = fakeClient({
+      data: [{ key: "expense_ledger", enabled: false, description: "預算與記帳", updated_at: "2026-11-23T08:00:00+00:00" }],
+      error: null,
+    });
+    await expect(new SupabaseFeatureFlagReader(client).list()).resolves.toEqual([
+      { key: "expense_ledger", enabled: false },
+    ]);
+    expect(calls).toContainEqual(["from", "feature_flags"]);
+  });
+
+  it("讀取失敗時拋出錯誤，不當作全部關閉", async () => {
+    const { client } = fakeClient({ data: null, error: { message: "boom" } });
+    await expect(new SupabaseFeatureFlagReader(client).list()).rejects.toThrow("讀取 feature_flags 失敗");
   });
 });

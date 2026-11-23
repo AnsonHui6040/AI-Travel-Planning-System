@@ -6,3 +6,5 @@ export * from "./sync";
 export * from "./apply-change";
 export * from "./conflicts";
 export * from "./restore";
+export * from "./registry";
+export * from "./extensions";

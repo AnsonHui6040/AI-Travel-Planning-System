@@ -71,7 +71,7 @@
 | MEM-08 | T41 | 待建立 | 未驗收 |
 | MEM-09 | T41 | 待建立 | 未驗收 |
 | MEM-10 | T41 | 待建立 | 未驗收 |
-| MEM-11 | T11、T41 | 待建立 | 未驗收 |
+| MEM-11 | T11、T41 | T11：`RoleSpec.memoryScope`、core `scopeMemories`（`packages/core/src/extensions.test.ts`）、`SupabaseMemoryReader.read` 依範圍查詢與過濾（`packages/db/src/repositories.test.ts`）；完整版本於 T41 | 部分 |
 
 ## 第 6 節 分享
 
@@ -90,11 +90,11 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| F-01 | T06、T11 | T06：行程項目的預估費用、實際費用、付款人欄位（schema 與 migration）；`ExpenseLedger` 介面於 T11 | 部分 |
-| F-02 | T11 | 待建立 | 未驗收 |
-| F-03 | T11 | 待建立 | 未驗收 |
-| F-04 | T11 | 待建立 | 未驗收 |
-| F-05 | T11 | 待建立 | 未驗收 |
+| F-01 | T06、T11 | T06：行程項目的預估費用、實際費用、付款人欄位（schema 與 migration）；T11：`ExpenseLedger` 介面與 feature flag `expense_ledger`（`docs/verification/T11.md`） | 已驗收 |
+| F-02 | T11 | `Exporter` 介面（`packages/core/src/ports.ts`）與 feature flag `calendar_export` | 已驗收 |
+| F-03 | T11 | `Notifier`（站內）、`LocationEvent`、`LocationSource` 介面與 feature flag `push_notifications`、`location_reminders` | 已驗收 |
+| F-04 | T11 | `Importer` 介面，`ImportedBooking.constraintClass` 固定為 `hard_constraint`；feature flag `booking_import` | 已驗收 |
+| F-05 | T11 | `supabase/tests/07_feature_flags.test.sql`（預設關閉、只讀）；`isFeatureEnabled` 與 `SupabaseFeatureFlagReader` 測試 | 已驗收 |
 
 ## 沒有負責 Task 的規則
 
