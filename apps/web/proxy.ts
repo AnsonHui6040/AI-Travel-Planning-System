@@ -21,7 +21,8 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     {
-      source: "/((?!api|_next/static|_next/image|favicon.ico).*)",
+      // .well-known/workflow/ 為 Vercel Workflow 內部路徑，不可被 proxy 攔截
+      source: "/((?!api|_next/static|_next/image|favicon.ico|.well-known/workflow/).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

@@ -12,6 +12,11 @@ export default tseslint.config(
       "**/playwright-report/**",
       "**/test-results/**",
       "**/coverage/**",
+      // Vercel Workflow 建置產生的檔案
+      "**/.workflow-vitest/**",
+      "**/.workflow-data/**",
+      "**/.well-known/workflow/**",
+      "**/.swc/**",
     ],
   },
   js.configs.recommended,

@@ -7,7 +7,7 @@
 | 用途 | 指令 |
 |---|---|
 | 安裝 | `pnpm install` |
-| 單元與工具測試 | `pnpm test` |
+| 單元與工具測試 | `pnpm test`（含 `pnpm test:workflow`，須在 repo 根目錄執行） |
 | 型別檢查 | `pnpm typecheck` |
 | Lint 與依賴方向 | `pnpm lint`（含 `pnpm depcruise`） |
 | Build | `pnpm build` |

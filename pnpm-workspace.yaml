@@ -4,4 +4,12 @@ packages:
 
 # S-11：只允許明列的套件執行安裝腳本；未列入而需要執行者會讓安裝失敗
 strictDepBuilds: true
-onlyBuiltDependencies: []
+# true 為允許執行，false 為明確不執行（預建二進位檔由 optionalDependencies 提供）
+allowBuilds:
+  "@swc/core": false
+  cbor-extract: false
+  esbuild: false
+
+# 依賴漏洞修補：GHSA-mrhx-c7xc-m3w5（zod <4.6.6），經 workflow > @workflow/cli > @vercel/cli-auth 間接帶入
+overrides:
+  "zod@<4.6.6": 4.6.7

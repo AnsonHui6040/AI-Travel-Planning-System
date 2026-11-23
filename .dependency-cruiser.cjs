@@ -85,7 +85,7 @@ module.exports = {
     doNotFollow: { path: "node_modules" },
     // node_modules 不可放在 exclude，否則外部依賴會整條被略過，M-01 檢查失效
     // next-env.d.ts 由 next build 產生且不納入版本控制
-    exclude: { path: "(^|/)((\\.next|test-results|playwright-report)/|next-env\\.d\\.ts$)" },
+    exclude: { path: "(^|/)((\\.next|\\.workflow-vitest|\\.workflow-data|\\.well-known|test-results|playwright-report)/|next-env\\.d\\.ts$)" },
     tsPreCompilationDeps: true,
     enhancedResolveOptions: {
       exportsFields: ["exports"],
