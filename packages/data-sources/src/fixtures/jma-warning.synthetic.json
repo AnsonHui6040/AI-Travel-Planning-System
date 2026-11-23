@@ -1,0 +1,40 @@
+[
+  {
+    "controlDatetime": "2026-11-23T11:23:29Z",
+    "reportDatetime": "2026-11-23T20:23:00+09:00",
+    "infoType": "発表",
+    "publishingOffice": "気象庁",
+    "headlineText": "東京地方では、大雨に注意してください。",
+    "warning": {
+      "class10Items": [
+        { "areaCode": "130010", "kinds": [{ "code": "10", "status": "発表" }, { "code": "15", "status": "発表" }] },
+        { "areaCode": "130020", "kinds": [{ "status": "発表警報・注意報はなし" }] },
+        { "areaCode": "130030", "kinds": [{ "code": "16", "status": "発表" }] }
+      ],
+      "class20Items": [
+        { "areaCode": "1310100", "kinds": [{ "code": "10", "status": "発表" }] },
+        { "areaCode": "1310600", "kinds": [{ "code": "10", "status": "発表" }, { "code": "15", "status": "発表" }] }
+      ]
+    },
+    "dataTypeCode": "VPWW61"
+  },
+  {
+    "controlDatetime": "2026-11-24T00:05:11Z",
+    "reportDatetime": "2026-11-24T09:05:00+09:00",
+    "infoType": "発表",
+    "publishingOffice": "気象庁",
+    "headlineText": "東京地方では、大雨による浸水に警戒してください。",
+    "warning": {
+      "class10Items": [
+        { "areaCode": "130010", "kinds": [{ "code": "03", "status": "発表" }, { "code": "15", "status": "解除" }, { "code": "99", "status": "発表" }] },
+        { "areaCode": "130020", "kinds": [{ "status": "発表警報・注意報はなし" }] },
+        { "areaCode": "130030", "kinds": [{ "status": "発表警報・注意報はなし" }] }
+      ],
+      "class20Items": [
+        { "areaCode": "1310100", "kinds": [{ "code": "43", "status": "発表" }] },
+        { "areaCode": "1310600", "kinds": [{ "code": "03", "status": "継続" }] }
+      ]
+    },
+    "dataTypeCode": "VPWW62"
+  }
+]

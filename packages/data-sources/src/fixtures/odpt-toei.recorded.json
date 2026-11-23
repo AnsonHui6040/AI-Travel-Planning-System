@@ -1,0 +1,26 @@
+[
+  {
+    "@id": "urn:uuid:28940ac6-c15d-4fbe-a30b-f1e7f068e721",
+    "@type": "odpt:TrainInformation",
+    "dc:date": "2026-11-24T02:10:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_TrainInformation.jsonld",
+    "dct:valid": "2026-11-24T02:15:00+09:00",
+    "owl:sameAs": "odpt.TrainInformation:Toei.Asakusa",
+    "odpt:railway": "odpt.Railway:Toei.Asakusa",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:timeOfOrigin": "2026-11-20T09:41:00+09:00",
+    "odpt:trainInformationText": { "ja": "現在、１５分以上の遅延はありません。" }
+  },
+  {
+    "@id": "urn:uuid:40d5b2cf-e399-4906-82d2-6678fd17d1eb",
+    "@type": "odpt:TrainInformation",
+    "dc:date": "2026-11-24T02:10:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_TrainInformation.jsonld",
+    "dct:valid": "2026-11-24T02:15:00+09:00",
+    "owl:sameAs": "odpt.TrainInformation:Toei.Mita",
+    "odpt:railway": "odpt.Railway:Toei.Mita",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:timeOfOrigin": "2026-11-24T00:00:00+09:00",
+    "odpt:trainInformationText": { "ja": "現在、１５分以上の遅延はありません。" }
+  }
+]
