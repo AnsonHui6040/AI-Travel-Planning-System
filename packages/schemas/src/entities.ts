@@ -234,6 +234,8 @@ export const versionRow = z.strictObject({
   new_arrangement: json,
   base_version: int(0, 1_000_000),
   created_at: offsetDateTime,
+  snapshot: nullable(json),
+  restored_from: nullable(uuid),
 });
 
 export const incidentRow = z.strictObject({

@@ -8,10 +8,10 @@
 |---|---|
 | 更新日期 | 2026-11-23 |
 | 目前 Phase | Phase 1：核心領域 |
-| 已完成 Task | T01–T10 |
+| 已完成 Task | T01–T10、T10A |
 | 進行中 Task | 無 |
-| 下一個 Task | T10A：復原任何舊版本 |
-| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md`、`T05.md`、`T06.md`、`T07.md`、`T08.md`、`T09.md`、`T10.md`；決策 `docs/decisions/0001`–`0005` |
+| 下一個 Task | T11：五個註冊表與共用契約測試 |
+| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md`、`T05.md`、`T06.md`、`T07.md`、`T08.md`、`T09.md`、`T10.md`、`T10A.md`；決策 `docs/decisions/0001`–`0005` |
 
 ## 開發
 

@@ -53,6 +53,26 @@ export const changePayload = z.strictObject({
 });
 export type ChangePayload = z.infer<typeof changePayload>;
 
+// T10A：每個版本保存的完整行程快照（versions.snapshot）。只含排程，At Risk 屬事實資料不隨復原改動
+export const scheduleSlot = z.strictObject({
+  itemId: uuid,
+  date: isoDate.nullable(),
+  start: hhmm.nullable(),
+  end: hhmm.nullable(),
+});
+export type ScheduleSlot = z.infer<typeof scheduleSlot>;
+
+export const scheduleSnapshot = z.array(scheduleSlot).max(1000);
+export type ScheduleSnapshot = z.infer<typeof scheduleSnapshot>;
+
+// 資料庫函式 restore_version 的回傳格式
+export const restoreResult = z.strictObject({
+  outcome: z.literal("restored"),
+  major: z.number().int().min(1),
+  minor: z.number().int().min(0),
+  version_id: uuid,
+});
+
 // 資料庫函式 approve_proposal、auto_apply_proposal 的回傳格式
 export const commitResult = z.discriminatedUnion("outcome", [
   z.strictObject({

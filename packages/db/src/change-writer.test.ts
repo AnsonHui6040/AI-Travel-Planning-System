@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { SupabaseChangeWriter, SupabaseNotificationRepository, type QueryClient, type RpcClient } from "./index";
+import {
+  SupabaseChangeWriter,
+  SupabaseNotificationRepository,
+  SupabaseVersionRestorer,
+  type QueryClient,
+  type RpcClient,
+} from "./index";
 
 const PROPOSAL = "40000000-0000-4000-8000-000000000001";
 const MEMBER = "00000000-0000-4000-8000-0000000000b2";
@@ -59,6 +65,33 @@ describe("SupabaseChangeWriter", () => {
   it("回傳格式不符時拋出", async () => {
     const { client } = fakeRpc({ data: { outcome: "applied" }, error: null });
     await expect(new SupabaseChangeWriter(client).approve({ proposalId: PROPOSAL, actorId: MEMBER })).rejects.toThrow();
+  });
+});
+
+describe("SupabaseVersionRestorer（T10A）", () => {
+  const VERSION = "50000000-0000-4000-8000-000000000001";
+  const NEW_VERSION = "50000000-0000-4000-8000-000000000002";
+
+  it("呼叫 restore_version，傳入版本編號與 base version", async () => {
+    const { client, calls } = fakeRpc({
+      data: { outcome: "restored", major: 3, minor: 0, version_id: NEW_VERSION },
+      error: null,
+    });
+    const result = await new SupabaseVersionRestorer(client).restore({ versionId: VERSION, baseVersion: 5 });
+    expect(calls).toEqual([["restore_version", { p_version_id: VERSION, p_base_version: 5 }]]);
+    expect(result).toEqual({ version: { major: 3, minor: 0 }, versionId: NEW_VERSION });
+  });
+
+  it("資料庫回傳錯誤時拋出，不洩漏錯誤內容", async () => {
+    const { client } = fakeRpc({ data: null, error: { message: "行程版本已變更" } });
+    await expect(new SupabaseVersionRestorer(client).restore({ versionId: VERSION, baseVersion: 5 })).rejects.toThrow(
+      /^復原版本失敗$/,
+    );
+  });
+
+  it("回傳格式不符時拋出", async () => {
+    const { client } = fakeRpc({ data: { outcome: "restored" }, error: null });
+    await expect(new SupabaseVersionRestorer(client).restore({ versionId: VERSION, baseVersion: 5 })).rejects.toThrow();
   });
 });
 

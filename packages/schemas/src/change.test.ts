@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CHANGE_KINDS, changePayload } from "./index";
+import { CHANGE_KINDS, changePayload, restoreResult, scheduleSnapshot } from "./index";
 
 const itemId = "30000000-0000-4000-8000-000000000001";
 
@@ -44,5 +44,26 @@ describe("變更提案內容（S-01）", () => {
     ["操作超過 50 個", { ...valid, operations: Array.from({ length: 51 }, () => valid.operations[0]) }],
   ])("拒絕%s", (_label, payload) => {
     expect(changePayload.safeParse(payload).success).toBe(false);
+  });
+});
+
+describe("版本快照與復原結果（T10A）", () => {
+  it("快照列出每個項目的日期與時間，未排程為 null", () => {
+    const snapshot = [
+      { itemId, date: "2026-12-01", start: "10:00", end: "11:30" },
+      { itemId: "30000000-0000-4000-8000-000000000002", date: null, start: null, end: null },
+    ];
+    expect(scheduleSnapshot.parse(snapshot)).toEqual(snapshot);
+  });
+
+  it("快照拒絕多餘欄位與錯誤時間格式", () => {
+    expect(() => scheduleSnapshot.parse([{ itemId, date: "2026-12-01", start: "10:00", end: "11:30", atRisk: true }])).toThrow();
+    expect(() => scheduleSnapshot.parse([{ itemId, date: "2026-12-01", start: "10:00:00", end: "11:30" }])).toThrow();
+  });
+
+  it("復原結果包含新版本號與版本編號", () => {
+    const result = { outcome: "restored", major: 2, minor: 0, version_id: "50000000-0000-4000-8000-000000000001" };
+    expect(restoreResult.parse(result)).toEqual(result);
+    expect(() => restoreResult.parse({ outcome: "restored", major: 2 })).toThrow();
   });
 });

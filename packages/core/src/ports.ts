@@ -57,6 +57,19 @@ export interface ChangeWriter {
   reject(input: { proposalId: string; actorId: string }): Promise<void>;
 }
 
+// T10A：復原舊版本。實作在資料庫交易內檢查權限與 base version（SH-04），
+// 把行程排程改回所選版本的快照並建立新版本；原有版本紀錄不變。
+export type VersionRow = Row<"versions">;
+
+export interface RestoreResult {
+  version: { major: number; minor: number };
+  versionId: string;
+}
+
+export interface VersionRestorer {
+  restore(input: { versionId: string; baseVersion: number }): Promise<RestoreResult>;
+}
+
 export interface NotificationRepository {
   listUnread(memberId: string): Promise<NotificationRow[]>;
   markRead(notificationId: string, at: Date): Promise<void>;
