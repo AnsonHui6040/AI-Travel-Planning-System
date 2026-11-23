@@ -24,7 +24,7 @@ function requireValue(env: Record<string, string>, name: string): string {
   return value;
 }
 
-export async function signInAsNewUser(context: BrowserContext, baseURL: string): Promise<{ email: string }> {
+export async function signInAsNewUser(context: BrowserContext, baseURL: string): Promise<{ email: string; userId: string }> {
   const env = loadEnv();
   const url = requireValue(env, "NEXT_PUBLIC_SUPABASE_URL");
   const anon = requireValue(env, "NEXT_PUBLIC_SUPABASE_ANON_KEY");
@@ -34,7 +34,8 @@ export async function signInAsNewUser(context: BrowserContext, baseURL: string):
   const password = `pw-${randomUUID()}`;
   const admin = createClient(url, service, { auth: { persistSession: false } });
   const created = await admin.auth.admin.createUser({ email, password, email_confirm: true });
-  if (created.error) throw new Error("建立測試使用者失敗");
+  if (created.error || !created.data.user) throw new Error("建立測試使用者失敗");
+  const userId = created.data.user.id;
 
   const jar: { name: string; value: string }[] = [];
   const client = createServerClient(url, anon, {
@@ -54,5 +55,30 @@ export async function signInAsNewUser(context: BrowserContext, baseURL: string):
 
   const { hostname } = new URL(baseURL);
   await context.addCookies(jar.map((c) => ({ ...c, domain: hostname, path: "/", httpOnly: false, sameSite: "Lax" })));
-  return { email };
+  return { email, userId };
+}
+
+function adminClient() {
+  const env = loadEnv();
+  return createClient(requireValue(env, "NEXT_PUBLIC_SUPABASE_URL"), requireValue(env, "SUPABASE_SERVICE_ROLE_KEY"), {
+    auth: { persistSession: false },
+  });
+}
+
+// 建立行程（觸發器把擁有者加入成員），可再加入其他成員
+export async function createTrip(ownerId: string, name: string, members: { userId: string; role: "companion" | "viewer" }[] = []): Promise<string> {
+  const admin = adminClient();
+  const trip = await admin.from("trips").insert({ name, owner_id: ownerId }).select("id").single();
+  if (trip.error) throw new Error("建立測試行程失敗");
+  const tripId = String(trip.data.id);
+  if (members.length > 0) {
+    const added = await admin.from("trip_members").insert(members.map((m) => ({ trip_id: tripId, user_id: m.userId, role: m.role })));
+    if (added.error) throw new Error("加入測試成員失敗");
+  }
+  return tripId;
+}
+
+export async function setDisplayName(userId: string, displayName: string): Promise<void> {
+  const result = await adminClient().from("profiles").update({ display_name: displayName }).eq("id", userId);
+  if (result.error) throw new Error("設定顯示名稱失敗");
 }

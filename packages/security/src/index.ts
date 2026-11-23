@@ -1,29 +1,5 @@
-// S-10、C-04：log、錯誤訊息與 AI 請求紀錄遮罩 API key
-
-const MASK = "[已遮罩]";
-const MIN_SECRET_LENGTH = 8;
-
-// 常見 key 與 token 格式：Anthropic、OpenAI、Google API key、Bearer token
-const KNOWN_PATTERNS = [
-  /sk-ant-[A-Za-z0-9_-]{8,}/g,
-  /sk-(?:proj-)?[A-Za-z0-9_-]{16,}/g,
-  /AIza[0-9A-Za-z_-]{30,}/g,
-  /Bearer\s+[A-Za-z0-9._~+/=-]+/g,
-];
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-export function redactSecrets(text: string, secrets: readonly string[]): string {
-  let result = text;
-  for (const secret of secrets) {
-    if (secret.length < MIN_SECRET_LENGTH) continue;
-    result = result.replace(new RegExp(escapeRegExp(secret), "g"), MASK);
-  }
-  for (const pattern of KNOWN_PATTERNS) result = result.replace(pattern, MASK);
-  return result;
-}
+// S-10、C-04：遮罩 API key
+export { redactSecrets } from "./redact";
 
 // T16、S-05：白名單 fetch（只供伺服器端使用）
 export { isPublicAddress } from "./address";
@@ -40,3 +16,19 @@ export {
   type TransportResponse,
 } from "./allowlisted-fetch";
 export { nodeResolve, nodeTransport, pinnedLookup } from "./node-transport";
+
+// T17、S-07、S-10：AI payload allowlist builder 與 log 遮罩
+export {
+  AI_ITEM_FIELDS,
+  AI_TRIP_FIELDS,
+  buildAiPayload,
+  serializeAiPayload,
+  type AiMember,
+  type AiPayload,
+  type AiPayloadInput,
+  type PayloadMember,
+  type SensitiveEntry,
+} from "./payload";
+export { createLogger, redactSensitive, type Logger, type LoggerOptions, type LogLevel, type RedactOptions } from "./logger";
+// 測試用合成資料（outbound payload 快照測試共用）
+export * as payloadFixtures from "./testing/payload-fixtures";

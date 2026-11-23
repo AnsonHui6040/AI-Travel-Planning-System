@@ -25,7 +25,7 @@
 | C-01 | T13、T19 | 待建立 | 未驗收 |
 | C-02 | T12 | `supabase/tests/08_api_keys.test.sql`（Vault 密文、只限 service_role 解密）；`apps/web/lib/server/api-keys-core.test.ts`（只解密 session 本人的 key）；E2E 只顯示末四碼 | 已驗收 |
 | C-03 | T12、T13、T19、T22 | T12：儲存前測試呼叫的掛鉤，失敗時不儲存（`packages/core/src/api-keys.test.ts`）；T13：三家 AI 的測試呼叫（`packages/ai/src/providers.contract.test.ts`）；Google Maps、ODPT 於 T19、T22 | 部分 |
-| C-04 | T12、T17 | T12：固定錯誤訊息（pgTAP、單元測試）、E2E 頁面不含完整 key、`tooling/scan-client-bundle.cjs`（CI build 後執行）；log 遮罩於 T17；Docker image 於 T04 已驗證不含 `.env` | 已驗收 |
+| C-04 | T12、T17 | T12：固定錯誤訊息（pgTAP、單元測試）、E2E 頁面不含完整 key、`tooling/scan-client-bundle.cjs`（CI build 後執行）；T17：`createLogger` 寫出前遮罩 key 與敏感欄位（`packages/security/src/logger.test.ts`）；Docker image 於 T04 已驗證不含 `.env` | 已驗收 |
 | C-05 | T12 | `08_api_keys.test.sql`：A 沒有 key 時 A 的 job 不借用 B 的；Server Action 忽略表單傳入的擁有者；功能降級於各功能 Task | 已驗收 |
 | C-06 | T11、T12 | T12 實作 `api_key`；`plan_oauth` 以 T11 的 `CredentialProvider`（`available: false`）預留 | 已驗收 |
 | C-07 | T13 | `packages/ai/src/providers.contract.test.ts`：只連官方 HTTPS 端點、逾時分類、限流後以退避重試成功；資料源 adapter（T19、T22）沿用相同設定 | 已驗收 |
@@ -45,17 +45,17 @@
 | S-04 | T14 | `packages/ai/src/roles.test.ts`（五個角色的工具）、`packages/core/src/role-runner.test.ts`（只把內建搜尋交給 AI）、T13 adapter 拒絕清單以外的工具 | 已驗收 |
 | S-05 | T16 | `packages/security/src/allowlisted-fetch.test.ts`（SSRF 測試集：IP 直連、DNS 解析至私有位址、redirect 至白名單外、https 與連接埠限制、大小、時間與內容類型上限、白名單設定檔格式、連線固定到已驗證位址）；`address.test.ts`（私有與保留位址）；連線真實網站於旅前 TBD | 已驗收 |
 | S-06 | T14 | `packages/core/src/role-runner.test.ts`（步數與 token 超過即停止並記錄）；`supabase/tests/09_ai_settings.test.sql`；E2E 設定頁顯示每個角色的用量 | 已驗收 |
-| S-07 | T17 | 待建立 | 未驗收 |
+| S-07 | T17 | `supabase/tests/10_sensitive_fields.test.sql`（Vault 加密、沒有明文欄位、AI 用函式只回傳開啟「提供給 AI」的欄位且只授權 service_role）；`packages/security/src/payload.test.ts`（allowlist builder）；`packages/ai/src/outbound-payload.test.ts`（三家 outbound payload 快照：開關關閉時不含欄位值） | 已驗收 |
 | S-08 | T01、T24 | T01：ESLint 禁止 `dangerouslySetInnerHTML`；`apps/web/lib/security-headers.test.ts`（CSP、nonce、HSTS）；`apps/web/e2e/security-headers.spec.ts`（實際回應標頭、腳本 nonce、無 CSP 違規）。T24：Markdown sanitize 與連結限制待建立 | 部分 |
 | S-09 | T21 | 待建立 | 未驗收 |
-| S-10 | T12、T17 | T12：`@atps/security` 的 `redactSecrets`（`packages/security/src/index.test.ts`）；套用到 log 與 AI 請求紀錄於 T17 | 部分 |
+| S-10 | T12、T17 | T12：`redactSecrets`；T17：`redactSensitive`、`createLogger`（`packages/security/src/logger.test.ts`），Server Action 失敗時經遮罩 log；AI 請求紀錄（`ai_usage`）只記錄用量，不含內容；資料庫與 repository 的錯誤訊息不含值 | 已驗收 |
 | S-11 | T01 | lockfile 已納入；`.npmrc` `save-exact=true`；`strictDepBuilds: true` | 部分 |
 | S-12 | T01、T02 | `.gitignore` 排除 `.env*`；`.env.example`；pre-commit gitleaks 擋下假 secret；CI gitleaks 擋下 PR #3 | 已驗收 |
 | S-13 | T04 | `tooling/verify-docker-image.sh`：非 root、無 .env、無 API key | 已驗收 |
 | S-14 | T02、T03、T14、T16、T18 | T02：test、typecheck、lint、build、依賴方向、gitleaks、依賴漏洞已啟用（PR #2、#3、#4）；T03：RLS 權限測試已啟用；main 分支保護已啟用（PR #5 為 blocked）；T14：AI 輸出 schema 驗證測試包含在 test；T16：SSRF 測試集包含在 test，並另列 CI 步驟；prompt injection 回歸測試集於 T18 | 部分 |
 | S-15 | 每個 Task | PR #1、#2 附 `/security-review` 結果 | 部分 |
 | S-16 | T19、T24 | 待建立 | 未驗收 |
-| S-17 | T19 | 待建立 | 未驗收 |
+| S-17 | T17、T19 | T17：payload builder 排除 place_id、地址、座標、當地名稱，三家 outbound 快照驗證；Google 內容的完整排除（名稱來源、評分、照片、路線）於 T19 | 部分 |
 
 ## 第 5 節 記憶
 
@@ -78,13 +78,13 @@
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
 | SH-01 | T03 | `supabase/tests/02_trip_permissions.test.sql`（Owner、Companion、Viewer；唯讀連結於 T33） | 部分 |
-| SH-02 | T03、T32 | `supabase/tests/02_trip_permissions.test.sql`：trips 與 trip_members 相關各格；其餘資料表於建立時補 | 部分 |
+| SH-02 | T03、T17、T32 | `supabase/tests/02_trip_permissions.test.sql`：trips 與 trip_members 相關各格；T17：「檢視他人敏感欄位：依當事人開關」的 Owner、Companion、Viewer 三格（`10_sensitive_fields.test.sql`），唯讀連結格於 T33；其餘資料表於建立時補 | 部分 |
 | SH-03 | T32 | 待建立 | 未驗收 |
 | SH-04 | T07、T09、T10A、T34 | T07：`packages/core/src/states.test.ts`；T09：`supabase/tests/05_apply_change.test.sql`（同一 base version 的第二個提案批准時失效）；T10A：`supabase/tests/06_restore_version.test.sql`（base version 不符時復原失敗、復原前的提案批准時失效）；T34 兩個瀏覽器 E2E、真機 R6 待建立 | 部分 |
 | SH-05 | T34、T35 | 待建立；真機 R3 | 未驗收 |
 | SH-06 | T09、T34 | T09：`supabase/tests/05_apply_change.test.sql`（批准、否決、失效通知成員，未讀可依成員查詢，通知表經 Realtime 推送）、`packages/db/src/change-writer.test.ts`；T34 E2E、真機 R6 待建立 | 部分 |
-| SH-07 | T32 | 待建立 | 未驗收 |
-| SH-08 | T33 | 待建立 | 未驗收 |
+| SH-07 | T17、T32 | T17：移除成員時刪除其在該行程的敏感欄位與 Vault secret（`10_sensitive_fields.test.sql`）；撤銷存取權與記憶合併於 T32、T41 | 部分 |
+| SH-08 | T17、T33 | T17：「提供給 Viewer 與唯讀連結」開關與 Viewer 查詢結果（pgTAP、E2E）；唯讀連結的查詢於 T33 | 部分 |
 
 ## 第 7 節 日後新增功能
 

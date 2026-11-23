@@ -14,6 +14,7 @@ import {
   uuid,
 } from "./common";
 import * as E from "./enums";
+import { memberSensitiveFieldRow } from "./sensitive";
 
 // 第 2.4 節與第 2.11 節的實體。鍵名與資料庫欄位一致（snake_case），
 // 一致性由 tooling/schema-migration-consistency.test.ts 檢查。所有物件拒絕未知欄位（S-02）。
@@ -394,6 +395,7 @@ export const tableSchemas = {
   feature_flags: featureFlagRow,
   ai_role_settings: aiRoleSettingRow,
   ai_usage: aiUsageRow,
+  member_sensitive_fields: memberSensitiveFieldRow,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;
