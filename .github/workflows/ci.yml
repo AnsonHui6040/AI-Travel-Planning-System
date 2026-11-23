@@ -45,6 +45,9 @@ jobs:
         run: pnpm depcruise
       - name: build
         run: pnpm build
+      # C-04：client bundle 不得含 API key 或 service role key
+      - name: client bundle 掃描
+        run: node tooling/scan-client-bundle.cjs
 
   gitleaks:
     name: gitleaks

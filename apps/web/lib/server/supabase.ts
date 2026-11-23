@@ -1,5 +1,6 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { GuardOptions } from "./guard";
 
@@ -9,7 +10,7 @@ function requireEnv(name: string): string {
   return value;
 }
 
-// C-09：伺服器端只用 anon key，資料存取受 RLS 限制；service role key 不在此使用
+// C-09：一般資料存取以請求者本人的 session（anon key）進行，受 RLS 限制
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
   return createServerClient(
@@ -24,6 +25,14 @@ export async function createSupabaseServerClient() {
       },
     },
   );
+}
+
+// C-09：service role 只用於 API key 的儲存與解密（T12），呼叫的資料庫函式只授權 service_role。
+// 不保存 session、不讀寫 cookie；只在伺服器模組使用（server-only）
+export function createSupabaseServiceClient() {
+  return createClient(requireEnv("NEXT_PUBLIC_SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 export function allowedOrigins(): string[] {

@@ -8,3 +8,4 @@ export * from "./conflicts";
 export * from "./restore";
 export * from "./registry";
 export * from "./extensions";
+export * from "./api-keys";

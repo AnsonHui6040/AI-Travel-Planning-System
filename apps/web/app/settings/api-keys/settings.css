@@ -1,0 +1,79 @@
+.settings {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  font-family: system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+  line-height: 1.6;
+  color: #1f2328;
+}
+
+.settings h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.settings .status {
+  min-height: 1.6em;
+  margin: 1rem 0;
+  font-weight: 600;
+}
+
+.settings .status.error {
+  color: #b42318;
+}
+
+.settings .key-row fieldset {
+  border: 0;
+  border-top: 1px solid #d0d7de;
+  margin: 0;
+  padding: 1rem 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.settings legend {
+  font-weight: 600;
+  padding: 0;
+  float: left;
+  width: 100%;
+}
+
+.settings .key-use,
+.settings .key-current {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #57606a;
+}
+
+.settings label {
+  font-size: 0.9rem;
+}
+
+.settings input[type="password"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  border: 1px solid #8c959f;
+  border-radius: 4px;
+}
+
+.settings .key-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.settings button {
+  font: inherit;
+  padding: 0.4rem 1rem;
+  border: 1px solid #8c959f;
+  border-radius: 4px;
+  background: #f6f8fa;
+  cursor: pointer;
+}
+
+.settings button[value="save"] {
+  background: #1f2328;
+  border-color: #1f2328;
+  color: #fff;
+}
