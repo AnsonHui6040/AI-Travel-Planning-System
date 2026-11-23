@@ -9,3 +9,5 @@ export * from "./restore";
 export * from "./registry";
 export * from "./extensions";
 export * from "./api-keys";
+export * from "./ai-settings";
+export * from "./role-runner";

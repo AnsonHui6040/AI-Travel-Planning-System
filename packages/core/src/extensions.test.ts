@@ -28,7 +28,9 @@ const provider: ProviderAdapter = {
 const role: RoleSpec = {
   id: "fake_role",
   tools: ["provider_search"],
+  instructions: "假角色",
   output: { safeParse: () => ({ success: true }) },
+  outputJsonSchema: { type: "object", properties: {} },
   maxSteps: 10,
   maxTokens: 20_000,
   dataScope: ["candidates"],
@@ -110,6 +112,8 @@ describe("RoleSpec 契約", () => {
 
   it("必須有輸出 schema，記憶範圍與資料範圍只能取自固定清單", () => {
     expect(checkRoleSpec({ ...role, output: {} as unknown as RoleSpec["output"] })).not.toEqual([]);
+    expect(checkRoleSpec({ ...role, instructions: " " })).not.toEqual([]);
+    expect(checkRoleSpec({ ...role, outputJsonSchema: { type: "string" } })).not.toEqual([]);
     expect(
       checkRoleSpec({ ...role, memoryScope: { layers: ["all" as unknown as "personal"], kinds: [] } }),
     ).not.toEqual([]);

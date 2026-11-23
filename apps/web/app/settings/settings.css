@@ -49,6 +49,8 @@
   font-size: 0.9rem;
 }
 
+.settings select,
+.settings input:not([type="hidden"]),
 .settings input[type="password"] {
   width: 100%;
   box-sizing: border-box;
@@ -76,4 +78,62 @@
   background: #1f2328;
   border-color: #1f2328;
   color: #fff;
+}
+
+.settings select {
+  background: #fff;
+}
+
+.settings .chain-row,
+.settings .limits {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .settings .chain-row,
+  .settings .limits {
+    grid-template-columns: 9rem 1fr;
+    align-items: center;
+    column-gap: 0.75rem;
+  }
+}
+
+.settings .model-lists {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.settings table.usage {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings table.usage caption {
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.settings table.usage th,
+.settings table.usage td {
+  padding: 0.4rem 0.3rem;
+  border-bottom: 1px solid #d0d7de;
+  text-align: right;
+}
+
+.settings table.usage thead th {
+  white-space: nowrap;
+}
+
+.settings table.usage th[scope="row"],
+.settings table.usage thead th:first-child {
+  text-align: left;
 }

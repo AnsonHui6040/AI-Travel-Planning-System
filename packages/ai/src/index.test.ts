@@ -14,7 +14,9 @@ const fakeProvider: ProviderAdapter = {
 const fakeRole: RoleSpec = {
   id: "fake_reviewer",
   tools: [],
+  instructions: "假角色",
   output: { safeParse: (value) => ({ success: typeof value === "object" && value !== null }) },
+  outputJsonSchema: { type: "object", properties: {} },
   maxSteps: 3,
   maxTokens: 4_000,
   dataScope: ["itinerary"],

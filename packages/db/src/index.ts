@@ -25,6 +25,8 @@ import { scopeMemories } from "@atps/core";
 import { commitResult, restoreResult, tableSchemas, type Row, type TableName } from "@atps/schemas";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+export { SupabaseRoleSettingsRepository, SupabaseUsageRecorder, type RoleUsageSummary } from "./ai-settings";
+
 // M-04：core port 的 Supabase 實作。client 以請求者本人的 session 建立，存取受 RLS 限制（C-09）。
 // 讀出的每一列都以 row schema 驗證，不符即拋出錯誤。
 

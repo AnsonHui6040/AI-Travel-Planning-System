@@ -341,6 +341,37 @@ export const featureFlagRow = z.strictObject({
   updated_at: offsetDateTime,
 });
 
+// T14：角色的模型與備援次序（決策 0006）
+export const roleChainEntry = z.strictObject({
+  provider: E.aiProvider,
+  model: nullable(z.string().regex(/^[A-Za-z0-9._:/-]{1,100}$/)),
+});
+
+export const aiRoleSettingRow = z.strictObject({
+  owner_id: uuid,
+  role: E.aiRole,
+  chain: z.array(roleChainEntry).min(1).max(3),
+  max_steps: int(1, 100),
+  max_tokens: int(1_000, 1_000_000),
+  updated_at: offsetDateTime,
+});
+
+export const aiUsageOutcome = z.enum(["completed", "output_invalid", "limit_reached", "provider_failed"]);
+
+export const aiUsageRow = z.strictObject({
+  id: uuid,
+  owner_id: uuid,
+  job_id: nullable(uuid),
+  role: E.aiRole,
+  provider: E.aiProvider,
+  model: text(LIMITS.modelName),
+  steps: int(0, 100),
+  input_tokens: int(0, 2_000_000_000),
+  output_tokens: int(0, 2_000_000_000),
+  outcome: aiUsageOutcome,
+  created_at: offsetDateTime,
+});
+
 // 資料表名稱與 row schema 對照，供一致性測試與 repository 使用
 export const tableSchemas = {
   profiles: profileRow,
@@ -361,6 +392,8 @@ export const tableSchemas = {
   background_jobs: backgroundJobRow,
   photos: photoRow,
   feature_flags: featureFlagRow,
+  ai_role_settings: aiRoleSettingRow,
+  ai_usage: aiUsageRow,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;
