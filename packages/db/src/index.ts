@@ -1,10 +1,13 @@
 import type {
   ChangeWriter,
   CommitResult,
+  FeatureFlag,
+  FeatureFlagReader,
   ItineraryItem,
   ItineraryRepository,
   Memory,
   MemoryReader,
+  MemoryRequest,
   NewMemberProposal,
   Notification,
   NotificationRepository,
@@ -15,7 +18,8 @@ import type {
   RestoreResult,
   VersionRestorer,
 } from "@atps/core";
-import { commitResult, restoreResult, tableSchemas, type TableName } from "@atps/schemas";
+import { scopeMemories } from "@atps/core";
+import { commitResult, restoreResult, tableSchemas, type Row, type TableName } from "@atps/schemas";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // M-04：core port 的 Supabase 實作。client 以請求者本人的 session 建立，存取受 RLS 限制（C-09）。
@@ -85,9 +89,29 @@ export class SupabaseProposalRepository implements ProposalRepository {
 export class SupabaseMemoryReader implements MemoryReader {
   constructor(private readonly client: QueryClient) {}
 
-  async listForOwner(ownerId: string): Promise<Memory[]> {
-    const result = await this.client.from("memories").select("*").eq("owner_id", ownerId).order("created_at");
-    return parseRows("memories", result) as Memory[];
+  // MEM-11：查詢只取記憶範圍內的層級與類型，回傳前再以 core 的 scopeMemories 過濾一次
+  async read(request: MemoryRequest): Promise<Memory[]> {
+    const { ownerIds, scope } = request;
+    if (ownerIds.length === 0 || scope.layers.length === 0 || scope.kinds.length === 0) return [];
+    const result = await this.client
+      .from("memories")
+      .select("*")
+      .in("owner_id", [...ownerIds])
+      .in("layer", [...scope.layers])
+      .in("kind", [...scope.kinds])
+      .order("created_at");
+    return scopeMemories(parseRows("memories", result) as Memory[], scope);
+  }
+}
+
+// F-05：功能開關。讀取失敗時拋出錯誤
+export class SupabaseFeatureFlagReader implements FeatureFlagReader {
+  constructor(private readonly client: QueryClient) {}
+
+  async list(): Promise<FeatureFlag[]> {
+    const result = await this.client.from("feature_flags").select("*").order("key");
+    const rows = parseRows("feature_flags", result) as Row<"feature_flags">[];
+    return rows.map(({ key, enabled }) => ({ key, enabled }));
   }
 }
 
