@@ -40,6 +40,9 @@ jobs:
       # S-14：SSRF 測試集（T16）也包含在 pnpm test，此步驟單獨列出以便辨識
       - name: SSRF 測試集
         run: pnpm exec vitest run packages/security/src/allowlisted-fetch.test.ts packages/security/src/address.test.ts
+      # S-14：prompt injection 回歸測試集（T18）也包含在 pnpm test，此步驟單獨列出以便辨識
+      - name: prompt injection 回歸測試集
+        run: pnpm exec vitest run packages/ai/src/injection packages/core/src/output-gate.test.ts packages/security/src/untrusted.test.ts
       - name: typecheck
         run: pnpm typecheck
       - name: lint

@@ -8,10 +8,10 @@
 |---|---|
 | 更新日期 | 2026-11-23 |
 | 目前 Phase | Phase 2：AI 層與安全 |
-| 已完成 Task | T01–T17、T10A |
+| 已完成 Task | T01–T18、T10A |
 | 進行中 Task | 無 |
-| 下一個 Task | T18：Prompt injection 防護與回歸測試集 |
-| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md`、`T05.md`、`T06.md`、`T07.md`、`T08.md`、`T09.md`、`T10.md`、`T10A.md`、`T11.md`、`T12.md`、`T13.md`、`T14.md`、`T15.md`、`T16.md`、`T17.md`；評估報告 `docs/verification/evals/`；決策 `docs/decisions/0001`–`0006` |
+| 下一個 Task | T19：Google Maps Platform adapter |
+| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md`、`T05.md`、`T06.md`、`T07.md`、`T08.md`、`T09.md`、`T10.md`、`T10A.md`、`T11.md`、`T12.md`、`T13.md`、`T14.md`、`T15.md`、`T16.md`、`T17.md`、`T18.md`；評估報告 `docs/verification/evals/`；決策 `docs/decisions/0001`–`0006` |
 
 ## 開發
 
