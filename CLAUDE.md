@@ -48,6 +48,7 @@
 
 ## 資料庫
 
+- 資料表欄位與 `packages/schemas` 的 row schema 必須一致（`tooling/schema-migration-consistency.test.ts`）；數值上下限見 `docs/decisions/0002-field-validation.md`。
 - 新增資料表必須啟用 RLS，policy 依計畫第 6 節權限表，並在 `supabase/tests/` 加 pgTAP 測試。
 - 權限判斷用 `private` schema 的 helper（security definer、`search_path = ''`）；`private` 不經 PostgREST 公開。
 - E2E 的 `/api/*` 測試需要 `supabase start` 與 `apps/web/.env.local`（範本見 `.env.example`）。

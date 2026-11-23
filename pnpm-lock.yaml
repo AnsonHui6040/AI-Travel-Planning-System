@@ -159,6 +159,9 @@ importers:
       '@atps/schemas':
         specifier: workspace:*
         version: link:../schemas
+      '@supabase/supabase-js':
+        specifier: 2.119.2
+        version: 2.119.2
 
   packages/memory:
     dependencies:

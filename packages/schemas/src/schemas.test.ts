@@ -127,7 +127,8 @@ describe("行程項目", () => {
   });
 
   it("缺少必填欄位時拒絕", () => {
-    const { name_zh: _omit, ...rest } = validItem;
+    const rest: Partial<typeof validItem> = { ...validItem };
+    delete rest.name_zh;
     expect(ok(itineraryItemRow, rest)).toBe(false);
   });
 

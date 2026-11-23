@@ -15,7 +15,7 @@
 | M-01 | T01 | `tooling/dependency-rules.test.ts`：M-01 兩個案例 | 已驗收 |
 | M-02 | T01 | `tooling/dependency-rules.test.ts`：M-02 案例 | 已驗收 |
 | M-03 | T01、T02 | `pnpm lint` 執行 depcruise；CI job「test、typecheck、lint、build、依賴方向」執行 depcruise（PR #2） | 已驗收 |
-| M-04 | T06、T09 | 待建立 | 未驗收 |
+| M-04 | T06、T09 | T06：`packages/core/src/ports.ts`、`packages/db/src/repositories.test.ts`；`applyChange` 只經 port 寫入於 T09 | 部分 |
 | M-05 | T01 | `tooling/dependency-rules.test.ts`：M-05 五個案例與全庫檢查 | 已驗收 |
 
 ## 第 3 節 連接安全
@@ -40,7 +40,7 @@
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
 | S-01 | T09、T18 | 待建立 | 未驗收 |
-| S-02 | T14 | 待建立 | 未驗收 |
+| S-02 | T06、T14 | T06：`packages/schemas/src/schemas.test.ts`（拒絕未知欄位、格式與上下限）；丟棄與記錄於 T14 | 部分 |
 | S-03 | T18、T24 | 待建立 | 未驗收 |
 | S-04 | T14 | 待建立 | 未驗收 |
 | S-05 | T16 | 待建立 | 未驗收 |
@@ -66,7 +66,7 @@
 | MEM-03 | T41 | 待建立 | 未驗收 |
 | MEM-04 | T40 | 待建立 | 未驗收 |
 | MEM-05 | T41 | 待建立 | 未驗收 |
-| MEM-06 | T41 | 待建立 | 未驗收 |
+| MEM-06 | T06、T41 | T06：`supabase/tests/04_entity_permissions.test.sql`（記憶只限本人存取）；payload 排除於 T41 | 部分 |
 | MEM-07 | T41 | 待建立 | 未驗收 |
 | MEM-08 | T41 | 待建立 | 未驗收 |
 | MEM-09 | T41 | 待建立 | 未驗收 |
@@ -90,7 +90,7 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| F-01 | T06、T11 | 待建立 | 未驗收 |
+| F-01 | T06、T11 | T06：行程項目的預估費用、實際費用、付款人欄位（schema 與 migration）；`ExpenseLedger` 介面於 T11 | 部分 |
 | F-02 | T11 | 待建立 | 未驗收 |
 | F-03 | T11 | 待建立 | 未驗收 |
 | F-04 | T11 | 待建立 | 未驗收 |
