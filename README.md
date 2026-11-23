@@ -8,10 +8,10 @@
 |---|---|
 | 更新日期 | 2026-11-23 |
 | 目前 Phase | Phase 2：AI 層與安全 |
-| 已完成 Task | T01–T15、T10A |
+| 已完成 Task | T01–T16、T10A |
 | 進行中 Task | 無 |
-| 下一個 Task | T16：白名單 fetch |
-| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md`、`T05.md`、`T06.md`、`T07.md`、`T08.md`、`T09.md`、`T10.md`、`T10A.md`、`T11.md`、`T12.md`、`T13.md`、`T14.md`、`T15.md`；評估報告 `docs/verification/evals/`；決策 `docs/decisions/0001`–`0006` |
+| 下一個 Task | T17：敏感欄位、allowlist payload builder、log 遮罩 |
+| 證據 | `docs/verification/T01.md`、`T02.md`、`T03.md`、`T04.md`、`T05.md`、`T06.md`、`T07.md`、`T08.md`、`T09.md`、`T10.md`、`T10A.md`、`T11.md`、`T12.md`、`T13.md`、`T14.md`、`T15.md`、`T16.md`；評估報告 `docs/verification/evals/`；決策 `docs/decisions/0001`–`0006` |
 
 ## 開發
 
