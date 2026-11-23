@@ -24,11 +24,11 @@
 |---|---|---|---|
 | C-01 | T13、T19 | 待建立 | 未驗收 |
 | C-02 | T12 | `supabase/tests/08_api_keys.test.sql`（Vault 密文、只限 service_role 解密）；`apps/web/lib/server/api-keys-core.test.ts`（只解密 session 本人的 key）；E2E 只顯示末四碼 | 已驗收 |
-| C-03 | T12、T13、T19、T22 | T12：儲存前測試呼叫的掛鉤，失敗時不儲存（`packages/core/src/api-keys.test.ts`）；T13：三家 AI 的測試呼叫（`packages/ai/src/providers.contract.test.ts`）；Google Maps、ODPT 於 T19、T22 | 部分 |
+| C-03 | T12、T13、T19、T22 | T12：儲存前測試呼叫的掛鉤，失敗時不儲存（`packages/core/src/api-keys.test.ts`）；T13：三家 AI 的測試呼叫（`packages/ai/src/providers.contract.test.ts`）；T19：Google Maps 以只取編號的 Text Search 測試，失敗時不儲存（`packages/data-sources/src/google-maps.contract.test.ts`）；ODPT 於 T22 | 部分 |
 | C-04 | T12、T17 | T12：固定錯誤訊息（pgTAP、單元測試）、E2E 頁面不含完整 key、`tooling/scan-client-bundle.cjs`（CI build 後執行）；T17：`createLogger` 寫出前遮罩 key 與敏感欄位（`packages/security/src/logger.test.ts`）；Docker image 於 T04 已驗證不含 `.env` | 已驗收 |
 | C-05 | T12 | `08_api_keys.test.sql`：A 沒有 key 時 A 的 job 不借用 B 的；Server Action 忽略表單傳入的擁有者；功能降級於各功能 Task | 已驗收 |
 | C-06 | T11、T12 | T12 實作 `api_key`；`plan_oauth` 以 T11 的 `CredentialProvider`（`available: false`）預留 | 已驗收 |
-| C-07 | T13 | `packages/ai/src/providers.contract.test.ts`：只連官方 HTTPS 端點、逾時分類、限流後以退避重試成功；資料源 adapter（T19、T22）沿用相同設定 | 已驗收 |
+| C-07 | T13 | `packages/ai/src/providers.contract.test.ts`：只連官方 HTTPS 端點、逾時分類、限流後以退避重試成功；T19：Google Maps 只連 `places.googleapis.com`、設逾時、拒絕 redirect，限流時回報錯誤不自動重試；ODPT 於 T22 | 已驗收 |
 | C-08 | T14、T38 | T14：`packages/core/src/role-runner.test.ts`（故障時不自動切換，回傳下一順位）；詢問畫面於 T24 起的 job 畫面與 T38 | 部分 |
 | C-09 | T03 | `supabase/tests/01_rls_enabled.test.sql`、`02_trip_permissions.test.sql`（anon 無權限）；伺服器端只用 anon key | 部分 |
 | C-10 | T33 | 待建立 | 未驗收 |
@@ -54,8 +54,8 @@
 | S-13 | T04 | `tooling/verify-docker-image.sh`：非 root、無 .env、無 API key | 已驗收 |
 | S-14 | T02、T03、T14、T16、T18 | T02：test、typecheck、lint、build、依賴方向、gitleaks、依賴漏洞已啟用（PR #2、#3、#4）；T03：RLS 權限測試已啟用；main 分支保護已啟用（PR #5 為 blocked）；T14：AI 輸出 schema 驗證測試包含在 test；T16：SSRF 測試集包含在 test，並另列 CI 步驟；T18：prompt injection 回歸測試集包含在 test，並另列 CI 步驟。第 4 節列出的關卡全部啟用 | 已驗收 |
 | S-15 | 每個 Task | PR #1、#2 附 `/security-review` 結果 | 部分 |
-| S-16 | T19、T24 | 待建立 | 未驗收 |
-| S-17 | T17、T19 | T17：payload builder 排除 place_id、地址、座標、當地名稱，三家 outbound 快照驗證；Google 內容的完整排除（名稱來源、評分、照片、路線）於 T19 | 部分 |
+| S-16 | T19、T24 | T19：place_id 由伺服器以 Places 搜尋解析並比對名稱與位置，不符時回傳未解析（`google-maps.contract.test.ts`）；照片只依 place_id 取得。AI 輸出含圖片網址被拒、解析失敗的候選標為 Unverified 於 T24 | 部分 |
+| S-17 | T17、T19 | T17：payload builder 排除 place_id、地址、座標、當地名稱，三家 outbound 快照驗證；T19：解析只保存 place_id，不寫入 Google 名稱；詳情、評分與照片標示為不可儲存，只即時顯示；座標逾 30 日由排程清除（`supabase/tests/11_google_coordinates.test.sql`） | 已驗收 |
 
 ## 第 5 節 記憶
 

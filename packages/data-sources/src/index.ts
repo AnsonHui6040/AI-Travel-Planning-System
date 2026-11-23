@@ -27,3 +27,20 @@ export function createDataSourceRegistry(): DataSourceRegistry {
         .filter((a) => region === undefined || a.regions === "global" || a.regions.includes(region)),
   };
 }
+
+// T19：Google Maps Platform（Places API (New)、Maps URLs）
+export {
+  COORDINATE_MAX_AGE_DAYS,
+  GoogleMapsError,
+  coordinatesDue,
+  createGoogleMapsAdapter,
+  createGoogleMapsClient,
+  createGoogleMapsKeyTester,
+  directionsUrl,
+  type GoogleMapsClient,
+  type GoogleMapsOptions,
+  type LatLng,
+  type LivePlaceDetails,
+  type PhotoRef,
+  type ResolveResult,
+} from "./google-maps";
