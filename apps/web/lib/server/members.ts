@@ -44,6 +44,15 @@ export async function membersActionDeps(): Promise<MembersDeps> {
       if (error) throw storeError(error.code);
       return data.length;
     },
+    async createReadonlyLink(tripId, days) {
+      const { data, error } = await session.rpc("create_readonly_link", { p_trip: tripId, p_days: days });
+      if (error || typeof data !== "string") throw storeError(error?.code);
+      return data;
+    },
+    async revokeReadonlyLink(id) {
+      const { error } = await session.rpc("revoke_readonly_link", { p_link: id });
+      if (error) throw storeError(error.code);
+    },
     logError: (message) => createLogger().error(message),
   };
 }
@@ -59,6 +68,8 @@ export type MembersView =
       myRole: MemberRole;
       members: Array<{ userId: string; name: string; role: MemberRole; isMe: boolean }>;
       invitations: Array<{ id: string; role: InviteRole; expiresAt: string; status: "active" | "accepted" | "revoked" | "expired" }>;
+      // T33：只有 Owner 看得到
+      readonlyLinks: Array<{ id: string; expiresAt: string; status: "active" | "revoked" | "expired" }>;
     };
 
 export async function loadMembers(tripId: string): Promise<MembersView> {
@@ -96,7 +107,22 @@ export async function loadMembers(tripId: string): Promise<MembersView> {
       status: i.accepted_at ? "accepted" : i.revoked_at ? "revoked" : Date.parse(String(i.expires_at)) <= now ? "expired" : "active",
     }));
   }
-  return { state: "ok", tripName: String(trip.name), myRole, members, invitations };
+  let readonlyLinks: Extract<MembersView, { state: "ok" }>["readonlyLinks"] = [];
+  if (myRole === "owner") {
+    const { data: links } = await session
+      .from("readonly_links")
+      .select("id, expires_at, revoked_at")
+      .eq("trip_id", tripId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    const now = Date.now();
+    readonlyLinks = (links ?? []).map((l) => ({
+      id: String(l.id),
+      expiresAt: String(l.expires_at),
+      status: l.revoked_at ? "revoked" : Date.parse(String(l.expires_at)) <= now ? "expired" : "active",
+    }));
+  }
+  return { state: "ok", tripName: String(trip.name), myRole, members, invitations, readonlyLinks };
 }
 
 export type InvitePreview = { state: "signed_out" } | { state: "invalid" } | { state: "member" | "valid"; tripName: string; role: InviteRole };

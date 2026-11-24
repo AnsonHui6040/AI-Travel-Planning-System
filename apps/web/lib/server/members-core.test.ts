@@ -4,9 +4,11 @@ import {
   acceptInviteAction,
   changeRoleAction,
   createInviteAction,
+  createReadonlyLinkAction,
   leaveTripAction,
   removeMemberAction,
   revokeInviteAction,
+  revokeReadonlyLinkAction,
   type MembersDeps,
 } from "./members-core";
 
@@ -38,6 +40,13 @@ function deps(over: Partial<MembersDeps> = {}) {
     changeRole: async (...args) => {
       calls.push(["changeRole", ...args]);
       return 1;
+    },
+    createReadonlyLink: async (...args) => {
+      calls.push(["createReadonlyLink", ...args]);
+      return TOKEN;
+    },
+    revokeReadonlyLink: async (...args) => {
+      calls.push(["revokeReadonlyLink", ...args]);
     },
     removeMember: async (...args) => {
       calls.push(["removeMember", ...args]);
@@ -118,5 +127,28 @@ describe("角色變更與移除", () => {
     const broken = deps({ removeMember: reject("unknown") });
     expect((await removeMemberAction(broken.d, TRIP, USER)).message).toBe("操作失敗，請稍後再試");
     expect(broken.logs).toEqual(["成員管理失敗"]);
+  });
+});
+
+describe("唯讀連結（T33）", () => {
+  it("Owner 建立 7 天或 30 天的唯讀連結，連結只顯示一次", async () => {
+    const { d, calls } = deps();
+    expect(await createReadonlyLinkAction(d, TRIP, "30")).toEqual({
+      ok: true,
+      message: "已建立唯讀連結，30 天內有效；任何拿到連結的人不必登入即可檢視",
+      link: `https://trip.example/r/${TOKEN}`,
+    });
+    expect(calls).toEqual([["createReadonlyLink", TRIP, 30]]);
+    expect((await createReadonlyLinkAction(d, TRIP, "45")).message).toBe("期限不正確");
+    expect((await createReadonlyLinkAction(deps({ createReadonlyLink: reject("forbidden") }).d, TRIP, "7")).message).toBe(
+      "只有 Owner 可以建立唯讀連結",
+    );
+  });
+
+  it("撤銷唯讀連結", async () => {
+    const { d, calls } = deps();
+    expect(await revokeReadonlyLinkAction(d, INVITE)).toEqual({ ok: true, message: "已撤銷唯讀連結" });
+    expect(calls).toEqual([["revokeReadonlyLink", INVITE]]);
+    expect((await revokeReadonlyLinkAction(d, "x")).message).toBe("連結不正確");
   });
 });
