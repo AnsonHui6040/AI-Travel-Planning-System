@@ -71,6 +71,7 @@ describe("Transport 輸出", () => {
     luggage_friendliness: "medium",
     comfort: "medium",
     delay_risk: "low",
+    sources: [source],
   };
   const segment = {
     from_item_id: "30000000-0000-4000-8000-000000000001",

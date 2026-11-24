@@ -64,6 +64,7 @@ describe("gateRoleOutput", () => {
               luggage_friendliness: "medium",
               comfort: "medium",
               delay_risk: "low",
+              sources: [source],
             },
           ],
           sources: [source],

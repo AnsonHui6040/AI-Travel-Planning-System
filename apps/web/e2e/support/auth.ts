@@ -269,3 +269,24 @@ export async function applyZoningAsAdmin(
   const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
   if (done.error) throw new Error("更新測試研究 job 失敗");
 }
+
+// T28：以研究 job 經 apply_mobility_segments 寫入交通估算（依名稱指定起點與終點）
+export async function applySegmentAsAdmin(tripId: string, initiatorId: string, from: string, to: string, segment: Record<string, unknown>): Promise<void> {
+  const admin = adminClient();
+  const items = await admin.from("itinerary_items").select("id, name_zh").eq("trip_id", tripId);
+  if (items.error) throw new Error("讀取測試候選失敗");
+  const idOf = (name: string) => String((items.data ?? []).find((r) => r.name_zh === name)?.id ?? "");
+  const job = await admin
+    .from("background_jobs")
+    .insert({ kind: "research", initiator_id: initiatorId, trip_id: tripId, status: "running" })
+    .select("id")
+    .single();
+  if (job.error) throw new Error("建立測試研究 job 失敗");
+  const applied = await admin.rpc("apply_mobility_segments", {
+    p_job: job.data.id,
+    p_segments: [{ ...segment, from_item_id: idOf(from), to_item_id: idOf(to) }],
+  });
+  if (applied.error) throw new Error("寫入測試交通估算失敗");
+  const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
+  if (done.error) throw new Error("更新測試研究 job 失敗");
+}

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { applyScoresAsAdmin, applyZoningAsAdmin, confirmTripAsAdmin, createTrip, seedResearchCandidates, signInAsNewUser, verifyCandidateAsAdmin } from "./support/auth";
+import { applyScoresAsAdmin, applySegmentAsAdmin, applyZoningAsAdmin, confirmTripAsAdmin, createTrip, seedResearchCandidates, signInAsNewUser, verifyCandidateAsAdmin } from "./support/auth";
 
 // T24：Candidate List 與 AI／網頁內容的安全呈現（S-08、S-16）。需本機 Supabase 與 apps/web/.env.local。
 // CAPTURE_SCREENSHOTS=1 時把截圖存到 docs/verification/screenshots/
@@ -164,6 +164,53 @@ test("T27：候選顯示分區與由出發地前往的轉乘次數；主要區�
   await expect(page.getByRole("article", { name: "新宿御苑" }).locator("dl.facts")).toContainText("Backup");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await capture(page, "zoning", "T27");
+});
+
+test("T28：每段顯示四種方案、含緩衝的估算時間與來源，並以 Google Maps 開啟對應路段", async ({ page, context, baseURL }) => {
+  const owner = await signInAsNewUser(context, baseURL ?? "");
+  const tripId = await createTrip(owner.userId, "東京五日");
+  await confirmTripAsAdmin(tripId);
+  await seedResearchCandidates(tripId, owner.userId, "A", [candidate({}), candidate({ name_zh: "上野公園", name_local: "上野恩賜公園", area: "上野", place_id: null })]);
+  const mapsUrl = "https://www.google.com/maps/dir/?api=1&origin=%E6%B5%85%E8%8D%89%E5%AF%BA&destination=%E4%B8%8A%E9%87%8E%E6%81%A9%E8%B3%9C%E5%85%AC%E5%9C%92&travelmode=transit";
+  const est = (mode: string, minutes: number, transfers: number, price: number | null, comfort: string) => ({
+    mode,
+    door_to_door_minutes: minutes,
+    price: price === null ? null : { amount: price, currency: "JPY" },
+    walk_minutes: mode === "walk" ? minutes : 5,
+    transfers,
+    luggage_friendliness: "medium",
+    comfort,
+    delay_risk: "low",
+    source_urls: ["https://railway.example.jp/route"],
+    buffer_minutes: 10 + 5 * transfers,
+    total_minutes: minutes + 10 + 5 * transfers,
+  });
+  await applySegmentAsAdmin(tripId, owner.userId, "淺草寺", "上野公園", {
+    estimates: [est("walk", 30, 0, null, "low"), est("rail", 12, 1, 180, "medium"), est("taxi", 10, 0, 1500, "high")],
+    buffer_minutes: 15,
+    recommended_mode: "rail",
+    plans: { recommended: "rail", fastest: "taxi", cheapest: "walk", comfortable: "taxi" },
+    source_urls: ["https://railway.example.jp/route"],
+    maps_url: mapsUrl,
+  });
+
+  await page.goto(`/trips/${tripId}/candidates`);
+  const segment = page.getByRole("article", { name: "淺草寺到上野公園" });
+  await expect(segment.getByText("四種方案（估算，含固定緩衝）")).toBeVisible();
+  const rows = segment.locator("tbody tr");
+  await expect(rows).toHaveCount(4);
+  await expect(rows.nth(0)).toContainText("推薦鐵路與地鐵約 27 分鐘（含緩衝 15 分鐘）約 180 JPY1 次");
+  await expect(rows.nth(1)).toContainText("最快計程車與叫車約 20 分鐘");
+  await expect(rows.nth(2)).toContainText("最便宜步行約 40 分鐘（含緩衝 10 分鐘）免費");
+  await expect(segment.getByRole("link", { name: "https://railway.example.jp/route" })).toBeVisible();
+  const maps = segment.getByRole("link", { name: "在 Google Maps 確認這段路線" });
+  await expect(maps).toHaveAttribute("rel", "noopener noreferrer");
+  const href = new URL((await maps.getAttribute("href")) ?? "");
+  expect(href.searchParams.get("origin")).toBe("浅草寺");
+  expect(href.searchParams.get("destination")).toBe("上野恩賜公園");
+  await expect(page.getByText(/全部為 AI 依官方資料的估算/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await capture(page, "transport", "T28");
 });
 
 test("沒有 Research 的 API key 時不能開始研究；基線未確認與 Viewer 看不到按鈕", async ({ page, context, baseURL, browser }) => {

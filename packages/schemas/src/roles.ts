@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { changePayload } from "./change";
 import { LIMITS, isoDate, text, uuid } from "./common";
-import { factClaim, mobilityEstimate, sourceRef } from "./entities";
+import { aiMobilityEstimate, factClaim, sourceRef } from "./entities";
 import * as E from "./enums";
 
 const nullable = <T extends z.ZodType>(schema: T) => schema.nullable();
@@ -39,7 +39,8 @@ export const verificationResult = z.strictObject({
 export const transportSegment = z.strictObject({
   from_item_id: uuid,
   to_item_id: uuid,
-  estimates: z.array(mobilityEstimate).min(1).max(5),
+  // T28：每個估算附來源
+  estimates: z.array(aiMobilityEstimate).min(1).max(5),
   sources,
 });
 

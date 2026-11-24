@@ -1,7 +1,7 @@
 import "server-only";
 import { RESEARCH_TRACKS, SCREENING_DIMENSIONS, type AiProvider, type ApiKeyProvider, type ResearchCandidate, type ResearchTrackId, type ResolvedFact, type ScreeningDimension } from "@atps/core";
 import { SupabaseRoleSettingsRepository } from "@atps/db";
-import { modelRef, resolvedFact, sourceRef, uuid } from "@atps/schemas";
+import { modelRef, resolvedFact, segmentPlans, sourceRef, storedMobilityEstimate, uuid } from "@atps/schemas";
 import { createLogger } from "@atps/security";
 import { start } from "workflow/api";
 import { researchJob } from "../../workflows/research-job";
@@ -87,6 +87,16 @@ export interface CandidateView {
   zone: { name: string; transfers: number | null; minutes: number | null } | null;
 }
 
+// T28：交通動線比較（全部為估算）
+export interface SegmentView {
+  id: string;
+  from: string;
+  to: string;
+  estimates: { mode: string; total_minutes: number; buffer_minutes: number; price: { amount: number; currency: string } | null; transfers: number; source_urls: string[] }[];
+  plans: { recommended: string; fastest: string; cheapest: string; comfortable: string } | null;
+  mapsUrl: string | null;
+}
+
 export type CandidateListView =
   | { state: "signed_out" }
   | { state: "not_found" }
@@ -97,6 +107,7 @@ export type CandidateListView =
       canResearch: boolean;
       latestJob: { status: string; createdAt: string } | null;
       candidates: CandidateView[];
+      segments: SegmentView[];
     };
 
 function zoneOf(r: Record<string, unknown>): CandidateView["zone"] {
@@ -169,6 +180,31 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
     };
   });
 
+  const names = new Map(candidates.map((c) => [c.id, c.nameZh]));
+  const { data: segmentRows } = await session
+    .from("mobility_segments")
+    .select("id, from_item_id, to_item_id, estimates, plans, maps_url")
+    .eq("trip_id", tripId)
+    .order("created_at", { ascending: true })
+    .limit(200);
+  const segments: SegmentView[] = (segmentRows ?? []).flatMap((r) => {
+    const from = names.get(String(r.from_item_id));
+    const to = names.get(String(r.to_item_id));
+    const estimates = storedMobilityEstimate.array().safeParse(r.estimates);
+    const plans = segmentPlans.nullable().safeParse(r.plans);
+    if (!from || !to || !estimates.success) return [];
+    return [
+      {
+        id: String(r.id),
+        from,
+        to,
+        estimates: estimates.data,
+        plans: plans.success ? plans.data : null,
+        mapsUrl: typeof r.maps_url === "string" ? r.maps_url : null,
+      },
+    ];
+  });
+
   return {
     state: "ok",
     tripName: String(trip.name),
@@ -176,5 +212,6 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
     canResearch: (role === "owner" || role === "companion") && ["planning", "locked", "in_progress"].includes(String(trip.status)),
     latestJob: job ? { status: String(job.status), createdAt: String(job.created_at) } : null,
     candidates,
+    segments,
   };
 }

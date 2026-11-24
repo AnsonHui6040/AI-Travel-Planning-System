@@ -226,14 +226,32 @@ export const mobilityEstimate = z.strictObject({
   delay_risk: E.level3,
 });
 
+// T28：AI 的估算附來源；儲存時加上固定緩衝與含緩衝的總時間（決策 0008）
+export const aiMobilityEstimate = mobilityEstimate.extend({ sources: z.array(sourceRef).min(1).max(5) });
+
+export const storedMobilityEstimate = mobilityEstimate.extend({
+  source_urls: z.array(httpsUrl).min(1).max(5),
+  buffer_minutes: int(LIMITS.bufferMinutes.min, LIMITS.bufferMinutes.max),
+  total_minutes: int(1, LIMITS.doorToDoorMinutes.max + LIMITS.bufferMinutes.max),
+});
+
+// 推薦、最快、最便宜、最舒適或低風險四種方案（各為一種交通方式）
+export const segmentPlans = z.strictObject({
+  recommended: E.transportMode,
+  fastest: E.transportMode,
+  cheapest: E.transportMode,
+  comfortable: E.transportMode,
+});
+
 export const mobilitySegmentRow = z.strictObject({
   id: uuid,
   trip_id: uuid,
   from_item_id: uuid,
   to_item_id: uuid,
-  estimates: z.array(mobilityEstimate).max(5),
+  estimates: z.array(storedMobilityEstimate).max(5),
   buffer_minutes: int(LIMITS.bufferMinutes.min, LIMITS.bufferMinutes.max),
   recommended_mode: nullable(E.transportMode),
+  plans: nullable(segmentPlans),
   source_urls: z.array(httpsUrl).max(10),
   maps_url: nullable(httpsUrl),
   created_at: offsetDateTime,
