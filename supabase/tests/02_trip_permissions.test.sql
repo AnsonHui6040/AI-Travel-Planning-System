@@ -52,13 +52,18 @@ select throws_ok(
   '42501', null, '不可替他人建立行程'
 );
 
--- 邀請成員：Owner 可
-select lives_ok(
+-- T32：成員只能經邀請連結由本人接受加入（supabase/tests/21_members.test.sql），Owner 也不可直接加入他人
+select throws_ok(
   $$insert into public.trip_members (trip_id, user_id, role) values
-    ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', 'companion'),
-    ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000c', 'viewer')$$,
-  '邀請成員：Owner 可'
+    ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', 'companion')$$,
+  '42501', null, '直接加入成員：Owner 也不可，須經邀請連結'
 );
+reset role;
+insert into public.trip_members (trip_id, user_id, role) values
+  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', 'companion'),
+  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000c', 'viewer');
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
 select throws_ok(
   $$insert into public.trip_members (trip_id, user_id, role) values ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000e', 'owner')$$,
   '42501', null, '邀請時不可直接指定為 Owner'
@@ -131,7 +136,10 @@ select is(
   public.__affected($q$delete from public.trip_members where user_id = '00000000-0000-0000-0000-00000000000a'$q$),
   0, '自行退出：Owner 須先轉移 Owner 或刪除行程'
 );
+reset role;
 insert into public.trip_members (trip_id, user_id, role) values ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000e', 'viewer');
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
 select is(
   public.__affected($q$delete from public.trip_members where user_id = '00000000-0000-0000-0000-00000000000e'$q$),
   1, '移除成員：Owner 可'

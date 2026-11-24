@@ -347,3 +347,22 @@ export async function simulateReverifyAsAdmin(tripId: string, itemId: string): P
   if (submitted.error) throw new Error("送出測試 At Risk 失敗");
   return true;
 }
+
+// T32：成員在行程中的資料（行程記憶、通知），用來確認移除後依 SH-07 刪除
+export async function seedMemberDataAsAdmin(tripId: string, userId: string): Promise<void> {
+  const admin = adminClient();
+  const memory = await admin
+    .from("memories")
+    .insert({ owner_id: userId, layer: "trip_context", trip_id: tripId, kind: "preference", item: "步行", value: "少走路", source: "manual" });
+  if (memory.error) throw new Error("建立測試記憶失敗");
+  const notice = await admin.from("notifications").insert({ recipient_id: userId, trip_id: tripId, kind: "proposal_applied" });
+  if (notice.error) throw new Error("建立測試通知失敗");
+}
+
+export async function countMemberDataAsAdmin(tripId: string, userId: string): Promise<number> {
+  const admin = adminClient();
+  const memories = await admin.from("memories").select("id", { count: "exact", head: true }).eq("owner_id", userId).eq("trip_id", tripId);
+  const notices = await admin.from("notifications").select("id", { count: "exact", head: true }).eq("recipient_id", userId).eq("trip_id", tripId);
+  if (memories.error || notices.error) throw new Error("讀取測試資料失敗");
+  return (memories.count ?? 0) + (notices.count ?? 0);
+}

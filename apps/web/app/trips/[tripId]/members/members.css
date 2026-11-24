@@ -1,0 +1,88 @@
+/* T32：成員管理 */
+.settings.members {
+  max-width: 48rem;
+}
+
+.members .trip-line {
+  margin: 0 0 0.5rem;
+  color: #57606a;
+}
+
+.members .muted {
+  color: #57606a;
+  font-size: 0.9rem;
+}
+
+.members section {
+  border-top: 1px solid #d0d7de;
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+}
+
+.members h2 {
+  font-size: 1.05rem;
+  margin: 0 0 0.5rem;
+}
+
+.member-list,
+.invite-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.member-list li,
+.invite-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #eaeef2;
+  overflow-wrap: anywhere;
+}
+
+.member-name {
+  font-weight: 600;
+  min-width: 0;
+}
+
+.member-role {
+  color: #57606a;
+  font-size: 0.9rem;
+}
+
+.member-controls,
+.invite-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.invite-buttons {
+  margin: 0.5rem 0;
+}
+
+.member-action p {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+}
+
+.member-action .error {
+  color: #cf222e;
+}
+
+.invite-link input {
+  width: 100%;
+  max-width: 100%;
+  font-size: 0.85rem;
+  padding: 0.3rem;
+}
+
+@media (max-width: 600px) {
+  .member-controls {
+    margin-left: 0;
+    width: 100%;
+  }
+}
