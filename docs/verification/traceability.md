@@ -33,7 +33,7 @@
 | C-09 | T03 | `supabase/tests/01_rls_enabled.test.sql`、`02_trip_permissions.test.sql`（anon 無權限）；伺服器端只用 anon key | 部分 |
 | C-10 | T33 | 待建立 | 未驗收 |
 | C-11 | T03 | `apps/web/lib/server/guard.test.ts`；`supabase/tests/03_rate_limit.test.sql`；`apps/web/e2e/guard.spec.ts` | 已驗收 |
-| C-12 | T05、T12、T31 | T05：`apps/web/workflows/spike-long-job.workflow.test.ts` 確認 job 輸入與結果帶發起人編號；T12：`decrypt_job_api_key` 只解密發起人的 key（`supabase/tests/08_api_keys.test.sql`）；T24：研究 job 的 step 只經 `decrypt_job_api_key` 取得發起人的 key，`add_research_candidates` 檢查發起人仍為 Owner 或 Companion；排程 job 使用 Owner 的 key 於 T31 | 部分 |
+| C-12 | T05、T12、T31 | T05：`apps/web/workflows/spike-long-job.workflow.test.ts` 確認 job 輸入與結果帶發起人編號；T12：`decrypt_job_api_key` 只解密發起人的 key（`supabase/tests/08_api_keys.test.sql`）；T24：研究 job 的 step 只經 `decrypt_job_api_key` 取得發起人的 key，`add_research_candidates` 檢查發起人仍為 Owner 或 Companion；T31：`start_reverification` 建立的排程 job 發起人固定為 Owner、未開啟排程時不建立 job（`supabase/tests/20_reverify.test.sql`），再核實 step 檢查發起人仍為 Owner | 已驗收 |
 
 ## 第 4 節 程式安全
 
@@ -82,7 +82,7 @@
 | SH-03 | T32 | 待建立 | 未驗收 |
 | SH-04 | T07、T09、T10A、T34 | T07：`packages/core/src/states.test.ts`；T09：`supabase/tests/05_apply_change.test.sql`（同一 base version 的第二個提案批准時失效）；T10A：`supabase/tests/06_restore_version.test.sql`（base version 不符時復原失敗、復原前的提案批准時失效）；T34 兩個瀏覽器 E2E、真機 R6 待建立 | 部分 |
 | SH-05 | T34、T35 | 待建立；真機 R3 | 未驗收 |
-| SH-06 | T09、T34 | T09：`supabase/tests/05_apply_change.test.sql`（批准、否決、失效通知成員，未讀可依成員查詢，通知表經 Realtime 推送）、`packages/db/src/change-writer.test.ts`；T34 E2E、真機 R6 待建立 | 部分 |
+| SH-06 | T09、T34 | T09：`supabase/tests/05_apply_change.test.sql`（批准、否決、失效通知成員，未讀可依成員查詢，通知表經 Realtime 推送）、`packages/db/src/change-writer.test.ts`；T31：首頁顯示本人的未讀通知與 At Risk 項目、可標為已讀（`apps/web/e2e/reverify.spec.ts`），再核實的 At Risk 提案記錄提出者並通知所有成員（`supabase/tests/20_reverify.test.sql`）；T34 E2E、真機 R6 待建立 | 部分 |
 | SH-07 | T17、T32 | T17：移除成員時刪除其在該行程的敏感欄位與 Vault secret（`10_sensitive_fields.test.sql`）；撤銷存取權與記憶合併於 T32、T41 | 部分 |
 | SH-08 | T17、T33 | T17：「提供給 Viewer 與唯讀連結」開關與 Viewer 查詢結果（pgTAP、E2E）；唯讀連結的查詢於 T33 | 部分 |
 

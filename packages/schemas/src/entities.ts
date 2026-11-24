@@ -82,6 +82,8 @@ export const tripRow = z.strictObject({
   current_version: int(0, 1_000_000),
   owner_id: uuid,
   created_at: offsetDateTime,
+  // T31：旅前自動再核實排程（只有 Owner 可開關）
+  reverify_enabled: z.boolean(),
 });
 
 export const tripMemberRow = z.strictObject({
@@ -441,6 +443,15 @@ export const aiUsageRow = z.strictObject({
 });
 
 // 資料表名稱與 row schema 對照，供一致性測試與 repository 使用
+// T31：每個行程的 T-7、T-1 再核實各執行一次
+export const reverifyRunRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  kind: z.enum(["T-7", "T-1"]),
+  job_id: nullable(uuid),
+  created_at: offsetDateTime,
+});
+
 export const tableSchemas = {
   profiles: profileRow,
   trips: tripRow,
@@ -460,6 +471,7 @@ export const tableSchemas = {
   background_jobs: backgroundJobRow,
   photos: photoRow,
   zones: zoneRow,
+  reverify_runs: reverifyRunRow,
   feature_flags: featureFlagRow,
   ai_role_settings: aiRoleSettingRow,
   ai_usage: aiUsageRow,
