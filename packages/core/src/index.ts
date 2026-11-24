@@ -19,3 +19,4 @@ export * from "./safe-markdown";
 export * from "./dedupe";
 export * from "./cross-check";
 export * from "./screening";
+export * from "./zoning";

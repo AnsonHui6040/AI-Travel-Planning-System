@@ -110,7 +110,7 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 | E6 | `evals/scenarios/E6.json` | PASS（`docs/verification/evals/2026-11-23-E6.md`） | TBD | 部分 |
 | E7 | 待建立 | 無 | TBD | 未驗收 |
 | E8 | 待建立 | 無 | TBD | 未驗收 |
-| E9 | 待建立 | 無 | TBD | 未驗收 |
+| E9 | `evals/zoning/E9.json` | PASS（`docs/verification/evals/2026-11-24-E9.md`） | TBD | 部分 |
 
 ## 沒有負責 Task 的規則
 

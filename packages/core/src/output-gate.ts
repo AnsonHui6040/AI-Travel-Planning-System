@@ -44,7 +44,8 @@ function decoded(text: string): string[] {
   return forms;
 }
 
-function leaks(output: unknown, forbidden: readonly string[]): boolean {
+// 輸出含 API key 或未開放的敏感欄位值（含網址編碼後的值）時為 true；地理分區（T27）共用
+export function leaks(output: unknown, forbidden: readonly string[]): boolean {
   const values = forbidden.filter((v) => v.length >= MIN_FORBIDDEN_LENGTH);
   if (values.length === 0) return false;
   return strings(output).some((s) => decoded(s).some((form) => values.some((v) => form.includes(v))));

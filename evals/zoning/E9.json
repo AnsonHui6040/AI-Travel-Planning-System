@@ -1,0 +1,37 @@
+{
+  "id": "E9",
+  "title": "甲地直線距離較近但需轉乘兩次，乙地較遠但直達",
+  "rule": "第 9.3 節 E9：分區時乙地與出發地同區；交通估算標示轉乘次數",
+  "base_area": "新宿",
+  "candidates": [
+    { "id": "f9000000-0000-4000-8000-0000000000a1", "name_zh": "甲地", "area": "甲區" },
+    { "id": "f9000000-0000-4000-8000-0000000000b2", "name_zh": "乙地", "area": "乙區" },
+    { "id": "f9000000-0000-4000-8000-0000000000c3", "name_zh": "新宿御苑", "area": "新宿" }
+  ],
+  "recording": {
+    "zones": [
+      {
+        "name": "新宿與直達沿線",
+        "base_area": "新宿",
+        "rationale": "乙地雖然較遠，但由新宿搭同一條路線直達，不需轉乘",
+        "items": [
+          { "item_id": "f9000000-0000-4000-8000-0000000000c3", "transfers_from_base": 0, "minutes_from_base": 10 },
+          { "item_id": "f9000000-0000-4000-8000-0000000000b2", "transfers_from_base": 0, "minutes_from_base": 25 }
+        ],
+        "sources": [{ "url": "https://railway.example.jp/route", "fetched_at": "2026-11-24T10:00:00+09:00", "grade": "official_transport_tourism" }]
+      },
+      {
+        "name": "甲區",
+        "base_area": null,
+        "rationale": "甲地直線距離較近，但由新宿需轉乘兩次",
+        "items": [{ "item_id": "f9000000-0000-4000-8000-0000000000a1", "transfers_from_base": 2, "minutes_from_base": 35 }],
+        "sources": [{ "url": "https://railway.example.jp/route", "fetched_at": "2026-11-24T10:00:00+09:00", "grade": "official_transport_tourism" }]
+      }
+    ]
+  },
+  "expect": {
+    "same_zone_as_base": ["f9000000-0000-4000-8000-0000000000b2"],
+    "not_same_zone_as_base": ["f9000000-0000-4000-8000-0000000000a1"],
+    "transfers": { "f9000000-0000-4000-8000-0000000000a1": 2, "f9000000-0000-4000-8000-0000000000b2": 0 }
+  }
+}

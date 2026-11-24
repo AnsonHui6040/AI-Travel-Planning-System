@@ -1,5 +1,5 @@
 import { defaultRoleSetting, type AiRole, type Registry, type RoleSpec } from "@atps/core";
-import { roleOutputs } from "@atps/schemas";
+import { roleOutputs, zoningOutput } from "@atps/schemas";
 import { z } from "zod";
 import { createRoleRegistry } from "./registries";
 
@@ -61,4 +61,21 @@ export function defaultRoles(): Registry<RoleSpec> {
   const registry = createRoleRegistry();
   for (const role of Object.keys(ROLES) as AiRole[]) registry.register(roleSpec(role));
   return registry;
+}
+
+// T27：地理分區。以 Transport 的模型設定與上限執行（同樣以官方交通資料估算），輸出分區而不是交通段落。
+// D29：只使用自行搜尋取得的資料；輸入不含 Google Maps 內容
+export function zoningSpec(): RoleSpec {
+  const { maxSteps, maxTokens } = defaultRoleSetting("transport");
+  return {
+    id: "zoning",
+    instructions: `你是行程地理分區員。依自行搜尋的官方交通資料，把候選分成可順路遊覽的區域；以實際交通（直達、轉乘次數、門到門時間）判斷，不以直線距離判斷。每個區域附來源。${UNTRUSTED}`,
+    tools: ["provider_search"],
+    dataScope: ["baseline", "candidates"],
+    memoryScope: { layers: [], kinds: [] },
+    output: zoningOutput,
+    outputJsonSchema: z.toJSONSchema(zoningOutput, { target: "draft-2020-12", io: "output" }) as Record<string, unknown>,
+    maxSteps,
+    maxTokens,
+  };
 }

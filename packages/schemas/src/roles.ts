@@ -51,4 +51,22 @@ export const roleOutputs = {
   live_planner: z.strictObject({ proposals: z.array(changePayload).min(1).max(3) }),
 } as const;
 
+// T27：地理分區的輸出（以 Transport 的模型設定執行）。每個項目標示由出發地前往的轉乘次數與分鐘數（E9）
+export const zoneAssignment = z.strictObject({
+  item_id: uuid,
+  transfers_from_base: int(0, 10),
+  minutes_from_base: int(1, 1440),
+});
+
+export const zoningZone = z.strictObject({
+  name: text(LIMITS.area),
+  base_area: nullable(text(LIMITS.area)),
+  rationale: text(LIMITS.longText),
+  items: z.array(zoneAssignment).min(1).max(50),
+  sources: z.array(sourceRef).max(10),
+});
+
+export const zoningOutput = z.strictObject({ zones: z.array(zoningZone).min(1).max(15) });
+export type ZoningOutput = z.infer<typeof zoningOutput>;
+
 export type RoleOutputs = { [K in keyof typeof roleOutputs]: z.infer<(typeof roleOutputs)[K]> };

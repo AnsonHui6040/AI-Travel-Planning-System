@@ -6,6 +6,7 @@ import { SupabaseKeyDecryptor, SupabaseRoleSettingsRepository, SupabaseUsageReco
 import { factClaimRecord, modelRef, sourceRef, tripBaselineData } from "@atps/schemas";
 import type { ResearchTrackDeps } from "./research-core";
 import type { ScreeningDeps } from "./screening-core";
+import type { ZoningDeps } from "./zoning-core";
 import { VERIFICATION_CHUNK_SIZE, type CandidateForCheck, type DedupeDeps, type VerificationDeps } from "./verification-core";
 import { createSupabaseServiceClient } from "./supabase";
 
@@ -236,6 +237,70 @@ export function screeningDeps(): ScreeningDeps {
       const payload = results.map(({ total: _total, ...r }) => r);
       const { data, error } = await service.rpc("apply_candidate_scores", { p_job: jobId, p_scores: payload });
       if (error) throw new Error("寫入候選評分失敗");
+      return Number(data ?? 0);
+    },
+  };
+}
+
+// ---- T27：地理分區 -----------------------------------------------------------
+
+const SCORE_COLUMNS = [
+  "score_personal_value",
+  "score_uniqueness",
+  "score_geographic_fit",
+  "score_time_cost",
+  "score_transport_cost",
+  "score_weather_dependency",
+  "score_time_slot_dependency",
+  "score_substitutability",
+] as const;
+
+export function zoningDeps(jobId: string): ZoningDeps {
+  const service = createSupabaseServiceClient();
+  const keys = new SupabaseKeyDecryptor(service);
+  const providers = defaultProviders();
+  return {
+    adapterFor: (provider) => adapterFor(providers, provider),
+    credentialFor: async (provider) => {
+      const secret = await keys.forJob(jobId, KEY_PROVIDER[provider]);
+      return secret ? { kind: "api_key", secret } : null;
+    },
+    recordUsage: (entry) => new SupabaseUsageRecorder(service).record(entry),
+    async loadContext(id) {
+      // 以 Transport 的模型設定執行
+      const base = await loadJob(service, keys, id, "transport");
+      if (!base) return null;
+      const { data: stored } = await service.from("trip_baselines").select("data, confirmed_at").eq("trip_id", base.tripId).eq("version", 1).maybeSingle();
+      const baseline = stored?.confirmed_at ? tripBaselineData.safeParse(stored.data) : null;
+      if (!baseline?.success) return null;
+      const { data, error } = await service
+        .from("itinerary_items")
+        .select(`id, name_zh, name_local, area, type, suggested_stay_minutes, candidate_role, place_id, coord_lat, coord_lng, ${SCORE_COLUMNS.join(", ")}`)
+        .eq("trip_id", base.tripId)
+        .in("lifecycle_status", SCREENED_STATES)
+        .limit(200);
+      if (error) throw new Error("讀取候選失敗");
+      const candidates = (data ?? []).map((row) => {
+        const r = row as unknown as Record<string, unknown>;
+        return {
+          id: String(r.id),
+          name_zh: String(r.name_zh),
+          name_local: (r.name_local as string | null) ?? null,
+          area: (r.area as string | null) ?? null,
+          type: r.type as CandidateForCheck["type"],
+          suggested_stay_minutes: Number(r.suggested_stay_minutes),
+          candidate_role: r.candidate_role === "backup" ? ("backup" as const) : ("primary" as const),
+          place_id: (r.place_id as string | null) ?? null,
+          coord_lat: (r.coord_lat as number | null) ?? null,
+          coord_lng: (r.coord_lng as number | null) ?? null,
+          total: SCORE_COLUMNS.reduce((sum, c) => sum + Number(r[c] ?? 0), 0),
+        };
+      });
+      return { ...base, baseline: baseline.data, candidates };
+    },
+    async applyZoning(id, write) {
+      const { data, error } = await service.rpc("apply_zoning", { p_job: id, p_zones: write.zones, p_roles: write.roles });
+      if (error) throw new Error("寫入分區失敗");
       return Number(data ?? 0);
     },
   };
