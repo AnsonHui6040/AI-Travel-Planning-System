@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { changePayload } from "./change";
 import { LIMITS, isoDate, text, uuid } from "./common";
-import { aiMobilityEstimate, factClaim, sourceRef } from "./entities";
+import { aiMobilityEstimate, availabilitySlot, factClaim, sourceRef } from "./entities";
 import * as E from "./enums";
 
 const nullable = <T extends z.ZodType>(schema: T) => schema.nullable();
@@ -34,6 +34,9 @@ export const verificationResult = z.strictObject({
   sources,
   // T25：核對後的事實，附來源；由伺服器依證據順序與 Research 的主張交叉判定
   facts: z.array(factClaim).max(10).default([]),
+  // T30：營業時段（依星期或指定日期）與預約需求，供可行性驗證；無法確認時為空陣列
+  availability: z.array(availabilitySlot).max(50).default([]),
+  reservation: E.reservationRequirement.default("none"),
 });
 
 export const transportSegment = z.strictObject({

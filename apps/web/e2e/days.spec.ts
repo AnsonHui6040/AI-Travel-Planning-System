@@ -8,17 +8,18 @@ import {
   markBaselineConfirmedAsAdmin,
   saveBaselineAsAdmin,
   seedResearchCandidates,
+  setAvailabilityAsAdmin,
   signInAsNewUser,
   verifyCandidateAsAdmin,
 } from "./support/auth";
 
-// T29：每日時段草案與行程 Card。需本機 Supabase 與 apps/web/.env.local。
+// T29：每日時段草案與行程 Card；T30：可行性驗證、批准與鎖定。需本機 Supabase 與 apps/web/.env.local。
 // CAPTURE_SCREENSHOTS=1 時把截圖存到 docs/verification/screenshots/
 
 async function capture(page: Page, name: string) {
   if (process.env.CAPTURE_SCREENSHOTS !== "1") return;
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({ path: `../../docs/verification/screenshots/T29-${name}-${page.viewportSize()?.width ?? 0}.png`, fullPage: true });
+  await page.screenshot({ path: `../../docs/verification/screenshots/${name}-${page.viewportSize()?.width ?? 0}.png`, fullPage: true });
 }
 
 const source = { url: "https://www.example.jp/", fetched_at: "2026-11-23T10:00:00+09:00", grade: "facility_official" };
@@ -57,15 +58,24 @@ test("依排程順序排入，行程 Card 顯示到達、停留、下一站、�
   });
   await markBaselineConfirmedAsAdmin(tripId);
   await confirmTripAsAdmin(tripId);
-  await seedResearchCandidates(tripId, owner.userId, "A", [candidate("淺草寺"), candidate("雷門"), candidate("咖啡店", "restaurant"), candidate("未核實景點")]);
-  for (const [name, status] of [["淺草寺", "verified"], ["雷門", "partially_verified"], ["咖啡店", "verified"]] as const) {
+  await seedResearchCandidates(tripId, owner.userId, "A", [
+    candidate("淺草寺"),
+    candidate("雷門"),
+    candidate("咖啡店", "restaurant"),
+    candidate("未核實景點"),
+    candidate("定休喫茶", "restaurant"),
+  ]);
+  for (const [name, status] of [["淺草寺", "verified"], ["雷門", "partially_verified"], ["咖啡店", "verified"], ["定休喫茶", "verified"]] as const) {
     await verifyCandidateAsAdmin(tripId, owner.userId, name, { status, facts: [], claims: [], sources: [], verifiedBy: gemini });
   }
   await applyScoresAsAdmin(tripId, owner.userId, {
     淺草寺: { role: "primary", scores: [5, 3, 5, 5, 5, 3, 4, 5] },
     雷門: { role: "primary", scores: [3, 3, 5, 5, 5, 3, 4, 3] },
     咖啡店: { role: "primary", scores: [3, 3, 5, 5, 5, 5, 4, 3] },
+    定休喫茶: { role: "primary", scores: [3, 3, 5, 5, 5, 5, 4, 3] },
   });
+  // T30：2026-12-01 是星期二；定休喫茶只在星期五營業（E3）
+  await setAvailabilityAsAdmin(tripId, owner.userId, "定休喫茶", [{ weekday: 5, start: "10:00", end: "18:00" }]);
   await applyZoningAsAdmin(tripId, owner.userId, [
     {
       name: "淺草",
@@ -75,6 +85,7 @@ test("依排程順序排入，行程 Card 顯示到達、停留、下一站、�
         { name: "雷門", transfers: 1, minutes: 31 },
         { name: "咖啡店", transfers: 1, minutes: 32 },
         { name: "未核實景點", transfers: 1, minutes: 33 },
+        { name: "定休喫茶", transfers: 1, minutes: 34 },
       ],
     },
   ]);
@@ -104,9 +115,9 @@ test("依排程順序排入，行程 Card 顯示到達、停留、下一站、�
   await page.goto(`/trips/${tripId}/days`);
   await expect(page.getByRole("heading", { name: "每日時段草案", level: 1 })).toBeVisible();
   const day = page.getByRole("region", { name: "2026-12-01" });
-  // 淺草寺與雷門的優先度相同（總分 35、31 → 4），先排高優先；咖啡店排在午餐時段；固定活動 13:00
+  // 淺草寺與雷門先排高優先；咖啡店在午餐時段放不下（到固定活動需交通加 15 分鐘緩衝），改排晚餐時段
   const order = await day.locator("article.day-card h3, p.fixed-row").allTextContents();
-  expect(order).toEqual(["淺草寺", "雷門", "咖啡店", "13:00–15:00 固定活動：和服體驗"]);
+  expect(order).toEqual(["淺草寺", "雷門", "13:00–15:00 固定活動：和服體驗", "咖啡店"]);
 
   const senso = day.getByRole("article", { name: "淺草寺" });
   await expect(senso).toContainText("到達09:00");
@@ -120,11 +131,34 @@ test("依排程順序排入，行程 Card 顯示到達、停留、下一站、�
   const kaminarimon = day.getByRole("article", { name: "雷門" });
   await expect(kaminarimon).toContainText("到達10:15");
   await expect(kaminarimon).toContainText("狀態Partially Verified");
-  await expect(day.getByRole("article", { name: "咖啡店" })).toContainText("到達11:30");
+  await expect(day.getByRole("article", { name: "咖啡店" })).toContainText("到達17:30");
+  // T30：當天公休的候選不排入，留在 Candidate List（E3）
+  await expect(day.getByRole("article", { name: "定休喫茶" })).toHaveCount(0);
+  await expect(day).toContainText("未通過可行性驗證、回到地理分區（留在 Candidate List）：定休喫茶（當天休館或公休）");
+  await expect(day.getByText("草案", { exact: true })).toBeVisible();
   // Unverified 不排入
   await expect(day.getByRole("article", { name: "未核實景點" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await capture(page, "day");
+  await capture(page, "T30-draft");
+
+  // T30：批准唯一的一天後行程鎖定
+  await day.getByRole("button", { name: /^批准/ }).click();
+  await expect(day.getByRole("status")).toHaveText("已批准 2026-12-01，所有日期都已批准，行程已鎖定");
+  await page.reload();
+  await expect(page.locator(".trip-line")).toHaveText("東京一日（已鎖定）");
+  const locked = page.getByRole("region", { name: "2026-12-01" });
+  await expect(locked.getByText("已批准", { exact: true })).toBeVisible();
+  await expect(locked.getByRole("button", { name: /^批准/ })).toHaveCount(0);
+  expect(await locked.locator("article.day-card h3, p.fixed-row").allTextContents()).toEqual(order);
+  await expect(locked.getByRole("article", { name: "咖啡店" })).toContainText("到達17:30");
+
+  // 鎖定後新研究只進 Candidate List
+  await seedResearchCandidates(tripId, owner.userId, "B", [candidate("鎖定後的新候選")]);
+  await page.reload();
+  await expect(page.getByRole("article", { name: "鎖定後的新候選" })).toHaveCount(0);
+  expect(await locked.locator("article.day-card h3, p.fixed-row").allTextContents()).toEqual(order);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await capture(page, "T30-locked");
 });
 
 test("基線未確認時不產生草案", async ({ page, context, baseURL }) => {

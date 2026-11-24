@@ -125,3 +125,20 @@ describe("draftDays", () => {
     expect(days[1]?.zone_ids).toEqual(["west"]);
   });
 });
+
+describe("draftDays 固定活動緩衝（T30）", () => {
+  it("固定活動之後另加緩衝才排入下一個項目", () => {
+    const fixedDay = { ...baseline, fixed_activities: [{ name: "和服體驗", area: null, date: "2026-12-01", start: "09:00", end: "10:00", paid: true }] };
+    const [day] = draftDays({ baseline: fixedDay, items: [item({})], travelMinutes: () => 20, fixedBuffer: 15 });
+    expect(day?.entries.find((e) => e.kind === "item")?.start).toBe("10:35");
+  });
+});
+
+describe("draftDays 到下一站的交通（T30）", () => {
+  it("項目結束後須留下到下一個時段的交通", () => {
+    const fixedDay = { ...baseline, fixed_activities: [{ name: "和服體驗", area: null, date: "2026-12-01", start: "10:20", end: "12:00", paid: true }] };
+    // 09:00–10:00 之後到固定活動需要 30 分鐘，所以改排到固定活動之後
+    const [day] = draftDays({ baseline: fixedDay, items: [item({})], travelMinutes: () => null });
+    expect(day?.entries.find((e) => e.kind === "item")?.start).toBe("12:30");
+  });
+});

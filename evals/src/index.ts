@@ -5,3 +5,4 @@ export { judgeSpec, parseRecording, parseScenario, type JudgeSpec, type PlannerO
 export { parseBaselineScenario, renderBaselineReport, runBaselineScenario, type BaselineScenario, type BaselineScenarioReport } from "./baseline";
 export { parseCrossCheckScenario, renderCrossCheckReport, runCrossCheckScenario, type CrossCheckScenario, type CrossCheckScenarioReport } from "./crosscheck";
 export { parseZoningScenario, renderZoningReport, runZoningScenario, type ZoningScenario, type ZoningScenarioReport } from "./zoning";
+export { parseFeasibilityScenario, renderFeasibilityReport, runFeasibilityScenario, type FeasibilityScenario, type FeasibilityScenarioReport } from "./feasibility";

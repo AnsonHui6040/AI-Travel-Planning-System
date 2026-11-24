@@ -4,16 +4,19 @@ import { expect, it } from "vitest";
 import {
   parseBaselineScenario,
   parseCrossCheckScenario,
+  parseFeasibilityScenario,
   parseZoningScenario,
   parseRecording,
   parseScenario,
   renderBaselineReport,
   renderCrossCheckReport,
+  renderFeasibilityReport,
   renderZoningReport,
   renderReport,
   replayInvoker,
   runBaselineScenario,
   runCrossCheckScenario,
+  runFeasibilityScenario,
   runZoningScenario,
   runScenario,
 } from "./src/index";
@@ -47,9 +50,23 @@ const zoningFiles = readdirSync(join(import.meta.dirname, "zoning"))
   .filter((f) => f.endsWith(".json"))
   .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
 
+// T30：可行性驗證場景（確定性規則，不呼叫 AI）
+const feasibilityFiles = readdirSync(join(import.meta.dirname, "feasibility"))
+  .filter((f) => f.endsWith(".json"))
+  .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
+
 it("有要執行的場景", () => {
-  expect(files.length + baselineFiles.length + crossCheckFiles.length + zoningFiles.length).toBeGreaterThan(0);
+  expect(files.length + baselineFiles.length + crossCheckFiles.length + zoningFiles.length + feasibilityFiles.length).toBeGreaterThan(0);
 });
+
+for (const file of feasibilityFiles) {
+  it(`評估 ${file}`, () => {
+    const report = runFeasibilityScenario(parseFeasibilityScenario(read(join(import.meta.dirname, "feasibility", file))));
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(join(outDir, `${date}-${report.scenario.id}.md`), renderFeasibilityReport(report, { date }));
+    expect(report.passed).toBe(true);
+  });
+}
 
 for (const file of zoningFiles) {
   it(`評估 ${file}`, () => {
