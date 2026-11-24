@@ -67,6 +67,7 @@
 - 候選篩選（T26，決策 0007 暫定）：core 的 `screenCandidates` 以確定性規則評八個維度與 Primary／Backup，只經 `apply_candidate_scores` 寫入。
 - 地理分區（T27，D29）：以 Transport 的模型設定執行 `zoningSpec`；輸入以 core 的 `zoningInput` 組成，不可加入 place_id、座標等 Google Maps 內容；輸出經 `gateZoningOutput` 檢查、`ensureZoneBackups` 補 Backup 後只經 `apply_zoning` 寫入。
 - 交通動線（T28，D27、決策 0008）：每個估算經 core 的 `withBuffer` 加固定緩衝（每段 10 分鐘＋每次轉乘 5 分鐘），`comparePlans` 產生四種方案；只經 `apply_mobility_segments` 寫入；Google Maps 連結用 `directionsUrl`（含 origin）。
+- 每日草案（T29）：core 的 `draftDays` 只計算、不寫入；只排 Verified 與 Partially Verified，順序為固定活動、時段敏感、高優先、餐飲、彈性，Backup 只列清單。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。
