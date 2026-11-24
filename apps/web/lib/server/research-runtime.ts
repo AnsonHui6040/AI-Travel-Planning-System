@@ -1,12 +1,13 @@
 import "server-only";
 import { adapterFor, defaultProviders } from "@atps/ai";
-import type { AiProvider, AiRole, ApiKeyProvider, RoleSetting } from "@atps/core";
+import { segmentPairs, type AiProvider, type AiRole, type ApiKeyProvider, type RoleSetting } from "@atps/core";
 import { createGoogleMapsClient } from "@atps/data-sources";
 import { SupabaseKeyDecryptor, SupabaseRoleSettingsRepository, SupabaseUsageRecorder } from "@atps/db";
 import { factClaimRecord, modelRef, sourceRef, tripBaselineData } from "@atps/schemas";
 import type { ResearchTrackDeps } from "./research-core";
 import type { ScreeningDeps } from "./screening-core";
 import type { ZoningDeps } from "./zoning-core";
+import { SEGMENTS_PER_CHUNK, type TransportDeps } from "./transport-core";
 import { VERIFICATION_CHUNK_SIZE, type CandidateForCheck, type DedupeDeps, type VerificationDeps } from "./verification-core";
 import { createSupabaseServiceClient } from "./supabase";
 
@@ -301,6 +302,79 @@ export function zoningDeps(jobId: string): ZoningDeps {
     async applyZoning(id, write) {
       const { data, error } = await service.rpc("apply_zoning", { p_job: id, p_zones: write.zones, p_roles: write.roles });
       if (error) throw new Error("寫入分區失敗");
+      return Number(data ?? 0);
+    },
+  };
+}
+
+// ---- T28：交通動線比較 -------------------------------------------------------
+
+// 依分區取得要估算的路段，分批（每批 SEGMENTS_PER_CHUNK 段）
+export async function transportPairChunks(jobId: string): Promise<{ from: string; to: string }[][]> {
+  const service = createSupabaseServiceClient();
+  const tripId = await jobTripId(service, jobId);
+  if (!tripId) return [];
+  const { data, error } = await service
+    .from("itinerary_items")
+    .select("id, zone_id, zone_minutes")
+    .eq("trip_id", tripId)
+    .in("lifecycle_status", SCREENED_STATES)
+    .not("zone_id", "is", null)
+    .limit(200);
+  if (error) throw new Error("讀取分區失敗");
+  const zones = new Map<string, { item_id: string; minutes: number }[]>();
+  for (const r of data ?? []) {
+    const zone = String(r.zone_id);
+    zones.set(zone, [...(zones.get(zone) ?? []), { item_id: String(r.id), minutes: Number(r.zone_minutes ?? 0) }]);
+  }
+  const pairs = segmentPairs([...zones.values()].map((items) => ({ items })));
+  const chunks: { from: string; to: string }[][] = [];
+  for (let i = 0; i < pairs.length; i += SEGMENTS_PER_CHUNK) chunks.push(pairs.slice(i, i + SEGMENTS_PER_CHUNK));
+  return chunks;
+}
+
+export function transportDeps(jobId: string): TransportDeps {
+  const service = createSupabaseServiceClient();
+  const keys = new SupabaseKeyDecryptor(service);
+  const providers = defaultProviders();
+  return {
+    adapterFor: (provider) => adapterFor(providers, provider),
+    credentialFor: async (provider) => {
+      const secret = await keys.forJob(jobId, KEY_PROVIDER[provider]);
+      return secret ? { kind: "api_key", secret } : null;
+    },
+    recordUsage: (entry) => new SupabaseUsageRecorder(service).record(entry),
+    async loadContext(id) {
+      const base = await loadJob(service, keys, id, "transport");
+      if (!base) return null;
+      const { data: stored } = await service.from("trip_baselines").select("data, confirmed_at").eq("trip_id", base.tripId).eq("version", 1).maybeSingle();
+      const baseline = stored?.confirmed_at ? tripBaselineData.safeParse(stored.data) : null;
+      const { data, error } = await service
+        .from("itinerary_items")
+        .select("id, name_zh, name_local, area, place_id")
+        .eq("trip_id", base.tripId)
+        .in("lifecycle_status", SCREENED_STATES)
+        .limit(200);
+      if (error) throw new Error("讀取候選失敗");
+      return {
+        tripId: base.tripId,
+        initiatorId: base.initiatorId,
+        setting: base.setting,
+        forbiddenValues: base.forbiddenValues,
+        transportPreferences: baseline?.success ? baseline.data.transport_preferences : [],
+        items: (data ?? []).map((r) => ({
+          id: String(r.id),
+          name_zh: String(r.name_zh),
+          name_local: (r.name_local as string | null) ?? null,
+          area: (r.area as string | null) ?? null,
+          place_id: (r.place_id as string | null) ?? null,
+        })),
+      };
+    },
+    async storeSegments(id, segments) {
+      if (segments.length === 0) return 0;
+      const { data, error } = await service.rpc("apply_mobility_segments", { p_job: id, p_segments: segments });
+      if (error) throw new Error("寫入交通估算失敗");
       return Number(data ?? 0);
     },
   };

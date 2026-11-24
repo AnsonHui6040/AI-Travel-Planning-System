@@ -5,7 +5,8 @@ import { RESEARCH_TRACK_IDS, type ResearchTrackId } from "@atps/core";
 // step 重試時候選不會重複寫入（add_research_candidates 以 job 與方向判斷）。
 // T25：研究完成後合併重複候選，再由 Verification 逐批交叉核查（每批一個 step）。
 // T26：以八個維度為所有候選評分，標記 Primary 與 Backup。
-// T27：最後依交通把候選分區（以 Transport 的模型設定），每個主要區域至少一個 Backup。
+// T27：依交通把候選分區（以 Transport 的模型設定），每個主要區域至少一個 Backup。
+// T28：最後由 Transport 估算各分區內相鄰候選之間的交通（每批一個 step）。
 // 伺服器模組在 step 內載入：workflow 本體不直接使用資料庫或網路。
 
 export interface ResearchJobInput {
@@ -83,12 +84,30 @@ async function zoning(jobId: string): Promise<string> {
   return (await runZoning(zoningDeps(jobId), { jobId, spec: zoningSpec() })).status;
 }
 
+async function transportChunks(jobId: string): Promise<{ from: string; to: string }[][]> {
+  "use step";
+  const { transportPairChunks } = await import("../lib/server/research-runtime");
+  return transportPairChunks(jobId);
+}
+
+async function estimateSegments(jobId: string, pairs: { from: string; to: string }[]): Promise<number> {
+  "use step";
+  const [{ roleSpec }, { runTransportSegments }, { transportDeps }] = await Promise.all([
+    import("@atps/ai"),
+    import("../lib/server/transport-core"),
+    import("../lib/server/research-runtime"),
+  ]);
+  const result = await runTransportSegments(transportDeps(jobId), { jobId, pairs, role: roleSpec("transport") });
+  return result.status === "stored" ? result.count : 0;
+}
+
 export interface ResearchJobResult {
   tracks: TrackSummary[];
   merged: number;
   verified: number;
   screened: number;
   zoning: string;
+  segments: number;
 }
 
 export async function researchJob(input: ResearchJobInput): Promise<ResearchJobResult> {
@@ -102,6 +121,10 @@ export async function researchJob(input: ResearchJobInput): Promise<ResearchJobR
   }
   const screened = await screen(input.jobId);
   const zoned = await zoning(input.jobId);
+  let segments = 0;
+  for (const chunk of await transportChunks(input.jobId)) {
+    segments += await estimateSegments(input.jobId, chunk);
+  }
   await setStatus(input.jobId, tracks.some((r) => r.status === "stored") ? "completed" : "failed");
-  return { tracks, merged, verified, screened, zoning: zoned };
+  return { tracks, merged, verified, screened, zoning: zoned, segments };
 }

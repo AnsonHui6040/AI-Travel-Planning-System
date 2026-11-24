@@ -268,11 +268,19 @@ export function createGoogleMapsAdapter(options: GoogleMapsOptions & { apiKey: s
 
 // D26：導航以 Google Maps URLs 開啟；不需要也不含 key
 export function directionsUrl(input: {
+  // T28：指定出發地時開啟對應路段；沒有時由使用者目前位置出發
+  origin?: string;
+  originPlaceId?: string | null;
   destination: string;
   destinationPlaceId: string | null;
   travelmode?: "transit" | "walking" | "driving" | "bicycling";
 }): string {
-  const params = new URLSearchParams({ api: "1", destination: input.destination });
+  const params = new URLSearchParams({ api: "1" });
+  if (input.origin) {
+    params.set("origin", input.origin);
+    if (input.originPlaceId && PLACE_ID.test(input.originPlaceId)) params.set("origin_place_id", input.originPlaceId);
+  }
+  params.set("destination", input.destination);
   if (input.destinationPlaceId && PLACE_ID.test(input.destinationPlaceId)) params.set("destination_place_id", input.destinationPlaceId);
   params.set("travelmode", input.travelmode ?? "transit");
   return `https://www.google.com/maps/dir/?${params.toString()}`;

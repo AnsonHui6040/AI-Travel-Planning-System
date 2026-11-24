@@ -66,6 +66,7 @@
 - 交叉核查（T25）：去重用 core 的 `findDuplicateGroups`，合併只經 `merge_duplicate_candidates`；核實結果先經 `crossCheck`（證據順序、Conflict、同一家上限）再經 `apply_verification` 寫入（擁有者 `atps_verification_writer`，資料庫再套一次同一家上限）。事實主張存 `fact_claims`，判定結果存 `facts`。確定性評估場景放 `evals/crosscheck/`。
 - 候選篩選（T26，決策 0007 暫定）：core 的 `screenCandidates` 以確定性規則評八個維度與 Primary／Backup，只經 `apply_candidate_scores` 寫入。
 - 地理分區（T27，D29）：以 Transport 的模型設定執行 `zoningSpec`；輸入以 core 的 `zoningInput` 組成，不可加入 place_id、座標等 Google Maps 內容；輸出經 `gateZoningOutput` 檢查、`ensureZoneBackups` 補 Backup 後只經 `apply_zoning` 寫入。
+- 交通動線（T28，D27、決策 0008）：每個估算經 core 的 `withBuffer` 加固定緩衝（每段 10 分鐘＋每次轉乘 5 分鐘），`comparePlans` 產生四種方案；只經 `apply_mobility_segments` 寫入；Google Maps 連結用 `directionsUrl`（含 origin）。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。

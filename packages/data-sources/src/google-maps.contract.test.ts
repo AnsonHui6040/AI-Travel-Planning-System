@@ -255,6 +255,14 @@ describe("DataSourceAdapter 與導航連結", () => {
     expect(url.href).not.toMatch(/key=/i);
   });
 
+  it("T28：指定出發地時開啟對應路段（origin、origin_place_id）", () => {
+    const url = new URL(directionsUrl({ origin: "上野公園", originPlaceId: PLACE, destination: "淺草寺", destinationPlaceId: null }));
+    expect(url.searchParams.get("origin")).toBe("上野公園");
+    expect(url.searchParams.get("origin_place_id")).toBe(PLACE);
+    expect(url.searchParams.get("destination")).toBe("淺草寺");
+    expect(url.searchParams.get("travelmode")).toBe("transit");
+  });
+
   it("沒有 place_id 時只用名稱", () => {
     const url = new URL(directionsUrl({ destination: "淺草寺", destinationPlaceId: null, travelmode: "walking" }));
     expect(url.searchParams.has("destination_place_id")).toBe(false);

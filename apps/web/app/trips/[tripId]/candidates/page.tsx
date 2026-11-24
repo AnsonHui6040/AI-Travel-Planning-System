@@ -1,7 +1,7 @@
 import { PROVIDER_NAMES, RESEARCH_TRACKS, SCREENING_DIMENSIONS, SCREENING_LABELS, type AiProvider } from "@atps/core";
 import type { Metadata } from "next";
 import { SafeLink, SafeMarkdown } from "../../../../components/safe-markdown";
-import { loadCandidateList, type CandidateView } from "../../../../lib/server/research";
+import { loadCandidateList, type CandidateView, type SegmentView } from "../../../../lib/server/research";
 import { StartResearchForm } from "./start-research-form";
 import "../../../settings/settings.css";
 import "./candidates.css";
@@ -38,6 +38,73 @@ const FACT_LABELS: Record<CandidateView["facts"][number]["field"], string> = {
   reservation: "預約",
   transport_service: "交通服務",
 };
+
+const MODE_LABELS: Record<string, string> = {
+  walk: "步行",
+  rail: "鐵路與地鐵",
+  bus: "公車",
+  taxi: "計程車與叫車",
+  drive: "自駕",
+};
+
+const PLAN_LABELS: [keyof NonNullable<SegmentView["plans"]>, string][] = [
+  ["recommended", "推薦"],
+  ["fastest", "最快"],
+  ["cheapest", "最便宜"],
+  ["comfortable", "最舒適或低風險"],
+];
+
+function Segment({ s }: { s: SegmentView }) {
+  return (
+    <article className="segment" aria-label={`${s.from}到${s.to}`}>
+      <h3>
+        {s.from}到{s.to}
+      </h3>
+      {s.plans ? (
+        <table>
+          <caption>四種方案（估算，含固定緩衝）</caption>
+          <thead>
+            <tr>
+              <th scope="col">方案</th>
+              <th scope="col">方式</th>
+              <th scope="col">時間</th>
+              <th scope="col">費用</th>
+              <th scope="col">轉乘</th>
+            </tr>
+          </thead>
+          <tbody>
+            {PLAN_LABELS.map(([key, name]) => {
+              const mode = s.plans?.[key] ?? "";
+              const e = s.estimates.find((x) => x.mode === mode);
+              return (
+                <tr key={key}>
+                  <th scope="row">{name}</th>
+                  <td>{MODE_LABELS[mode] ?? mode}</td>
+                  <td>{e ? `約 ${e.total_minutes} 分鐘（含緩衝 ${e.buffer_minutes} 分鐘）` : ""}</td>
+                  <td>{e?.price ? `約 ${e.price.amount} ${e.price.currency}` : mode === "walk" ? "免費" : "不明"}</td>
+                  <td>{e ? `${e.transfers} 次` : ""}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : null}
+      <h4 className="label">估算來源</h4>
+      <ul className="sources">
+        {[...new Set(s.estimates.flatMap((e) => e.source_urls))].map((url) => (
+          <li key={url}>
+            <SafeLink href={url}>{url}</SafeLink>
+          </li>
+        ))}
+      </ul>
+      {s.mapsUrl ? (
+        <p>
+          <SafeLink href={s.mapsUrl}>在 Google Maps 確認這段路線</SafeLink>
+        </p>
+      ) : null}
+    </article>
+  );
+}
 
 const JOB_LABELS: Record<string, string> = {
   queued: "排隊中",
@@ -193,6 +260,15 @@ export default async function CandidatesPage({ params }: { params: Promise<{ tri
             ))}
           </section>
         ))}
+      {view.segments.length > 0 ? (
+        <section aria-labelledby="segments">
+          <h2 id="segments">交通動線比較</h2>
+          <p className="muted">全部為 AI 依官方資料的估算，並加上固定緩衝（每段 10 分鐘，每次轉乘再加 5 分鐘）。出發前請以 Google Maps 確認。</p>
+          {view.segments.map((s) => (
+            <Segment key={s.id} s={s} />
+          ))}
+        </section>
+      ) : null}
       {others.length > 0 ? (
         <section aria-labelledby="track-other">
           <h2 id="track-other">成員加入</h2>
