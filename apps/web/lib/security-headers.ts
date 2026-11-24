@@ -15,12 +15,27 @@ export function createNonce(): string {
   return btoa(String.fromCharCode(...bytes));
 }
 
+// T34：Supabase Realtime 由瀏覽器連線（anon key 與本人 session，C-09），只另外允許該網址的 http(s) 與 ws(s)
+function supabaseConnectSources(url: string | undefined): string[] {
+  if (!url) return [];
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return [];
+    const socket = parsed.protocol === "https:" ? "wss:" : "ws:";
+    return [parsed.origin, `${socket}//${parsed.host}`];
+  } catch {
+    return [];
+  }
+}
+
 export function buildContentSecurityPolicy({
   nonce,
   isDev,
+  supabaseUrl,
 }: {
   nonce: string;
   isDev: boolean;
+  supabaseUrl?: string | undefined;
 }): string {
   if (!NONCE_PATTERN.test(nonce)) throw new Error("nonce 必須是 base64 字串");
 
@@ -34,7 +49,7 @@ export function buildContentSecurityPolicy({
     ["style-src", ["'self'", `'nonce-${nonce}'`]],
     ["img-src", ["'self'", "blob:", "data:"]],
     ["font-src", ["'self'"]],
-    ["connect-src", ["'self'"]],
+    ["connect-src", ["'self'", ...supabaseConnectSources(supabaseUrl)]],
     ["object-src", ["'none'"]],
     ["base-uri", ["'self'"]],
     ["form-action", ["'self'"]],

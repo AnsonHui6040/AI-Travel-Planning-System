@@ -38,9 +38,26 @@ interface QueryResult {
   error: { message: string } | null;
 }
 
+// Postgres 的 time 欄位回傳 HH:MM:SS；row schema 以 HH:MM 表示（T34）
+const TIME_COLUMNS: Partial<Record<TableName, readonly string[]>> = {
+  itinerary_items: ["scheduled_start", "scheduled_end", "movable_from", "movable_to"],
+};
+
+function normalizeTimes(table: TableName, row: unknown): unknown {
+  const columns = TIME_COLUMNS[table];
+  if (!columns || typeof row !== "object" || row === null) return row;
+  const copy: Record<string, unknown> = { ...(row as Record<string, unknown>) };
+  for (const column of columns) {
+    const value = copy[column];
+    if (typeof value === "string" && /^\d{2}:\d{2}:\d{2}$/.test(value)) copy[column] = value.slice(0, 5);
+  }
+  return copy;
+}
+
 function parseRows<T extends TableName>(table: T, result: QueryResult) {
   if (result.error) throw new Error(`讀取 ${table} 失敗`);
-  return tableSchemas[table].array().parse(result.data ?? []);
+  const rows = Array.isArray(result.data) ? result.data.map((row) => normalizeTimes(table, row)) : (result.data ?? []);
+  return tableSchemas[table].array().parse(rows);
 }
 
 function parseRow<T extends TableName>(table: T, result: QueryResult) {
