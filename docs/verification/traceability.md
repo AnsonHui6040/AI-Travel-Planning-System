@@ -78,12 +78,12 @@
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
 | SH-01 | T03 | `supabase/tests/02_trip_permissions.test.sql`（Owner、Companion、Viewer；唯讀連結於 T33） | 部分 |
-| SH-02 | T03、T17、T32 | `supabase/tests/02_trip_permissions.test.sql`：trips 與 trip_members 相關各格；T17：「檢視他人敏感欄位：依當事人開關」的 Owner、Companion、Viewer 三格（`10_sensitive_fields.test.sql`），唯讀連結格於 T33；其餘資料表於建立時補 | 部分 |
-| SH-03 | T32 | 待建立 | 未驗收 |
+| SH-02 | T03、T17、T32 | 權限表每一格對應的測試見 `docs/verification/T32.md`「權限表」；已實作的動作全部有 Owner、Companion、Viewer 三欄的測試。唯讀連結欄於 T33，Morning Check、Incident Mode、記錄活動完成於對應 Task | 部分 |
+| SH-03 | T12、T32 | `08_api_keys.test.sql`：job 只解密發起人本人的 key（C-05）；T32：加入行程不取得任何 key 的使用權，AI 動作仍由發起人的 key 執行；T31 的排程 job 只在 Owner 開啟時使用 Owner 的 key（`20_reverify.test.sql`） | 已驗收 |
 | SH-04 | T07、T09、T10A、T34 | T07：`packages/core/src/states.test.ts`；T09：`supabase/tests/05_apply_change.test.sql`（同一 base version 的第二個提案批准時失效）；T10A：`supabase/tests/06_restore_version.test.sql`（base version 不符時復原失敗、復原前的提案批准時失效）；T34 兩個瀏覽器 E2E、真機 R6 待建立 | 部分 |
 | SH-05 | T34、T35 | 待建立；真機 R3 | 未驗收 |
 | SH-06 | T09、T34 | T09：`supabase/tests/05_apply_change.test.sql`（批准、否決、失效通知成員，未讀可依成員查詢，通知表經 Realtime 推送）、`packages/db/src/change-writer.test.ts`；T31：首頁顯示本人的未讀通知與 At Risk 項目、可標為已讀（`apps/web/e2e/reverify.spec.ts`），再核實的 At Risk 提案記錄提出者並通知所有成員（`supabase/tests/20_reverify.test.sql`）；T34 E2E、真機 R6 待建立 | 部分 |
-| SH-07 | T17、T32 | T17：移除成員時刪除其在該行程的敏感欄位與 Vault secret（`10_sensitive_fields.test.sql`）；撤銷存取權與記憶合併於 T32、T41 | 部分 |
+| SH-07 | T17、T32 | T17：移除成員時刪除其在該行程的敏感欄位與 Vault secret（`10_sensitive_fields.test.sql`）；撤銷存取權與記憶合併於 T32、T41；T32：移除或退出後看不到行程、刪除該行程的行程記憶與通知、保留個人記憶（`21_members.test.sql`、E2E `apps/web/e2e/members.spec.ts`）；記憶合併以成員名單決定，移除後即不再合併（T41 補合併流程） | 部分 |
 | SH-08 | T17、T33 | T17：「提供給 Viewer 與唯讀連結」開關與 Viewer 查詢結果（pgTAP、E2E）；唯讀連結的查詢於 T33 | 部分 |
 
 ## 第 7 節 日後新增功能

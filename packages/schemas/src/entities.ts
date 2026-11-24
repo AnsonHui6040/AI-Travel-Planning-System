@@ -452,6 +452,20 @@ export const reverifyRunRow = z.strictObject({
   created_at: offsetDateTime,
 });
 
+// T32：邀請連結（只保存 token 的 SHA-256）
+export const tripInvitationRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  role: z.enum(["companion", "viewer"]),
+  token_hash: z.string().regex(/^[0-9a-f]{64}$/),
+  created_by: uuid,
+  expires_at: offsetDateTime,
+  accepted_by: nullable(uuid),
+  accepted_at: nullable(offsetDateTime),
+  revoked_at: nullable(offsetDateTime),
+  created_at: offsetDateTime,
+});
+
 export const tableSchemas = {
   profiles: profileRow,
   trips: tripRow,
@@ -472,6 +486,7 @@ export const tableSchemas = {
   photos: photoRow,
   zones: zoneRow,
   reverify_runs: reverifyRunRow,
+  trip_invitations: tripInvitationRow,
   feature_flags: featureFlagRow,
   ai_role_settings: aiRoleSettingRow,
   ai_usage: aiUsageRow,
