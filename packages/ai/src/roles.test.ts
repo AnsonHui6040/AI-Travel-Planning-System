@@ -1,6 +1,6 @@
 import { DEFAULT_ROLE_SETTINGS, checkRoleSpec } from "@atps/core";
 import { describe, expect, it } from "vitest";
-import { defaultRoles, listModels } from "./index";
+import { defaultRoles, listModels, zoningSpec } from "./index";
 import { fakeFetch } from "./testing/fake-fetch";
 import { anthropicFixtures, geminiFixtures, openaiFixtures } from "./testing/fixtures";
 
@@ -91,5 +91,12 @@ describe("列出可用模型（決策 0006）", () => {
 describe("Research 的資料範圍（T24）", () => {
   it("不讀候選清單：各研究方向彼此不讀對方結論", () => {
     expect(defaultRoles().get("research")?.dataScope).toEqual(["baseline"]);
+  });
+});
+
+describe("地理分區的 RoleSpec（T27）", () => {
+  it("通過 RoleSpec 契約，輸出 schema 拒絕未知欄位", () => {
+    expect(checkRoleSpec(zoningSpec())).toEqual([]);
+    expect(zoningSpec().output.safeParse({ zones: [], extra: 1 }).success).toBe(false);
   });
 });

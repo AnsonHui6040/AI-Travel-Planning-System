@@ -234,3 +234,38 @@ export async function applyScoresAsAdmin(
   const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
   if (done.error) throw new Error("更新測試研究 job 失敗");
 }
+
+// T27：以研究 job 經 apply_zoning 寫入分區（依名稱指定項目）
+export async function applyZoningAsAdmin(
+  tripId: string,
+  initiatorId: string,
+  zones: { name: string; base_area: string | null; items: { name: string; transfers: number; minutes: number }[] }[],
+  backups: string[] = [],
+): Promise<void> {
+  const admin = adminClient();
+  const items = await admin.from("itinerary_items").select("id, name_zh").eq("trip_id", tripId);
+  if (items.error) throw new Error("讀取測試候選失敗");
+  const idOf = (name: string) => {
+    const row = (items.data ?? []).find((r) => r.name_zh === name);
+    if (!row) throw new Error("找不到測試候選");
+    return String(row.id);
+  };
+  const payload = zones.map((z) => ({
+    name: z.name,
+    base_area: z.base_area,
+    rationale: "測試分區",
+    sources: [],
+    items: z.items.map((i) => ({ item_id: idOf(i.name), transfers_from_base: i.transfers, minutes_from_base: i.minutes })),
+  }));
+  const job = await admin
+    .from("background_jobs")
+    .insert({ kind: "research", initiator_id: initiatorId, trip_id: tripId, status: "running" })
+    .select("id")
+    .single();
+  if (job.error) throw new Error("建立測試研究 job 失敗");
+  const roles = backups.map((name) => ({ item_id: idOf(name), candidate_role: "backup" }));
+  const applied = await admin.rpc("apply_zoning", { p_job: job.data.id, p_zones: payload, p_roles: roles });
+  if (applied.error) throw new Error("寫入測試分區失敗");
+  const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
+  if (done.error) throw new Error("更新測試研究 job 失敗");
+}

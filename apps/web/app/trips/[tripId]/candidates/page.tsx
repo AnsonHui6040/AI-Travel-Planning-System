@@ -86,6 +86,17 @@ function Candidate({ c }: { c: CandidateView }) {
           <dt>候選角色</dt>
           <dd>{c.role === "primary" ? "Primary" : "Backup"}</dd>
         </div>
+        {c.zone ? (
+          <div className="wide">
+            <dt>分區</dt>
+            <dd>
+              {c.zone.name}
+              {c.zone.transfers !== null && c.zone.minutes !== null
+                ? `（估算：轉乘 ${c.zone.transfers} 次，約 ${c.zone.minutes} 分鐘）`
+                : ""}
+            </dd>
+          </div>
+        ) : null}
       </dl>
       <h4 className="label">篩選評分（0–5，5 為最適合）</h4>
       <dl className="scores" aria-label={`${c.nameZh}的篩選評分`}>

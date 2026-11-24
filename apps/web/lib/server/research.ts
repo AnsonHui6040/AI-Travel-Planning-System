@@ -83,6 +83,8 @@ export interface CandidateView {
   // T26：八個篩選維度與候選角色
   scores: Record<ScreeningDimension, number>;
   role: "primary" | "backup";
+  // T27：所屬分區與由出發地前往的轉乘次數、分鐘數
+  zone: { name: string; transfers: number | null; minutes: number | null } | null;
 }
 
 export type CandidateListView =
@@ -96,6 +98,13 @@ export type CandidateListView =
       latestJob: { status: string; createdAt: string } | null;
       candidates: CandidateView[];
     };
+
+function zoneOf(r: Record<string, unknown>): CandidateView["zone"] {
+  const zone = r.zones as { name?: unknown } | null | undefined;
+  if (!zone || typeof zone.name !== "string") return null;
+  const num = (v: unknown) => (typeof v === "number" ? v : null);
+  return { name: zone.name, transfers: num(r.zone_transfers), minutes: num(r.zone_minutes) };
+}
 
 const TRACK_IDS = new Set<string>(RESEARCH_TRACKS.map((t) => t.id));
 
@@ -113,7 +122,7 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
 
   const { data: rows, error: itemsError } = await session
     .from("itinerary_items")
-    .select("id, name_zh, name_local, area, type, suggested_stay_minutes, recommendation_reason, constraint_note, place_id, verification_status, research_track, sources, generated_by, verified_by, facts, candidate_role, score_personal_value, score_uniqueness, score_geographic_fit, score_time_cost, score_transport_cost, score_weather_dependency, score_time_slot_dependency, score_substitutability")
+    .select("id, name_zh, name_local, area, type, suggested_stay_minutes, recommendation_reason, constraint_note, place_id, verification_status, research_track, sources, generated_by, verified_by, facts, candidate_role, score_personal_value, score_uniqueness, score_geographic_fit, score_time_cost, score_transport_cost, score_weather_dependency, score_time_slot_dependency, score_substitutability, zone_transfers, zone_minutes, zones(name)")
     .eq("trip_id", tripId)
     // 候選、待核實與已核實（尚未排入行程）
     .in("lifecycle_status", ["candidate", "pending_verification", "verified"])
@@ -156,6 +165,7 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
       facts: facts.success ? facts.data : [],
       scores: Object.fromEntries(SCREENING_DIMENSIONS.map((d) => [d, Number(r[`score_${d}`])])) as Record<ScreeningDimension, number>,
       role: r.candidate_role === "backup" ? "backup" : "primary",
+      zone: zoneOf(r),
     };
   });
 

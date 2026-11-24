@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { applyScoresAsAdmin, confirmTripAsAdmin, createTrip, seedResearchCandidates, signInAsNewUser, verifyCandidateAsAdmin } from "./support/auth";
+import { applyScoresAsAdmin, applyZoningAsAdmin, confirmTripAsAdmin, createTrip, seedResearchCandidates, signInAsNewUser, verifyCandidateAsAdmin } from "./support/auth";
 
 // T24：Candidate List 與 AI／網頁內容的安全呈現（S-08、S-16）。需本機 Supabase 與 apps/web/.env.local。
 // CAPTURE_SCREENSHOTS=1 時把截圖存到 docs/verification/screenshots/
@@ -137,6 +137,33 @@ test("T26：每個候選顯示八個篩選維度的評分與 Primary 或 Backup"
   await expect(scores.nth(7)).toHaveText("替代性1");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await capture(page, "screening", "T26");
+});
+
+test("T27：候選顯示分區與由出發地前往的轉乘次數；主要區域有 Backup", async ({ page, context, baseURL }) => {
+  const owner = await signInAsNewUser(context, baseURL ?? "");
+  const tripId = await createTrip(owner.userId, "東京五日");
+  await confirmTripAsAdmin(tripId);
+  await seedResearchCandidates(tripId, owner.userId, "A", [
+    candidate({ name_zh: "乙地", name_local: null, area: "乙區", place_id: null }),
+    candidate({ name_zh: "新宿御苑", name_local: null, area: "新宿", place_id: null }),
+    candidate({ name_zh: "甲地", name_local: null, area: "甲區", place_id: null }),
+  ]);
+  await applyZoningAsAdmin(
+    tripId,
+    owner.userId,
+    [
+      { name: "新宿與直達沿線", base_area: "新宿", items: [{ name: "新宿御苑", transfers: 0, minutes: 10 }, { name: "乙地", transfers: 0, minutes: 25 }] },
+      { name: "甲區", base_area: null, items: [{ name: "甲地", transfers: 2, minutes: 35 }] },
+    ],
+    ["新宿御苑"],
+  );
+
+  await page.goto(`/trips/${tripId}/candidates`);
+  await expect(page.getByRole("article", { name: "乙地" }).locator("dl.facts")).toContainText("新宿與直達沿線（估算：轉乘 0 次，約 25 分鐘）");
+  await expect(page.getByRole("article", { name: "甲地" }).locator("dl.facts")).toContainText("甲區（估算：轉乘 2 次，約 35 分鐘）");
+  await expect(page.getByRole("article", { name: "新宿御苑" }).locator("dl.facts")).toContainText("Backup");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await capture(page, "zoning", "T27");
 });
 
 test("沒有 Research 的 API key 時不能開始研究；基線未確認與 Viewer 看不到按鈕", async ({ page, context, baseURL, browser }) => {

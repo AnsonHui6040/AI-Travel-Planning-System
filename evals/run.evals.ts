@@ -4,14 +4,17 @@ import { expect, it } from "vitest";
 import {
   parseBaselineScenario,
   parseCrossCheckScenario,
+  parseZoningScenario,
   parseRecording,
   parseScenario,
   renderBaselineReport,
   renderCrossCheckReport,
+  renderZoningReport,
   renderReport,
   replayInvoker,
   runBaselineScenario,
   runCrossCheckScenario,
+  runZoningScenario,
   runScenario,
 } from "./src/index";
 
@@ -39,9 +42,23 @@ const crossCheckFiles = readdirSync(join(import.meta.dirname, "crosscheck"))
   .filter((f) => f.endsWith(".json"))
   .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
 
+// T27：地理分區場景（錄製回應）
+const zoningFiles = readdirSync(join(import.meta.dirname, "zoning"))
+  .filter((f) => f.endsWith(".json"))
+  .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
+
 it("有要執行的場景", () => {
-  expect(files.length + baselineFiles.length + crossCheckFiles.length).toBeGreaterThan(0);
+  expect(files.length + baselineFiles.length + crossCheckFiles.length + zoningFiles.length).toBeGreaterThan(0);
 });
+
+for (const file of zoningFiles) {
+  it(`評估 ${file}`, () => {
+    const report = runZoningScenario(parseZoningScenario(read(join(import.meta.dirname, "zoning", file))));
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(join(outDir, `${date}-${report.scenario.id}.md`), renderZoningReport(report, { date }));
+    expect(report.passed).toBe(true);
+  });
+}
 
 for (const file of crossCheckFiles) {
   it(`評估 ${file}`, () => {

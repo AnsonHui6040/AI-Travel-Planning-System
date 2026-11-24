@@ -190,6 +190,10 @@ export const itineraryItemRow = z.strictObject({
   // T25：Research 與 Verification 的事實主張，與依證據順序判定的結果
   fact_claims: z.array(factClaimRecord).max(50),
   facts: z.array(resolvedFact).max(10),
+  // T27：所屬分區與由出發地前往的轉乘次數、分鐘數（AI 估算）
+  zone_id: nullable(uuid),
+  zone_transfers: nullable(int(0, 10)),
+  zone_minutes: nullable(int(1, 1440)),
   lifecycle_status: E.lifecycleStatus,
   at_risk: z.boolean(),
   standby: z.boolean(),
@@ -353,6 +357,19 @@ export const backgroundJobRow = z.strictObject({
   updated_at: offsetDateTime,
 });
 
+// T27：地理分區。由 AI 依自行搜尋的資料與交通估算分群（D29）；項目以 zone_id 指向分區
+export const zoneRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  research_job_id: nullable(uuid),
+  name: text(LIMITS.area),
+  // 含出發地（住宿）的分區記錄出發地區
+  base_area: nullable(text(LIMITS.area)),
+  rationale: text(LIMITS.longText),
+  sources: z.array(sourceRef).max(10),
+  created_at: offsetDateTime,
+});
+
 export const photoRow = z.strictObject({
   id: uuid,
   trip_id: uuid,
@@ -424,6 +441,7 @@ export const tableSchemas = {
   readonly_links: readonlyLinkRow,
   background_jobs: backgroundJobRow,
   photos: photoRow,
+  zones: zoneRow,
   feature_flags: featureFlagRow,
   ai_role_settings: aiRoleSettingRow,
   ai_usage: aiUsageRow,
