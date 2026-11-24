@@ -73,6 +73,7 @@
 - 成員（T32）：authenticated 不能直接新增 `trip_members`；只經邀請連結加入（`create_trip_invitation` 只限 Owner、只回傳一次 token、資料庫只存 SHA-256，`accept_trip_invitation` 由受邀者本人，擁有者 `atps_member_manager`）。角色變更與移除沿用 T03 的 RLS。成員被移除或退出時，trigger `cleanup_removed_member` 刪除其行程記憶與通知（SH-07）。新資料表要先 `revoke all ... from anon, authenticated` 再授權（Supabase 預設權限會授予整張表）。
 - 唯讀連結（T33，C-10、SH-08）：token 只經 `create_readonly_link`（只限 Owner）產生；讀取只經 `readonly_trip`（anon 可呼叫，擁有者 `atps_readonly_reader`，只有讀取權限）。`/r/[token]` 頁面不得載入 AI、外部資料來源、背景 job、service role 或 Server Action（`readonly-boundary.test.ts` 會檢查）。
 - 共同批准（T34）：批准與否決經 `/trips/[tripId]/proposals` 的 Server Action，以 core 的 `applyChange` 與 `SupabaseChangeWriter`（使用者 session）執行，批准者取自 session。Realtime 由瀏覽器以 anon key 與本人 session 訂閱 `notifications`（訂閱前先 `realtime.setAuth`，否則 RLS 不推送）；CSP 的 `connect-src` 只另外允許 `NEXT_PUBLIC_SUPABASE_URL`。`packages/db` 讀取 `itinerary_items` 時把 Postgres 的 `HH:MM:SS` 轉為 `HH:MM`。
+- 離線（T35，D11、SH-05）：當日包與佇列的計算在 `@atps/offline`（純函式）；瀏覽器端 IndexedDB 在 `apps/web/lib/client/offline-store.ts`。`public/sw.js` 只快取 `/offline-today`、`/_next/static`、`/api/photos`、`/icons`，`/trips/<id>/today` 離線時改回應 `/offline-today`；API 與 Server Action 不快取。離線修改只經 `/api/trips/[tripId]/offline-proposals` 建立待批准提案。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。
