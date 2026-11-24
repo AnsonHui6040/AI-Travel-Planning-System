@@ -24,6 +24,16 @@ describe("S-08 CSP", () => {
     expect(scriptSrc).toEqual(["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"]);
   });
 
+  it("connect-src 預設只允許本站；T34 Realtime 只另外允許 Supabase 的 https 與 wss", () => {
+    expect(directive(production, "connect-src")).toEqual(["'self'"]);
+    const withSupabase = buildContentSecurityPolicy({ nonce, isDev: false, supabaseUrl: "https://abc.supabase.co/" });
+    expect(directive(withSupabase, "connect-src")).toEqual(["'self'", "https://abc.supabase.co", "wss://abc.supabase.co"]);
+    const local = buildContentSecurityPolicy({ nonce, isDev: false, supabaseUrl: "http://127.0.0.1:54321" });
+    expect(directive(local, "connect-src")).toEqual(["'self'", "http://127.0.0.1:54321", "ws://127.0.0.1:54321"]);
+    // 不是 http(s) 網址時不加入
+    expect(directive(buildContentSecurityPolicy({ nonce, isDev: false, supabaseUrl: "javascript:alert(1)" }), "connect-src")).toEqual(["'self'"]);
+  });
+
   it("frame-ancestors 禁止任何網站以框架嵌入", () => {
     expect(directive(production, "frame-ancestors")).toEqual(["'none'"]);
   });

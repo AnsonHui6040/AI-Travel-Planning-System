@@ -1,0 +1,98 @@
+/* T34：提案與 Change Log */
+.settings.proposals {
+  max-width: 48rem;
+}
+
+.proposals .trip-line {
+  margin: 0 0 0.5rem;
+  color: #57606a;
+}
+
+.proposals .muted {
+  color: #57606a;
+}
+
+.proposals section {
+  border-top: 1px solid #d0d7de;
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+}
+
+.proposals h2 {
+  font-size: 1.05rem;
+  margin: 0 0 0.5rem;
+}
+
+.proposal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.proposal-list li {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #eaeef2;
+  overflow-wrap: anywhere;
+}
+
+.proposal-list .summary {
+  margin: 0;
+  font-weight: 600;
+}
+
+.proposal-status {
+  display: inline-block;
+  margin-right: 0.5rem;
+  padding: 0 0.4rem;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.proposal-status.pending {
+  border-color: #9a6700;
+  color: #9a6700;
+}
+
+.proposal-list .version {
+  display: inline-block;
+  margin-right: 0.5rem;
+  font-variant-numeric: tabular-nums;
+  color: #57606a;
+}
+
+.proposal-list .meta {
+  margin: 0.25rem 0 0;
+  color: #57606a;
+  font-size: 0.9rem;
+}
+
+.proposal-decision {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.proposal-decision form {
+  margin: 0;
+}
+
+.proposal-decision p {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.proposal-decision .error {
+  color: #cf222e;
+}
+
+.live-notice {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+  background: #f6f8fa;
+}

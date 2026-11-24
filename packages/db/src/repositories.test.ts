@@ -98,6 +98,13 @@ describe("ItineraryRepository", () => {
     expect(calls).toContainEqual(["eq", "trip_id", item.trip_id]);
   });
 
+  it("T34：Postgres 的 time 欄位（HH:MM:SS）轉為 HH:MM 再驗證", async () => {
+    const scheduled = { ...item, scheduled_date: "2026-12-10", scheduled_start: "13:00:00", scheduled_end: "14:30:00", movable_from: "12:30:00", movable_to: "13:15:00" };
+    const { client } = fakeClient({ data: [scheduled], error: null });
+    const [read] = await new SupabaseItineraryRepository(client).listItems(item.trip_id);
+    expect([read?.scheduled_start, read?.scheduled_end, read?.movable_from, read?.movable_to]).toEqual(["13:00", "14:30", "12:30", "13:15"]);
+  });
+
   it("資料庫回傳不符 schema 的資料時拋出錯誤", async () => {
     const { client } = fakeClient({ data: [{ ...item, priority: 9 }], error: null });
     await expect(new SupabaseItineraryRepository(client).listItems(item.trip_id)).rejects.toThrow();

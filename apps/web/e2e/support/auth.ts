@@ -366,3 +366,29 @@ export async function countMemberDataAsAdmin(tripId: string, userId: string): Pr
   if (memories.error || notices.error) throw new Error("讀取測試資料失敗");
   return (memories.count ?? 0) + (notices.count ?? 0);
 }
+
+// T34：成員提出的待批准提案（改排同一天的時段），base version 為目前版本
+export async function createProposalAsAdmin(tripId: string, proposerId: string, itemId: string, summary: string, start: string, end: string): Promise<string> {
+  const admin = adminClient();
+  const trip = await admin.from("trips").select("current_version").eq("id", tripId).single();
+  if (trip.error) throw new Error("讀取測試行程失敗");
+  const change = {
+    changeKind: "minor_non_incident",
+    versionKind: "minor",
+    summary,
+    operations: [{ op: "schedule_item", itemId, date: "2026-12-10", start, end }],
+  };
+  const result = await admin
+    .from("proposals")
+    .insert({
+      trip_id: tripId,
+      proposer_member_id: proposerId,
+      base_version: trip.data.current_version,
+      change,
+      impact_scope: { dates: ["2026-12-10"] },
+    })
+    .select("id")
+    .single();
+  if (result.error) throw new Error("建立測試提案失敗");
+  return String(result.data.id);
+}

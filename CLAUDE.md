@@ -72,6 +72,7 @@
 - 旅前再核實（T31，C-12）：只有 Owner 經 `set_reverify_schedule` 開關（預設關閉）。Vercel Cron 每天呼叫 `/api/cron/reverify`（`Authorization: Bearer $CRON_SECRET`，設定見 `apps/web/vercel.json`）；以 core 的 `dueReverification` 依目的地時區判斷 T-7、T-1，job 只經 `start_reverification` 建立（發起人固定為 Owner）。再核實不寫回核實狀態，問題項目只經 `submit_reverify_at_risk` 以 approved_fact_invalidated 提案標示 At Risk。
 - 成員（T32）：authenticated 不能直接新增 `trip_members`；只經邀請連結加入（`create_trip_invitation` 只限 Owner、只回傳一次 token、資料庫只存 SHA-256，`accept_trip_invitation` 由受邀者本人，擁有者 `atps_member_manager`）。角色變更與移除沿用 T03 的 RLS。成員被移除或退出時，trigger `cleanup_removed_member` 刪除其行程記憶與通知（SH-07）。新資料表要先 `revoke all ... from anon, authenticated` 再授權（Supabase 預設權限會授予整張表）。
 - 唯讀連結（T33，C-10、SH-08）：token 只經 `create_readonly_link`（只限 Owner）產生；讀取只經 `readonly_trip`（anon 可呼叫，擁有者 `atps_readonly_reader`，只有讀取權限）。`/r/[token]` 頁面不得載入 AI、外部資料來源、背景 job、service role 或 Server Action（`readonly-boundary.test.ts` 會檢查）。
+- 共同批准（T34）：批准與否決經 `/trips/[tripId]/proposals` 的 Server Action，以 core 的 `applyChange` 與 `SupabaseChangeWriter`（使用者 session）執行，批准者取自 session。Realtime 由瀏覽器以 anon key 與本人 session 訂閱 `notifications`（訂閱前先 `realtime.setAuth`，否則 RLS 不推送）；CSP 的 `connect-src` 只另外允許 `NEXT_PUBLIC_SUPABASE_URL`。`packages/db` 讀取 `itinerary_items` 時把 Postgres 的 `HH:MM:SS` 轉為 `HH:MM`。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。
