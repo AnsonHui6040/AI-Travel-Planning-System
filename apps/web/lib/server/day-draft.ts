@@ -54,6 +54,9 @@ export type DayDraftView =
       tripStatus: string;
       // Owner、Companion
       canEdit: boolean;
+      // T31：只有 Owner 可開關旅前自動再核實
+      isOwner: boolean;
+      reverifyEnabled: boolean;
       canApprove: boolean;
       baseVersion: number;
       days: DayView[];
@@ -99,7 +102,7 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
   const { data: auth } = await session.auth.getUser();
   if (!auth.user) return { state: "signed_out" };
   if (!uuid.safeParse(tripId).success) return { state: "not_found" };
-  const { data: trip } = await session.from("trips").select("name, status, current_version").eq("id", tripId).maybeSingle();
+  const { data: trip } = await session.from("trips").select("name, status, current_version, reverify_enabled").eq("id", tripId).maybeSingle();
   if (!trip) return { state: "not_found" };
   const tripName = String(trip.name);
 
@@ -230,6 +233,8 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
     tripName,
     tripStatus: String(trip.status),
     canEdit: role === "owner" || role === "companion",
+    isOwner: role === "owner",
+    reverifyEnabled: trip.reverify_enabled === true,
     canApprove: (role === "owner" || role === "companion") && trip.status === "planning",
     baseVersion: Number(trip.current_version),
     days,

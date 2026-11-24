@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { FEASIBILITY_LABELS, isDayBlocked, type DraftEntry } from "@atps/core";
 import { loadDayDraft, type CardItem, type DayStatus, type TravelInfo } from "../../../../lib/server/day-draft";
+import { ReverifyToggle } from "../../../inbox-forms";
 import { ApproveDayForm } from "./approve-day-form";
 import "../../../settings/settings.css";
 import "./days.css";
@@ -135,6 +136,15 @@ export default async function DaysPage({ params }: { params: Promise<{ tripId: s
         依固定活動、時段敏感活動、高優先景點、餐飲、彈性活動的順序排入，只使用 Verified 與 Partially Verified 的候選，並核查營業時間、休館日、交通時間與固定活動前後的緩衝。未通過的項目留在
         Candidate List。草案在批准前不會改動行程；所有日期都批准後行程鎖定。
       </p>
+      {view.isOwner && (view.tripStatus === "planning" || view.tripStatus === "locked") ? (
+        <section aria-label="旅前自動再核實" className="reverify">
+          <h2>旅前自動再核實：{view.reverifyEnabled ? "已開啟" : "未開啟"}</h2>
+          <p className="muted">
+            開啟後，出發前 7 天與前 1 天會以你的 API key 重新核實已排入行程的項目；資料可能已變動的項目標示 At Risk，並通知所有成員。可隨時關閉。
+          </p>
+          <ReverifyToggle tripId={tripId} enabled={view.reverifyEnabled} />
+        </section>
+      ) : null}
       {view.days.map((day) => {
         const placed = day.entries.flatMap((e) => (e.kind === "item" ? [e.item_id] : []));
         const nameOf = (id: string | null) => (id ? (view.items[id]?.nameZh ?? "") : "");

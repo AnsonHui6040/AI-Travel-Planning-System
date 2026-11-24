@@ -69,6 +69,7 @@
 - 交通動線（T28，D27、決策 0008）：每個估算經 core 的 `withBuffer` 加固定緩衝（每段 10 分鐘＋每次轉乘 5 分鐘），`comparePlans` 產生四種方案；只經 `apply_mobility_segments` 寫入；Google Maps 連結用 `directionsUrl`（含 origin）。
 - 每日草案（T29）：core 的 `draftDays` 只計算、不寫入；只排 Verified 與 Partially Verified，順序為固定活動、時段敏感、高優先、餐飲、彈性，Backup 只列清單。
 - 可行性與鎖定（T30）：草案一律經 core 的 `planFeasibleDays`（排入時遵守營業時段、交通、固定活動前後 15 分鐘緩衝，再以 `checkDay` 核查十一項），放不下的項目留在 Candidate List。營業時段只經 `set_item_availability`（service_role）寫入。批准只經 `approve_day`（擁有者 `atps_change_writer`）：Server Action 重新計算草案、該日有會擋下的問題時不送出；所有日期批准後行程與項目進入已鎖定。
+- 旅前再核實（T31，C-12）：只有 Owner 經 `set_reverify_schedule` 開關（預設關閉）。Vercel Cron 每天呼叫 `/api/cron/reverify`（`Authorization: Bearer $CRON_SECRET`，設定見 `apps/web/vercel.json`）；以 core 的 `dueReverification` 依目的地時區判斷 T-7、T-1，job 只經 `start_reverification` 建立（發起人固定為 Owner）。再核實不寫回核實狀態，問題項目只經 `submit_reverify_at_risk` 以 approved_fact_invalidated 提案標示 At Risk。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。

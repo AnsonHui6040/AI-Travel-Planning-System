@@ -15,6 +15,7 @@ export const fullTrip: Row<"trips"> = {
   current_version: 3,
   owner_id: MEMBER_A,
   created_at: "2026-11-01T10:00:00+08:00",
+  reverify_enabled: false,
 };
 
 export const fullItem: Row<"itinerary_items"> = {

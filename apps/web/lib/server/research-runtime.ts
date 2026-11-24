@@ -9,6 +9,7 @@ import type { ScreeningDeps } from "./screening-core";
 import type { ZoningDeps } from "./zoning-core";
 import { SEGMENTS_PER_CHUNK, type TransportDeps } from "./transport-core";
 import { VERIFICATION_CHUNK_SIZE, type CandidateForCheck, type DedupeDeps, type VerificationDeps } from "./verification-core";
+import type { ReverifyChunkDeps } from "./reverify-core";
 import { createSupabaseServiceClient } from "./supabase";
 
 // T24：研究 job 背景 step 的 Supabase 連接（workflows/research-job.ts 在 step 內載入）。
@@ -26,14 +27,15 @@ export async function setResearchJobStatus(jobId: string, status: "running" | "c
 type Service = ReturnType<typeof createSupabaseServiceClient>;
 type Keys = SupabaseKeyDecryptor;
 
-// 執行中的研究 job、發起人仍為 Owner 或 Companion、行程已確認基線時回傳；否則 null
-async function loadJob(service: Service, keys: Keys, id: string, role: AiRole) {
+// 執行中的研究 job、發起人仍為 Owner 或 Companion、行程已確認基線時回傳；否則 null。
+// T31：再核實 job 的發起人必須是 Owner（排程使用 Owner 的 key，C-12）
+async function loadJob(service: Service, keys: Keys, id: string, role: AiRole, kind: "research" | "reverify" = "research") {
   const { data: job } = await service.from("background_jobs").select("kind, status, initiator_id, trip_id").eq("id", id).maybeSingle();
-  if (!job || job.kind !== "research" || job.status !== "running" || !job.trip_id) return null;
+  if (!job || job.kind !== kind || job.status !== "running" || !job.trip_id) return null;
   const tripId = String(job.trip_id);
   const initiatorId = String(job.initiator_id);
   const { data: member } = await service.from("trip_members").select("role").eq("trip_id", tripId).eq("user_id", initiatorId).maybeSingle();
-  if (member?.role !== "owner" && member?.role !== "companion") return null;
+  if (member?.role !== "owner" && (kind === "reverify" || member?.role !== "companion")) return null;
   const { data: trip } = await service.from("trips").select("name, destination, status").eq("id", tripId).maybeSingle();
   if (!trip || !["planning", "locked", "in_progress"].includes(String(trip.status))) return null;
   const settings = await new SupabaseRoleSettingsRepository(service).list(initiatorId);
@@ -386,6 +388,87 @@ export function transportDeps(jobId: string): TransportDeps {
       const { data, error } = await service.rpc("apply_mobility_segments", { p_job: id, p_segments: segments });
       if (error) throw new Error("寫入交通估算失敗");
       return Number(data ?? 0);
+    },
+  };
+}
+
+// ---- T31：旅前自動再核實 -----------------------------------------------------------
+
+const SCHEDULED_STATES = ["approved", "locked"];
+
+async function reverifyJobTripId(service: Service, jobId: string): Promise<string | null> {
+  const { data } = await service.from("background_jobs").select("trip_id, kind").eq("id", jobId).maybeSingle();
+  return data?.kind === "reverify" && data.trip_id ? String(data.trip_id) : null;
+}
+
+export async function setReverifyJobStatus(jobId: string, status: "completed" | "failed"): Promise<void> {
+  const service = createSupabaseServiceClient();
+  const { error } = await service.from("background_jobs").update({ status, updated_at: new Date().toISOString() }).eq("id", jobId).eq("kind", "reverify");
+  if (error) throw new Error("更新再核實 job 狀態失敗");
+}
+
+// 已排入行程（已批准、已鎖定）的項目，分批
+export async function reverifyTargets(jobId: string): Promise<string[][]> {
+  const service = createSupabaseServiceClient();
+  const tripId = await reverifyJobTripId(service, jobId);
+  if (!tripId) return [];
+  const { data, error } = await service
+    .from("itinerary_items")
+    .select("id")
+    .eq("trip_id", tripId)
+    .in("lifecycle_status", SCHEDULED_STATES)
+    .order("scheduled_date", { ascending: true })
+    .limit(MAX_VERIFICATION_ITEMS);
+  if (error) throw new Error("讀取行程項目失敗");
+  const ids = (data ?? []).map((r) => String(r.id));
+  const chunks: string[][] = [];
+  for (let i = 0; i < ids.length; i += VERIFICATION_CHUNK_SIZE) chunks.push(ids.slice(i, i + VERIFICATION_CHUNK_SIZE));
+  return chunks;
+}
+
+export function reverifyChunkDeps(jobId: string): ReverifyChunkDeps {
+  const service = createSupabaseServiceClient();
+  const keys = new SupabaseKeyDecryptor(service);
+  const providers = defaultProviders();
+  return {
+    adapterFor: (provider) => adapterFor(providers, provider),
+    credentialFor: async (provider) => {
+      const secret = await keys.forJob(jobId, KEY_PROVIDER[provider]);
+      return secret ? { kind: "api_key", secret } : null;
+    },
+    recordUsage: (entry) => new SupabaseUsageRecorder(service).record(entry),
+    async loadContext(id) {
+      const base = await loadJob(service, keys, id, "verification", "reverify");
+      return base ? { tripId: base.tripId, initiatorId: base.initiatorId, setting: base.setting, forbiddenValues: base.forbiddenValues } : null;
+    },
+    async loadCandidates(id, itemIds) {
+      const tripId = await reverifyJobTripId(service, id);
+      if (!tripId || itemIds.length === 0) return [];
+      const { data, error } = await service.from("itinerary_items").select(CANDIDATE_COLUMNS).eq("trip_id", tripId).in("id", [...itemIds]).in("lifecycle_status", SCHEDULED_STATES);
+      if (error) throw new Error("讀取行程項目失敗");
+      return (data ?? []).map((r) => toCandidate(r as Record<string, unknown>));
+    },
+    async loadScheduled(id, itemIds) {
+      const tripId = await reverifyJobTripId(service, id);
+      if (!tripId || itemIds.length === 0) return [];
+      const { data, error } = await service
+        .from("itinerary_items")
+        .select("id, scheduled_date, scheduled_start, scheduled_end, at_risk")
+        .eq("trip_id", tripId)
+        .in("id", [...itemIds])
+        .in("lifecycle_status", SCHEDULED_STATES);
+      if (error) throw new Error("讀取行程項目失敗");
+      return (data ?? []).map((r) => ({
+        id: String(r.id),
+        scheduled_date: (r.scheduled_date as string | null) ?? null,
+        scheduled_start: (r.scheduled_start as string | null) ?? null,
+        scheduled_end: (r.scheduled_end as string | null) ?? null,
+        at_risk: r.at_risk === true,
+      }));
+    },
+    async submitAtRisk(id, change, by) {
+      const { error } = await service.rpc("submit_reverify_at_risk", { p_job: id, p_change: change, p_by: by });
+      if (error) throw new Error("標示 At Risk 失敗");
     },
   };
 }

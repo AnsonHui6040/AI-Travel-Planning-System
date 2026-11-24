@@ -318,3 +318,32 @@ export async function setAvailabilityAsAdmin(
   const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
   if (done.error) throw new Error("更新測試研究 job 失敗");
 }
+
+// T31：把項目設為已排入並鎖定的行程項目
+export async function lockItemAsAdmin(tripId: string, itemId: string, date: string): Promise<void> {
+  const admin = adminClient();
+  const item = await admin
+    .from("itinerary_items")
+    .update({ verification_status: "verified", lifecycle_status: "locked", scheduled_date: date, scheduled_start: "13:00", scheduled_end: "14:00" })
+    .eq("id", itemId);
+  if (item.error) throw new Error("設定測試項目失敗");
+  const trip = await admin.from("trips").update({ status: "locked" }).eq("id", tripId);
+  if (trip.error) throw new Error("設定行程狀態失敗");
+}
+
+// T31：模擬排程端點建立 T-7 job，並以 job 送出 At Risk 標示（AI 回應不在 E2E 範圍）。回傳是否建立 job
+export async function simulateReverifyAsAdmin(tripId: string, itemId: string): Promise<boolean> {
+  const admin = adminClient();
+  const job = await admin.rpc("start_reverification", { p_trip: tripId, p_kind: "T-7" });
+  if (job.error) throw new Error("建立測試再核實 job 失敗");
+  if (typeof job.data !== "string") return false;
+  const change = {
+    changeKind: "approved_fact_invalidated",
+    versionKind: "minor",
+    summary: "旅前再核實：1 個項目的資料可能已有變動，標示為 At Risk",
+    operations: [{ op: "set_at_risk", itemId, atRisk: true }],
+  };
+  const submitted = await admin.rpc("submit_reverify_at_risk", { p_job: job.data, p_change: change, p_by: { provider: "google", model: "gemini-model" } });
+  if (submitted.error) throw new Error("送出測試 At Risk 失敗");
+  return true;
+}
