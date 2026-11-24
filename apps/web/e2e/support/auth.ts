@@ -290,3 +290,9 @@ export async function applySegmentAsAdmin(tripId: string, initiatorId: string, f
   const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
   if (done.error) throw new Error("更新測試研究 job 失敗");
 }
+
+// T29：把已存入的基線標為已確認
+export async function markBaselineConfirmedAsAdmin(tripId: string): Promise<void> {
+  const result = await adminClient().from("trip_baselines").update({ confirmed_at: new Date().toISOString() }).eq("trip_id", tripId);
+  if (result.error) throw new Error("確認測試基線失敗");
+}
