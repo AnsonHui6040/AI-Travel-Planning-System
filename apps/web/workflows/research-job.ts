@@ -4,6 +4,7 @@ import { RESEARCH_TRACK_IDS, type ResearchTrackId } from "@atps/core";
 // 每個 step 只以 job 編號重新讀取行程與基線，只解密 job 發起人的 key（C-12）。
 // step 重試時候選不會重複寫入（add_research_candidates 以 job 與方向判斷）。
 // T25：研究完成後合併重複候選，再由 Verification 逐批交叉核查（每批一個 step）。
+// T26：最後以八個維度為所有候選評分，標記 Primary 與 Backup。
 // 伺服器模組在 step 內載入：workflow 本體不直接使用資料庫或網路。
 
 export interface ResearchJobInput {
@@ -62,10 +63,20 @@ async function verifyChunk(jobId: string, itemIds: string[]): Promise<{ status: 
   return { status: result.status, count: result.status === "stored" ? result.count : 0 };
 }
 
+async function screen(jobId: string): Promise<number> {
+  "use step";
+  const [{ screenJobCandidates }, { screeningDeps }] = await Promise.all([
+    import("../lib/server/screening-core"),
+    import("../lib/server/research-runtime"),
+  ]);
+  return screenJobCandidates(screeningDeps(), jobId);
+}
+
 export interface ResearchJobResult {
   tracks: TrackSummary[];
   merged: number;
   verified: number;
+  screened: number;
 }
 
 export async function researchJob(input: ResearchJobInput): Promise<ResearchJobResult> {
@@ -77,6 +88,7 @@ export async function researchJob(input: ResearchJobInput): Promise<ResearchJobR
   for (const chunk of await verificationChunks(input.jobId)) {
     verified += (await verifyChunk(input.jobId, chunk)).count;
   }
+  const screened = await screen(input.jobId);
   await setStatus(input.jobId, tracks.some((r) => r.status === "stored") ? "completed" : "failed");
-  return { tracks, merged, verified };
+  return { tracks, merged, verified, screened };
 }

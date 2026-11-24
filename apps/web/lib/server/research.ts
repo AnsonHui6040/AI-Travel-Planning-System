@@ -1,5 +1,5 @@
 import "server-only";
-import { RESEARCH_TRACKS, type AiProvider, type ApiKeyProvider, type ResearchCandidate, type ResearchTrackId, type ResolvedFact } from "@atps/core";
+import { RESEARCH_TRACKS, SCREENING_DIMENSIONS, type AiProvider, type ApiKeyProvider, type ResearchCandidate, type ResearchTrackId, type ResolvedFact, type ScreeningDimension } from "@atps/core";
 import { SupabaseRoleSettingsRepository } from "@atps/db";
 import { modelRef, resolvedFact, sourceRef, uuid } from "@atps/schemas";
 import { createLogger } from "@atps/security";
@@ -80,6 +80,9 @@ export interface CandidateView {
   verifiedBy: { provider: string; model: string } | null;
   // T25：依證據順序判定的事實
   facts: ResolvedFact[];
+  // T26：八個篩選維度與候選角色
+  scores: Record<ScreeningDimension, number>;
+  role: "primary" | "backup";
 }
 
 export type CandidateListView =
@@ -110,7 +113,7 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
 
   const { data: rows, error: itemsError } = await session
     .from("itinerary_items")
-    .select("id, name_zh, name_local, area, type, suggested_stay_minutes, recommendation_reason, constraint_note, place_id, verification_status, research_track, sources, generated_by, verified_by, facts")
+    .select("id, name_zh, name_local, area, type, suggested_stay_minutes, recommendation_reason, constraint_note, place_id, verification_status, research_track, sources, generated_by, verified_by, facts, candidate_role, score_personal_value, score_uniqueness, score_geographic_fit, score_time_cost, score_transport_cost, score_weather_dependency, score_time_slot_dependency, score_substitutability")
     .eq("trip_id", tripId)
     // 候選、待核實與已核實（尚未排入行程）
     .in("lifecycle_status", ["candidate", "pending_verification", "verified"])
@@ -151,6 +154,8 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
       generatedBy: generatedBy.success ? generatedBy.data : null,
       verifiedBy: verifiedBy.success ? verifiedBy.data : null,
       facts: facts.success ? facts.data : [],
+      scores: Object.fromEntries(SCREENING_DIMENSIONS.map((d) => [d, Number(r[`score_${d}`])])) as Record<ScreeningDimension, number>,
+      role: r.candidate_role === "backup" ? "backup" : "primary",
     };
   });
 

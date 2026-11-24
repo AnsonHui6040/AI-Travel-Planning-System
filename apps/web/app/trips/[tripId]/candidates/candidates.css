@@ -121,3 +121,25 @@
 .candidate .facts-list .conflict {
   color: #cf222e;
 }
+
+.candidate .scores {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem 1rem;
+  margin: 0;
+}
+
+.candidate .scores div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+  border-bottom: 1px solid #eaeef2;
+  padding: 0.15rem 0;
+}
+
+@media (max-width: 600px) {
+  .candidate .scores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
