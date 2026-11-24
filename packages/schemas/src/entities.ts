@@ -162,6 +162,9 @@ export const itineraryItemRow = z.strictObject({
   sources: z.array(sourceRef).max(20),
   generated_by: nullable(modelRef),
   verified_by: nullable(modelRef),
+  // T24：由哪個研究方向、哪個背景 job 產生（成員自行加入時為 null）
+  research_track: nullable(E.researchTrack),
+  research_job_id: nullable(uuid),
   lifecycle_status: E.lifecycleStatus,
   at_risk: z.boolean(),
   standby: z.boolean(),

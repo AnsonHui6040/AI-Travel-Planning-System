@@ -42,4 +42,6 @@ export const memorySource = z.enum(["manual", "post_trip_proposal"]);
 export const keyProvider = z.enum(["anthropic", "google_ai", "openai", "google_maps", "odpt"]);
 export const jobStatus = z.enum(["queued", "running", "completed", "failed", "cancelled"]);
 export const photoSource = z.enum(["user_upload", "wikimedia_commons"]);
+// T24：Research A（主要景點與官方資訊）、B（餐飲、咖啡、購物）、C（攝影、日出日落、夜景、季節活動）、D（冷門替代）
+export const researchTrack = z.enum(["A", "B", "C", "D"]);
 export const completion = z.enum(["completed", "partial", "skipped"]);

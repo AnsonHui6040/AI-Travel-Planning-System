@@ -69,6 +69,8 @@ const item = {
   sources: [],
   generated_by: null,
   verified_by: null,
+  research_track: null,
+  research_job_id: null,
   lifecycle_status: "candidate",
   at_risk: false,
   standby: false,

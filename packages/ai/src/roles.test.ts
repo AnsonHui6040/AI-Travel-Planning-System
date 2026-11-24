@@ -87,3 +87,9 @@ describe("列出可用模型（決策 0006）", () => {
     expect((error as Error).message).not.toContain("test-only-key-value-0001");
   });
 });
+
+describe("Research 的資料範圍（T24）", () => {
+  it("不讀候選清單：各研究方向彼此不讀對方結論", () => {
+    expect(defaultRoles().get("research")?.dataScope).toEqual(["baseline"]);
+  });
+});

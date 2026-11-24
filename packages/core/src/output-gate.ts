@@ -1,16 +1,18 @@
 import { roleOutputs, type RoleOutputs } from "@atps/schemas";
 import { approvalRule } from "./approval";
+import { containsImageUrl } from "./research";
 import { AI_ROLES, type AiRole } from "./ai-settings";
 import { runRole, type RoleRunDeps, type RoleRunInput, type RoleRunResult } from "./role-runner";
 
 // T18、S-01、S-03：AI 輸出寫入前的最後檢查。
 // AI 只能產生候選、核實結果、交通估算或待批准提案；正式行程只由 applyChange 經成員批准寫入。
 // 1. 依角色 schema 重新驗證（未知欄位一律拒絕）
-// 2. 輸出含 API key 或未開放給 AI 的敏感欄位值時拒絕（含網址編碼後的值）
-// 3. Planner 的提案只能是需要批准的種類；自動套用的種類由伺服器產生，不接受 AI 提出
-// 4. 只能操作行程中已知的項目
+// 2. 輸出含圖片網址時拒絕（S-16）
+// 3. 輸出含 API key 或未開放給 AI 的敏感欄位值時拒絕（含網址編碼後的值）
+// 4. Planner 的提案只能是需要批准的種類；自動套用的種類由伺服器產生，不接受 AI 提出
+// 5. 只能操作行程中已知的項目
 
-export type GateRejection = "schema" | "leak" | "auto_kind" | "unknown_item";
+export type GateRejection = "schema" | "image_url" | "leak" | "auto_kind" | "unknown_item";
 
 export interface GateContext {
   knownItemIds: ReadonlySet<string>;
@@ -53,6 +55,8 @@ const reject = (reason: GateRejection, detail: string): GateResult => ({ ok: fal
 export function gateRoleOutput(role: AiRole, output: unknown, ctx: GateContext): GateResult {
   const parsed = roleOutputs[role].safeParse(output);
   if (!parsed.success) return reject("schema", "輸出不符角色格式");
+  // S-16：照片只依 place_id 或離線照片來源取得，AI 輸出含圖片網址時整份拒絕
+  if (containsImageUrl(parsed.data)) return reject("image_url", "輸出含有圖片網址");
   // 訊息不含輸出內容（S-02、S-10）
   if (leaks(parsed.data, ctx.forbiddenValues)) return reject("leak", "輸出含有不可提供的資料");
 

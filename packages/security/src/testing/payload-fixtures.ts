@@ -58,6 +58,8 @@ export const fullItem: Row<"itinerary_items"> = {
   sources: [],
   generated_by: { provider: "anthropic", model: "claude-opus-5-5" },
   verified_by: { provider: "google", model: "gemini-model" },
+  research_track: "A",
+  research_job_id: null,
   lifecycle_status: "approved",
   at_risk: false,
   standby: false,
