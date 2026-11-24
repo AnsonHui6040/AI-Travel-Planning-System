@@ -5,6 +5,7 @@ import { createGoogleMapsClient } from "@atps/data-sources";
 import { SupabaseKeyDecryptor, SupabaseRoleSettingsRepository, SupabaseUsageRecorder } from "@atps/db";
 import { factClaimRecord, modelRef, sourceRef, tripBaselineData } from "@atps/schemas";
 import type { ResearchTrackDeps } from "./research-core";
+import type { ScreeningDeps } from "./screening-core";
 import { VERIFICATION_CHUNK_SIZE, type CandidateForCheck, type DedupeDeps, type VerificationDeps } from "./verification-core";
 import { createSupabaseServiceClient } from "./supabase";
 
@@ -188,6 +189,54 @@ export function verificationDeps(jobId: string): VerificationDeps {
         p_verified_by: write.verifiedBy,
       });
       if (error) throw new Error("寫入核實結果失敗");
+    },
+  };
+}
+
+// ---- T26：候選篩選 -----------------------------------------------------------
+
+const SCREENED_STATES = ["candidate", "pending_verification", "verified"];
+
+export function screeningDeps(): ScreeningDeps {
+  const service = createSupabaseServiceClient();
+  return {
+    async loadBaseline(jobId) {
+      const tripId = await jobTripId(service, jobId);
+      if (!tripId) return null;
+      const { data } = await service.from("trip_baselines").select("data, confirmed_at").eq("trip_id", tripId).eq("version", 1).maybeSingle();
+      const parsed = data?.confirmed_at ? tripBaselineData.safeParse(data.data) : null;
+      return parsed?.success ? parsed.data : null;
+    },
+    async listCandidates(jobId) {
+      const tripId = await jobTripId(service, jobId);
+      if (!tripId) return [];
+      const { data, error } = await service
+        .from("itinerary_items")
+        .select("id, name_zh, name_local, area, type, suggested_stay_minutes, research_track, fact_claims")
+        .eq("trip_id", tripId)
+        .in("lifecycle_status", SCREENED_STATES)
+        .limit(500);
+      if (error) throw new Error("讀取候選失敗");
+      return (data ?? []).map((r) => {
+        const claims = factClaimRecord.array().safeParse(r.fact_claims);
+        const track = r.research_track as string | null;
+        return {
+          id: String(r.id),
+          name_zh: String(r.name_zh),
+          name_local: (r.name_local as string | null) ?? null,
+          area: (r.area as string | null) ?? null,
+          type: r.type as CandidateForCheck["type"],
+          suggested_stay_minutes: Number(r.suggested_stay_minutes),
+          research_track: track === "A" || track === "B" || track === "C" || track === "D" ? track : null,
+          fact_claims: claims.success ? claims.data : [],
+        };
+      });
+    },
+    async applyScores(jobId, results) {
+      const payload = results.map(({ total: _total, ...r }) => r);
+      const { data, error } = await service.rpc("apply_candidate_scores", { p_job: jobId, p_scores: payload });
+      if (error) throw new Error("寫入候選評分失敗");
+      return Number(data ?? 0);
     },
   };
 }

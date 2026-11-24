@@ -189,3 +189,48 @@ export async function verifyCandidateAsAdmin(
   const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
   if (done.error) throw new Error("更新測試研究 job 失敗");
 }
+
+// T26：以研究 job 經 apply_candidate_scores 寫入評分（依名稱指定）
+const DIMENSIONS = [
+  "personal_value",
+  "uniqueness",
+  "geographic_fit",
+  "time_cost",
+  "transport_cost",
+  "weather_dependency",
+  "time_slot_dependency",
+  "substitutability",
+] as const;
+
+export async function applyScoresAsAdmin(
+  tripId: string,
+  initiatorId: string,
+  byName: Record<string, { role: "primary" | "backup"; scores: number[] }>,
+): Promise<void> {
+  const admin = adminClient();
+  const items = await admin.from("itinerary_items").select("id, name_zh").eq("trip_id", tripId);
+  if (items.error) throw new Error("讀取測試候選失敗");
+  const payload = (items.data ?? []).flatMap((row) => {
+    const entry = byName[String(row.name_zh)];
+    if (!entry) return [];
+    return [
+      {
+        item_id: row.id,
+        candidate_role: entry.role,
+        priority: 3,
+        weather_dependency: "medium",
+        scores: Object.fromEntries(DIMENSIONS.map((d, i) => [d, entry.scores[i] ?? 0])),
+      },
+    ];
+  });
+  const job = await admin
+    .from("background_jobs")
+    .insert({ kind: "research", initiator_id: initiatorId, trip_id: tripId, status: "running" })
+    .select("id")
+    .single();
+  if (job.error) throw new Error("建立測試研究 job 失敗");
+  const applied = await admin.rpc("apply_candidate_scores", { p_job: job.data.id, p_scores: payload });
+  if (applied.error) throw new Error("寫入測試評分失敗");
+  const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
+  if (done.error) throw new Error("更新測試研究 job 失敗");
+}
