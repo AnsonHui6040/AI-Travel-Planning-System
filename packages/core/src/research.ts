@@ -115,6 +115,8 @@ export interface CandidateRow {
   suggested_stay_minutes: number;
   constraint_note: string | null;
   sources: ResearchCandidate["sources"];
+  // T25：Research 提出的事實主張，記錄提出的模型，供交叉核查
+  fact_claims: (ResearchCandidate["facts"][number] & { by: { provider: AiProvider; model: string } })[];
   data_date: string;
   generated_by: { provider: AiProvider; model: string };
   place_id: string | null;
@@ -156,6 +158,7 @@ export async function toCandidateRows(
       suggested_stay_minutes: c.suggested_stay_minutes,
       constraint_note: c.constraints,
       sources: c.sources,
+      fact_claims: c.facts.map((f) => ({ ...f, by: generatedBy })),
       data_date: c.data_date,
       generated_by: generatedBy,
       place_id: placeId,

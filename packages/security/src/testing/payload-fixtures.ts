@@ -60,6 +60,8 @@ export const fullItem: Row<"itinerary_items"> = {
   verified_by: { provider: "google", model: "gemini-model" },
   research_track: "A",
   research_job_id: null,
+  fact_claims: [],
+  facts: [],
   lifecycle_status: "approved",
   at_risk: false,
   standby: false,

@@ -1,7 +1,7 @@
 import "server-only";
-import { RESEARCH_TRACKS, type AiProvider, type ApiKeyProvider, type ResearchCandidate, type ResearchTrackId } from "@atps/core";
+import { RESEARCH_TRACKS, type AiProvider, type ApiKeyProvider, type ResearchCandidate, type ResearchTrackId, type ResolvedFact } from "@atps/core";
 import { SupabaseRoleSettingsRepository } from "@atps/db";
-import { modelRef, sourceRef, uuid } from "@atps/schemas";
+import { modelRef, resolvedFact, sourceRef, uuid } from "@atps/schemas";
 import { createLogger } from "@atps/security";
 import { start } from "workflow/api";
 import { researchJob } from "../../workflows/research-job";
@@ -77,6 +77,9 @@ export interface CandidateView {
   track: ResearchTrackId | null;
   sources: { url: string; fetched_at: string; grade: string }[];
   generatedBy: { provider: string; model: string } | null;
+  verifiedBy: { provider: string; model: string } | null;
+  // T25：依證據順序判定的事實
+  facts: ResolvedFact[];
 }
 
 export type CandidateListView =
@@ -107,9 +110,10 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
 
   const { data: rows, error: itemsError } = await session
     .from("itinerary_items")
-    .select("id, name_zh, name_local, area, type, suggested_stay_minutes, recommendation_reason, constraint_note, place_id, verification_status, research_track, sources, generated_by")
+    .select("id, name_zh, name_local, area, type, suggested_stay_minutes, recommendation_reason, constraint_note, place_id, verification_status, research_track, sources, generated_by, verified_by, facts")
     .eq("trip_id", tripId)
-    .eq("lifecycle_status", "candidate")
+    // 候選、待核實與已核實（尚未排入行程）
+    .in("lifecycle_status", ["candidate", "pending_verification", "verified"])
     .order("research_track", { ascending: true })
     .order("created_at", { ascending: true })
     .limit(500);
@@ -128,6 +132,8 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
   const candidates: CandidateView[] = (rows ?? []).map((r) => {
     const sources = sourceRef.array().safeParse(r.sources);
     const generatedBy = modelRef.nullable().safeParse(r.generated_by);
+    const verifiedBy = modelRef.nullable().safeParse(r.verified_by);
+    const facts = resolvedFact.array().safeParse(r.facts);
     const track = typeof r.research_track === "string" && TRACK_IDS.has(r.research_track) ? (r.research_track as ResearchTrackId) : null;
     return {
       id: String(r.id),
@@ -143,6 +149,8 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
       track,
       sources: sources.success ? sources.data : [],
       generatedBy: generatedBy.success ? generatedBy.data : null,
+      verifiedBy: verifiedBy.success ? verifiedBy.data : null,
+      facts: facts.success ? facts.data : [],
     };
   });
 

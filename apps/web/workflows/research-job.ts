@@ -3,6 +3,7 @@ import { RESEARCH_TRACK_IDS, type ResearchTrackId } from "@atps/core";
 // T24：多 AI 獨立研究的背景 job。Research A–D 各為一個 step 平行執行，彼此不交換結果；
 // 每個 step 只以 job 編號重新讀取行程與基線，只解密 job 發起人的 key（C-12）。
 // step 重試時候選不會重複寫入（add_research_candidates 以 job 與方向判斷）。
+// T25：研究完成後合併重複候選，再由 Verification 逐批交叉核查（每批一個 step）。
 // 伺服器模組在 step 內載入：workflow 本體不直接使用資料庫或網路。
 
 export interface ResearchJobInput {
@@ -35,10 +36,47 @@ async function researchTrack(jobId: string, track: ResearchTrackId): Promise<Tra
   return { track, status: "not_completed", count: 0, detail: result.run.status };
 }
 
-export async function researchJob(input: ResearchJobInput): Promise<TrackSummary[]> {
+async function dedupe(jobId: string): Promise<number> {
+  "use step";
+  const [{ dedupeCandidates }, { dedupeDeps }] = await Promise.all([
+    import("../lib/server/verification-core"),
+    import("../lib/server/research-runtime"),
+  ]);
+  return dedupeCandidates(dedupeDeps(), jobId);
+}
+
+async function verificationChunks(jobId: string): Promise<string[][]> {
+  "use step";
+  const { verificationTargets } = await import("../lib/server/research-runtime");
+  return verificationTargets(jobId);
+}
+
+async function verifyChunk(jobId: string, itemIds: string[]): Promise<{ status: string; count: number }> {
+  "use step";
+  const [{ roleSpec }, { runVerificationChunk }, { verificationDeps }] = await Promise.all([
+    import("@atps/ai"),
+    import("../lib/server/verification-core"),
+    import("../lib/server/research-runtime"),
+  ]);
+  const result = await runVerificationChunk(verificationDeps(jobId), { jobId, itemIds, role: roleSpec("verification") });
+  return { status: result.status, count: result.status === "stored" ? result.count : 0 };
+}
+
+export interface ResearchJobResult {
+  tracks: TrackSummary[];
+  merged: number;
+  verified: number;
+}
+
+export async function researchJob(input: ResearchJobInput): Promise<ResearchJobResult> {
   "use workflow";
   await setStatus(input.jobId, "running");
-  const results = await Promise.all(RESEARCH_TRACK_IDS.map((track) => researchTrack(input.jobId, track)));
-  await setStatus(input.jobId, results.some((r) => r.status === "stored") ? "completed" : "failed");
-  return results;
+  const tracks = await Promise.all(RESEARCH_TRACK_IDS.map((track) => researchTrack(input.jobId, track)));
+  const merged = await dedupe(input.jobId);
+  let verified = 0;
+  for (const chunk of await verificationChunks(input.jobId)) {
+    verified += (await verifyChunk(input.jobId, chunk)).count;
+  }
+  await setStatus(input.jobId, tracks.some((r) => r.status === "stored") ? "completed" : "failed");
+  return { tracks, merged, verified };
 }

@@ -159,3 +159,33 @@ export async function seedResearchCandidates(
   const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
   if (done.error) throw new Error("更新測試研究 job 失敗");
 }
+
+// T25：以研究 job 經 apply_verification 寫入核實結果
+export async function verifyCandidateAsAdmin(
+  tripId: string,
+  initiatorId: string,
+  itemName: string,
+  write: { status: string; facts: unknown[]; claims: unknown[]; sources: unknown[]; verifiedBy: { provider: string; model: string } },
+): Promise<void> {
+  const admin = adminClient();
+  const item = await admin.from("itinerary_items").select("id").eq("trip_id", tripId).eq("name_zh", itemName).single();
+  if (item.error) throw new Error("找不到測試候選");
+  const job = await admin
+    .from("background_jobs")
+    .insert({ kind: "research", initiator_id: initiatorId, trip_id: tripId, status: "running" })
+    .select("id")
+    .single();
+  if (job.error) throw new Error("建立測試研究 job 失敗");
+  const applied = await admin.rpc("apply_verification", {
+    p_job: job.data.id,
+    p_item: item.data.id,
+    p_status: write.status,
+    p_facts: write.facts,
+    p_claims: write.claims,
+    p_sources: write.sources,
+    p_verified_by: write.verifiedBy,
+  });
+  if (applied.error) throw new Error("寫入測試核實結果失敗");
+  const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
+  if (done.error) throw new Error("更新測試研究 job 失敗");
+}

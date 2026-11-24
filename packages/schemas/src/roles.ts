@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { changePayload } from "./change";
 import { LIMITS, isoDate, text, uuid } from "./common";
-import { mobilityEstimate, sourceRef } from "./entities";
+import { factClaim, mobilityEstimate, sourceRef } from "./entities";
 import * as E from "./enums";
 
 const nullable = <T extends z.ZodType>(schema: T) => schema.nullable();
@@ -23,6 +23,8 @@ export const researchCandidate = z.strictObject({
   constraints: nullable(text(LIMITS.longText)),
   sources,
   data_date: isoDate,
+  // T25：營業時間等事實，附來源；沒有時為空陣列
+  facts: z.array(factClaim).max(10).default([]),
 });
 
 export const verificationResult = z.strictObject({
@@ -30,6 +32,8 @@ export const verificationResult = z.strictObject({
   status: E.verificationStatus,
   findings: text(LIMITS.longText),
   sources,
+  // T25：核對後的事實，附來源；由伺服器依證據順序與 Research 的主張交叉判定
+  facts: z.array(factClaim).max(10).default([]),
 });
 
 export const transportSegment = z.strictObject({

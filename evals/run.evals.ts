@@ -3,12 +3,15 @@ import { join } from "node:path";
 import { expect, it } from "vitest";
 import {
   parseBaselineScenario,
+  parseCrossCheckScenario,
   parseRecording,
   parseScenario,
   renderBaselineReport,
+  renderCrossCheckReport,
   renderReport,
   replayInvoker,
   runBaselineScenario,
+  runCrossCheckScenario,
   runScenario,
 } from "./src/index";
 
@@ -31,9 +34,23 @@ const baselineFiles = readdirSync(join(import.meta.dirname, "baseline"))
   .filter((f) => f.endsWith(".json"))
   .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
 
+// T25：交叉核查場景（確定性規則，不呼叫 AI）
+const crossCheckFiles = readdirSync(join(import.meta.dirname, "crosscheck"))
+  .filter((f) => f.endsWith(".json"))
+  .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
+
 it("有要執行的場景", () => {
-  expect(files.length + baselineFiles.length).toBeGreaterThan(0);
+  expect(files.length + baselineFiles.length + crossCheckFiles.length).toBeGreaterThan(0);
 });
+
+for (const file of crossCheckFiles) {
+  it(`評估 ${file}`, () => {
+    const report = runCrossCheckScenario(parseCrossCheckScenario(read(join(import.meta.dirname, "crosscheck", file))));
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(join(outDir, `${date}-${report.scenario.id}.md`), renderCrossCheckReport(report, { date }));
+    expect(report.passed).toBe(true);
+  });
+}
 
 for (const file of baselineFiles) {
   it(`評估 ${file}`, () => {

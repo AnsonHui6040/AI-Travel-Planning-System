@@ -71,6 +71,8 @@ const item = {
   verified_by: null,
   research_track: null,
   research_job_id: null,
+  fact_claims: [],
+  facts: [],
   lifecycle_status: "candidate",
   at_risk: false,
   standby: false,

@@ -31,6 +31,14 @@ const GRADE_LABELS: Record<string, string> = {
   user_reviews: "使用者評論",
 };
 
+const FACT_LABELS: Record<CandidateView["facts"][number]["field"], string> = {
+  opening_hours: "營業時間",
+  closed_days: "休館日",
+  admission: "門票",
+  reservation: "預約",
+  transport_service: "交通服務",
+};
+
 const JOB_LABELS: Record<string, string> = {
   queued: "排隊中",
   running: "研究中",
@@ -75,6 +83,19 @@ function Candidate({ c }: { c: CandidateView }) {
           <dd>{c.placeId ? "已對應" : "未對應"}</dd>
         </div>
       </dl>
+      {c.facts.length > 0 ? (
+        <>
+          <h4 className="label">核實的事實</h4>
+          <ul className="facts-list">
+            {c.facts.map((f) => (
+              <li key={f.field} className={f.status === "conflict" ? "conflict" : undefined}>
+                {FACT_LABELS[f.field]}：
+                {f.status === "conflict" ? "來源不一致，無法判定" : `${f.value ?? ""}（${GRADE_LABELS[f.grade ?? ""] ?? "來源不明"}）`}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
       <h4 className="label">推薦原因</h4>
       <SafeMarkdown source={c.reason} className="md" />
       {c.constraintNote ? (
@@ -97,6 +118,7 @@ function Candidate({ c }: { c: CandidateView }) {
       {c.generatedBy ? (
         <p className="muted">
           由 {providerName(c.generatedBy.provider)}（{c.generatedBy.model}）產生
+          {c.verifiedBy ? `，${providerName(c.verifiedBy.provider)}（${c.verifiedBy.model}）核實` : ""}
         </p>
       ) : null}
     </article>
@@ -123,7 +145,7 @@ export default async function CandidatesPage({ params }: { params: Promise<{ tri
       <h1>Candidate List</h1>
       <p className="trip-line">{view.tripName}</p>
       <p className="muted">
-        Research A–D 各自依旅行基線研究，彼此不參考對方結果。候選只列在這裡，不會自動排進行程；核實前一律為 Unverified。
+        Research A–D 各自依旅行基線研究，彼此不參考對方結果。候選只列在這裡，不會自動排進行程；核實前一律為 Unverified，Unverified 與 Conflict 不會進入行程。
       </p>
 
       {view.canResearch ? <StartResearchForm tripId={tripId} /> : null}

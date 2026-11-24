@@ -41,6 +41,7 @@ const candidate: ResearchCandidate = {
   constraints: null,
   sources: [source],
   data_date: "2026-11-23",
+  facts: [{ field: "opening_hours", value: "06:00–17:00", source }],
 };
 
 describe("RESEARCH_TRACKS", () => {
@@ -124,6 +125,7 @@ describe("toCandidateRows（S-16）", () => {
       constraint_note: null,
       generated_by: generatedBy,
       place_resolution: "resolved",
+      fact_claims: [{ field: "opening_hours", value: "06:00–17:00", source, by: generatedBy }],
     });
   });
 
