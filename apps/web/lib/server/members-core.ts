@@ -24,6 +24,9 @@ export interface MembersDeps {
   // 回傳受影響的列數（RLS 擋下時為 0）
   changeRole: (tripId: string, userId: string, role: InviteRole) => Promise<number>;
   removeMember: (tripId: string, userId: string) => Promise<number>;
+  // T33：唯讀連結（只限 Owner，期限 1–30 天）
+  createReadonlyLink: (tripId: string, days: number) => Promise<string>;
+  revokeReadonlyLink: (linkId: string) => Promise<void>;
   logError: (message: string) => void;
 }
 
@@ -122,5 +125,31 @@ export function leaveTripAction(deps: MembersDeps, tripIdRaw: unknown): Promise<
     if (!tripId.success) return { ok: false, message: "參數不正確" };
     if ((await deps.removeMember(tripId.data, user.id)) === 0) return { ok: false, message: "Owner 須先轉移 Owner 或刪除行程才能退出" };
     return { ok: true, message: "已退出行程" };
+  });
+}
+
+const READONLY_DAYS = new Set([7, 30]);
+
+export function createReadonlyLinkAction(deps: MembersDeps, tripIdRaw: unknown, daysRaw: unknown): Promise<MembersActionResult> {
+  return run(deps, "只有 Owner 可以建立唯讀連結", async () => {
+    const tripId = uuid.safeParse(tripIdRaw);
+    if (!tripId.success) return { ok: false, message: "行程不正確" };
+    const days = typeof daysRaw === "string" ? Number(daysRaw) : NaN;
+    if (!READONLY_DAYS.has(days)) return { ok: false, message: "期限不正確" };
+    const token = await deps.createReadonlyLink(tripId.data, days);
+    return {
+      ok: true,
+      message: `已建立唯讀連結，${days} 天內有效；任何拿到連結的人不必登入即可檢視`,
+      link: `${deps.siteUrl.replace(/\/$/, "")}/r/${token}`,
+    };
+  });
+}
+
+export function revokeReadonlyLinkAction(deps: MembersDeps, linkRaw: unknown): Promise<MembersActionResult> {
+  return run(deps, "只有 Owner 可以撤銷唯讀連結", async () => {
+    const id = uuid.safeParse(linkRaw);
+    if (!id.success) return { ok: false, message: "連結不正確" };
+    await deps.revokeReadonlyLink(id.data);
+    return { ok: true, message: "已撤銷唯讀連結" };
   });
 }

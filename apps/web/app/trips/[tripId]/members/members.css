@@ -62,6 +62,13 @@
 
 .invite-buttons {
   margin: 0.5rem 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.invite-buttons .member-action {
+  width: 100%;
+  max-width: 36rem;
 }
 
 .member-action p {

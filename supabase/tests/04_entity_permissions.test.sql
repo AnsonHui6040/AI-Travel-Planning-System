@@ -110,10 +110,11 @@ reset role;
 -- Owner ----------------------------------------------------------------
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000b1","role":"authenticated"}', true);
-select lives_ok($$insert into public.readonly_links (trip_id, token_hash, expires_at, created_by)
-  values ('20000000-0000-0000-0000-000000000001', repeat('c', 64), now() + interval '1 day', '00000000-0000-0000-0000-0000000000b1')$$, 'O：建立唯讀連結');
-select is((select count(*)::int from public.readonly_links), 2, 'O：檢視唯讀連結');
-select is(public.__affected($q$update public.readonly_links set revoked_at = now()$q$), 2, 'O：撤銷唯讀連結');
+-- T33：token 須由 create_readonly_link 產生（C-10），不可自行寫入（supabase/tests/22_readonly_links.test.sql）
+select throws_ok($$insert into public.readonly_links (trip_id, token_hash, expires_at, created_by)
+  values ('20000000-0000-0000-0000-000000000001', repeat('c', 64), now() + interval '1 day', '00000000-0000-0000-0000-0000000000b1')$$, '42501', null, 'O：不可自行寫入唯讀連結 token');
+select is((select count(*)::int from public.readonly_links), 1, 'O：檢視唯讀連結');
+select is(public.__affected($q$update public.readonly_links set revoked_at = now()$q$), 1, 'O：撤銷唯讀連結');
 select throws_ok($$delete from public.itinerary_items$$, '42501', null, 'O：不可直接刪除正式行程項目（S-01）');
 reset role;
 

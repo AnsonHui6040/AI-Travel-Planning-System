@@ -5,9 +5,11 @@ import { redirect } from "next/navigation";
 import {
   changeRoleAction,
   createInviteAction,
+  createReadonlyLinkAction,
   leaveTripAction,
   removeMemberAction,
   revokeInviteAction,
+  revokeReadonlyLinkAction,
   type MembersActionResult,
 } from "../../../../lib/server/members-core";
 import { membersActionDeps } from "../../../../lib/server/members";
@@ -40,4 +42,12 @@ export async function leaveTrip(_previous: MembersActionResult | null, form: For
   const result = await leaveTripAction(await membersActionDeps(), form.get("tripId"));
   if (result.ok) redirect("/");
   return result;
+}
+
+export async function createReadonlyLink(_previous: MembersActionResult | null, form: FormData): Promise<MembersActionResult> {
+  return refresh(form, await createReadonlyLinkAction(await membersActionDeps(), form.get("tripId"), form.get("days")));
+}
+
+export async function revokeReadonlyLink(_previous: MembersActionResult | null, form: FormData): Promise<MembersActionResult> {
+  return refresh(form, await revokeReadonlyLinkAction(await membersActionDeps(), form.get("linkId")));
 }

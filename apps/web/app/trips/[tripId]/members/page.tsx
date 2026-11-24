@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { loadMembers } from "../../../../lib/server/members";
-import { InviteButtons, LeaveTripButton, MemberControls, RevokeInviteButton } from "./member-forms";
+import { InviteButtons, LeaveTripButton, MemberControls, ReadonlyLinkButtons, RevokeInviteButton, RevokeReadonlyLinkButton } from "./member-forms";
 import "../../../settings/settings.css";
 import "./members.css";
 
@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 const ROLE_LABELS = { owner: "Owner", companion: "Companion", viewer: "Viewer" } as const;
 const STATUS_LABELS = { active: "有效", accepted: "已接受", revoked: "已撤銷", expired: "已過期" } as const;
+const LINK_STATUS_LABELS = { active: "有效", revoked: "已撤銷", expired: "已過期" } as const;
 function formatDate(iso: string): string {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Taipei", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(iso));
   const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
@@ -61,6 +62,29 @@ export default async function MembersPage({ params }: { params: Promise<{ tripId
                     {i.status === "active" ? `，到 ${formatDate(i.expiresAt)}` : ""}
                   </span>
                   {i.status === "active" ? <RevokeInviteButton tripId={tripId} invitationId={i.id} /> : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
+      {isOwner ? (
+        <section aria-labelledby="readonly-heading">
+          <h2 id="readonly-heading">唯讀連結</h2>
+          <p className="muted">
+            拿到連結的人不必登入即可檢視已排入的行程，不能修改、不能使用 AI。只顯示當事人開啟「提供給 Viewer 與唯讀連結」的敏感欄位。可隨時撤銷。
+          </p>
+          <ReadonlyLinkButtons tripId={tripId} />
+          {view.readonlyLinks.length > 0 ? (
+            <ul className="invite-list">
+              {view.readonlyLinks.map((l) => (
+                <li key={l.id}>
+                  <span>唯讀連結</span>
+                  <span>
+                    {LINK_STATUS_LABELS[l.status]}
+                    {l.status === "active" ? `，到 ${formatDate(l.expiresAt)}` : ""}
+                  </span>
+                  {l.status === "active" ? <RevokeReadonlyLinkButton tripId={tripId} linkId={l.id} /> : null}
                 </li>
               ))}
             </ul>

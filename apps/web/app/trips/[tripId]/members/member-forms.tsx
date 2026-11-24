@@ -2,13 +2,25 @@
 
 import { useActionState } from "react";
 import type { MembersActionResult } from "../../../../lib/server/members-core";
-import { changeRole, createInvite, leaveTrip, removeMember, revokeInvite } from "./actions";
+import { changeRole, createInvite, createReadonlyLink, leaveTrip, removeMember, revokeInvite, revokeReadonlyLink } from "./actions";
 
 // T32：成員管理的表單。表單內只有隱藏欄位與按鈕（React 19 會在 Server Action 後重設表單）
 
 type Action = (previous: MembersActionResult | null, form: FormData) => Promise<MembersActionResult>;
 
-function ActionButton({ action, fields, label, confirmText }: { action: Action; fields: Record<string, string>; label: string; confirmText?: string }) {
+function ActionButton({
+  action,
+  fields,
+  label,
+  confirmText,
+  linkLabel = "邀請連結",
+}: {
+  action: Action;
+  fields: Record<string, string>;
+  label: string;
+  confirmText?: string;
+  linkLabel?: string;
+}) {
   const [state, run, pending] = useActionState(action, null);
   return (
     <form
@@ -31,7 +43,7 @@ function ActionButton({ action, fields, label, confirmText }: { action: Action; 
       ) : null}
       {state?.link ? (
         <p className="invite-link">
-          <input readOnly value={state.link} aria-label="邀請連結" onFocus={(e) => e.currentTarget.select()} />
+          <input readOnly value={state.link} aria-label={linkLabel} onFocus={(e) => e.currentTarget.select()} />
         </p>
       ) : null}
     </form>
@@ -68,4 +80,18 @@ export function MemberControls({ tripId, userId, name, role }: { tripId: string;
 
 export function LeaveTripButton({ tripId }: { tripId: string }) {
   return <ActionButton action={leaveTrip} fields={{ tripId }} label="退出這個行程" confirmText="退出後就看不到這個行程，確定退出？" />;
+}
+
+// T33：唯讀連結
+export function ReadonlyLinkButtons({ tripId }: { tripId: string }) {
+  return (
+    <div className="invite-buttons">
+      <ActionButton action={createReadonlyLink} fields={{ tripId, days: "7" }} label="建立唯讀連結（7 天）" linkLabel="唯讀連結" />
+      <ActionButton action={createReadonlyLink} fields={{ tripId, days: "30" }} label="建立唯讀連結（30 天）" linkLabel="唯讀連結" />
+    </div>
+  );
+}
+
+export function RevokeReadonlyLinkButton({ tripId, linkId }: { tripId: string; linkId: string }) {
+  return <ActionButton action={revokeReadonlyLink} fields={{ tripId, linkId }} label="撤銷" />;
 }

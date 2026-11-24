@@ -31,7 +31,7 @@
 | C-07 | T13 | `packages/ai/src/providers.contract.test.ts`：只連官方 HTTPS 端點、逾時分類、限流後以退避重試成功；T19：Google Maps 只連 `places.googleapis.com`、設逾時、拒絕 redirect，限流時回報錯誤不自動重試；T22：Open-Meteo、ODPT 只連固定官方端點、設逾時、拒絕 redirect、回應上限 2 MB（`packages/data-sources/src/live-data.contract.test.ts`） | 已驗收 |
 | C-08 | T14、T38 | T14：`packages/core/src/role-runner.test.ts`（故障時不自動切換，回傳下一順位）；詢問畫面於 T24 起的 job 畫面與 T38 | 部分 |
 | C-09 | T03 | `supabase/tests/01_rls_enabled.test.sql`、`02_trip_permissions.test.sql`（anon 無權限）；伺服器端只用 anon key | 部分 |
-| C-10 | T33 | 待建立 | 未驗收 |
+| C-10 | T33 | `supabase/tests/22_readonly_links.test.sql`：token 由 `create_readonly_link` 產生（256 位元），資料庫只存 SHA-256；期限 1–30 天；撤銷、過期後讀不到；Owner 不能自行寫入 token（`04_entity_permissions.test.sql`）；E2E 撤銷後無法存取 | 已驗收 |
 | C-11 | T03 | `apps/web/lib/server/guard.test.ts`；`supabase/tests/03_rate_limit.test.sql`；`apps/web/e2e/guard.spec.ts` | 已驗收 |
 | C-12 | T05、T12、T31 | T05：`apps/web/workflows/spike-long-job.workflow.test.ts` 確認 job 輸入與結果帶發起人編號；T12：`decrypt_job_api_key` 只解密發起人的 key（`supabase/tests/08_api_keys.test.sql`）；T24：研究 job 的 step 只經 `decrypt_job_api_key` 取得發起人的 key，`add_research_candidates` 檢查發起人仍為 Owner 或 Companion；T31：`start_reverification` 建立的排程 job 發起人固定為 Owner、未開啟排程時不建立 job（`supabase/tests/20_reverify.test.sql`），再核實 step 檢查發起人仍為 Owner | 已驗收 |
 
@@ -77,14 +77,14 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| SH-01 | T03 | `supabase/tests/02_trip_permissions.test.sql`（Owner、Companion、Viewer；唯讀連結於 T33） | 部分 |
+| SH-01 | T03、T33 | `supabase/tests/02_trip_permissions.test.sql`（Owner、Companion、Viewer）；T33：唯讀連結（`22_readonly_links.test.sql`、E2E `apps/web/e2e/readonly.spec.ts`） | 已驗收 |
 | SH-02 | T03、T17、T32 | 權限表每一格對應的測試見 `docs/verification/T32.md`「權限表」；已實作的動作全部有 Owner、Companion、Viewer 三欄的測試。唯讀連結欄於 T33，Morning Check、Incident Mode、記錄活動完成於對應 Task | 部分 |
 | SH-03 | T12、T32 | `08_api_keys.test.sql`：job 只解密發起人本人的 key（C-05）；T32：加入行程不取得任何 key 的使用權，AI 動作仍由發起人的 key 執行；T31 的排程 job 只在 Owner 開啟時使用 Owner 的 key（`20_reverify.test.sql`） | 已驗收 |
 | SH-04 | T07、T09、T10A、T34 | T07：`packages/core/src/states.test.ts`；T09：`supabase/tests/05_apply_change.test.sql`（同一 base version 的第二個提案批准時失效）；T10A：`supabase/tests/06_restore_version.test.sql`（base version 不符時復原失敗、復原前的提案批准時失效）；T34 兩個瀏覽器 E2E、真機 R6 待建立 | 部分 |
 | SH-05 | T34、T35 | 待建立；真機 R3 | 未驗收 |
 | SH-06 | T09、T34 | T09：`supabase/tests/05_apply_change.test.sql`（批准、否決、失效通知成員，未讀可依成員查詢，通知表經 Realtime 推送）、`packages/db/src/change-writer.test.ts`；T31：首頁顯示本人的未讀通知與 At Risk 項目、可標為已讀（`apps/web/e2e/reverify.spec.ts`），再核實的 At Risk 提案記錄提出者並通知所有成員（`supabase/tests/20_reverify.test.sql`）；T34 E2E、真機 R6 待建立 | 部分 |
 | SH-07 | T17、T32 | T17：移除成員時刪除其在該行程的敏感欄位與 Vault secret（`10_sensitive_fields.test.sql`）；撤銷存取權與記憶合併於 T32、T41；T32：移除或退出後看不到行程、刪除該行程的行程記憶與通知、保留個人記憶（`21_members.test.sql`、E2E `apps/web/e2e/members.spec.ts`）；記憶合併以成員名單決定，移除後即不再合併（T41 補合併流程） | 部分 |
-| SH-08 | T17、T33 | T17：「提供給 Viewer 與唯讀連結」開關與 Viewer 查詢結果（pgTAP、E2E）；唯讀連結的查詢於 T33 | 部分 |
+| SH-08 | T17、T33 | T17：「提供給 Viewer 與唯讀連結」開關與 Viewer 查詢結果（pgTAP、E2E）；T33：唯讀連結只回傳開啟該開關的欄位（pgTAP、E2E）；唯讀頁面不載入 AI、外部資料來源、背景 job、service role，沒有 Server Action（`apps/web/lib/server/readonly-boundary.test.ts`），E2E 確認頁面沒有表單與按鈕、沒有對外請求 | 已驗收 |
 
 ## 第 7 節 日後新增功能
 
