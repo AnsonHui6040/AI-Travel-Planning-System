@@ -1,0 +1,114 @@
+/* T24：Candidate List */
+.settings.candidates {
+  max-width: 48rem;
+}
+
+.candidates .trip-line {
+  margin: 0 0 0.5rem;
+  color: #57606a;
+}
+
+.candidates .muted {
+  color: #57606a;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.candidates .research-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.candidates .research-start .status {
+  margin: 0;
+}
+
+.candidates section {
+  border-top: 1px solid #d0d7de;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+
+.candidates h2 {
+  font-size: 1.05rem;
+  margin: 0 0 0.5rem;
+}
+
+.candidate {
+  padding: 0.75rem 0 1rem;
+  border-bottom: 1px solid #eaeef2;
+  overflow-wrap: anywhere;
+}
+
+.candidate:last-child {
+  border-bottom: 0;
+}
+
+.candidate h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.candidate .local {
+  margin-left: 0.5rem;
+  font-weight: normal;
+  color: #57606a;
+}
+
+.candidate .facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.candidate .facts div {
+  min-width: 0;
+}
+
+.candidate dt {
+  font-size: 0.8rem;
+  color: #57606a;
+}
+
+.candidate dd {
+  margin: 0;
+}
+
+.candidate .label {
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0.25rem;
+  color: #24292f;
+}
+
+.candidate .md p,
+.candidate .md ul,
+.candidate .md ol {
+  margin: 0.25rem 0;
+}
+
+.candidate .md h3,
+.candidate .md h4,
+.candidate .md h5,
+.candidate .md h6 {
+  font-size: 0.95rem;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.candidate .sources {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.candidate .sources li {
+  margin: 0.2rem 0;
+}
+
+.candidate .sources .muted {
+  display: block;
+  font-size: 0.8rem;
+  margin: 0;
+}

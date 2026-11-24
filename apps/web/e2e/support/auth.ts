@@ -133,3 +133,29 @@ export async function saveBaselineAsAdmin(tripId: string, data: Record<string, u
   const result = await adminClient().from("trip_baselines").insert({ trip_id: tripId, version: 1, data });
   if (result.error) throw new Error("存入測試基線失敗");
 }
+
+// T24：把行程設為已確認基線（規劃中），再以研究 job 經 add_research_candidates 寫入候選
+export async function confirmTripAsAdmin(tripId: string): Promise<void> {
+  const admin = adminClient();
+  const result = await admin.from("trips").update({ status: "planning" }).eq("id", tripId);
+  if (result.error) throw new Error("設定行程狀態失敗");
+}
+
+export async function seedResearchCandidates(
+  tripId: string,
+  initiatorId: string,
+  track: "A" | "B" | "C" | "D",
+  candidates: Record<string, unknown>[],
+): Promise<void> {
+  const admin = adminClient();
+  const job = await admin
+    .from("background_jobs")
+    .insert({ kind: "research", initiator_id: initiatorId, trip_id: tripId, status: "running" })
+    .select("id")
+    .single();
+  if (job.error) throw new Error("建立測試研究 job 失敗");
+  const added = await admin.rpc("add_research_candidates", { p_job: job.data.id, p_track: track, p_candidates: candidates });
+  if (added.error) throw new Error("寫入測試候選失敗");
+  const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
+  if (done.error) throw new Error("更新測試研究 job 失敗");
+}

@@ -14,7 +14,8 @@ const ROLES: Record<AiRole, Omit<RoleSpec, "id" | "output" | "outputJsonSchema" 
   research: {
     instructions: `你是旅行研究員。依旅行目標找出候選地點，每個候選附官方或可靠來源網址與取得時間。不輸出圖片網址。${UNTRUSTED}`,
     tools: ["provider_search"],
-    dataScope: ["baseline", "candidates"],
+    // T24：各研究方向彼此不讀對方結論，所以不提供候選清單
+    dataScope: ["baseline"],
     memoryScope: { layers: ["personal", "planning_rules", "trip_context"], kinds: ["preference", "constraint"] },
   },
   verification: {

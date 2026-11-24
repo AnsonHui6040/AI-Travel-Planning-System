@@ -33,7 +33,7 @@
 | C-09 | T03 | `supabase/tests/01_rls_enabled.test.sql`、`02_trip_permissions.test.sql`（anon 無權限）；伺服器端只用 anon key | 部分 |
 | C-10 | T33 | 待建立 | 未驗收 |
 | C-11 | T03 | `apps/web/lib/server/guard.test.ts`；`supabase/tests/03_rate_limit.test.sql`；`apps/web/e2e/guard.spec.ts` | 已驗收 |
-| C-12 | T05、T12、T31 | T05：`apps/web/workflows/spike-long-job.workflow.test.ts` 確認 job 輸入與結果帶發起人編號；T12：`decrypt_job_api_key` 只解密發起人的 key（`supabase/tests/08_api_keys.test.sql`）；排程 job 使用 Owner 的 key 於 T31 | 部分 |
+| C-12 | T05、T12、T31 | T05：`apps/web/workflows/spike-long-job.workflow.test.ts` 確認 job 輸入與結果帶發起人編號；T12：`decrypt_job_api_key` 只解密發起人的 key（`supabase/tests/08_api_keys.test.sql`）；T24：研究 job 的 step 只經 `decrypt_job_api_key` 取得發起人的 key，`add_research_candidates` 檢查發起人仍為 Owner 或 Companion；排程 job 使用 Owner 的 key 於 T31 | 部分 |
 
 ## 第 4 節 程式安全
 
@@ -41,12 +41,12 @@
 |---|---|---|---|
 | S-01 | T09、T18 | T09：`packages/schemas/src/change.test.ts`（提案 schema）、`supabase/tests/05_apply_change.test.sql`（只有 `atps_change_writer` 可寫入正式行程表）；T18：`packages/core/src/output-gate.test.ts`（AI 提案只能是需要批准的種類、只能操作已知項目）、回歸測試集 `packages/ai/src/injection/`（21 筆，沒有批准或正式行程寫入） | 已驗收 |
 | S-02 | T06、T14 | T06：`packages/schemas/src/schemas.test.ts`（拒絕未知欄位、格式與上下限）；T14：五個角色的 strict 輸出 schema（`packages/schemas/src/roles.test.ts`）、不符即丟棄並記錄、回傳原因與欄位（`packages/core/src/role-runner.test.ts`）；畫面顯示與重試隨各 job 畫面 | 部分 |
-| S-03 | T18、T24 | T18：`packages/security/src/untrusted.test.ts`（資料區塊、偽造標記中和）；回歸測試集 `packages/ai/src/injection/`（七類各 3 筆）；網頁與搜尋結果只產生候選並附來源（`researchCandidate` 的 sources 必填）。呈現端 Markdown sanitize 於 T24 | 部分 |
+| S-03 | T18、T24 | T18：`packages/security/src/untrusted.test.ts`（資料區塊、偽造標記中和）；回歸測試集 `packages/ai/src/injection/`（七類各 3 筆）；網頁與搜尋結果只產生候選並附來源（`researchCandidate` 的 sources 必填）。T24：Research A–D 的輸入只含行程與基線的資料區塊，不讀其他方向的結論（`packages/core/src/research.test.ts`）；Research 的資料範圍只有基線 | 已驗收 |
 | S-04 | T14 | `packages/ai/src/roles.test.ts`（五個角色的工具）、`packages/core/src/role-runner.test.ts`（只把內建搜尋交給 AI）、T13 adapter 拒絕清單以外的工具 | 已驗收 |
 | S-05 | T16 | `packages/security/src/allowlisted-fetch.test.ts`（SSRF 測試集：IP 直連、DNS 解析至私有位址、redirect 至白名單外、https 與連接埠限制、大小、時間與內容類型上限、白名單設定檔格式、連線固定到已驗證位址）；`address.test.ts`（私有與保留位址）；T20：日本 pack 的 12 個官方主機加入設定檔，`packages/data-sources/src/region-allowlist.test.ts` 確認地區白名單與設定檔一致；連線真實網站於旅前 TBD | 已驗收 |
 | S-06 | T14 | `packages/core/src/role-runner.test.ts`（步數與 token 超過即停止並記錄）；`supabase/tests/09_ai_settings.test.sql`；E2E 設定頁顯示每個角色的用量 | 已驗收 |
 | S-07 | T17 | `supabase/tests/10_sensitive_fields.test.sql`（Vault 加密、沒有明文欄位、AI 用函式只回傳開啟「提供給 AI」的欄位且只授權 service_role）；`packages/security/src/payload.test.ts`（allowlist builder）；`packages/ai/src/outbound-payload.test.ts`（三家 outbound payload 快照：開關關閉時不含欄位值） | 已驗收 |
-| S-08 | T01、T24 | T01：ESLint 禁止 `dangerouslySetInnerHTML`；`apps/web/lib/security-headers.test.ts`（CSP、nonce、HSTS）；`apps/web/e2e/security-headers.spec.ts`（實際回應標頭、腳本 nonce、無 CSP 違規）。T24：Markdown sanitize 與連結限制待建立 | 部分 |
+| S-08 | T01、T24 | T01：ESLint 禁止 `dangerouslySetInnerHTML`；`apps/web/lib/security-headers.test.ts`（CSP、nonce、HSTS）；`apps/web/e2e/security-headers.spec.ts`（實際回應標頭、腳本 nonce、無 CSP 違規）。T24：AI 與網頁內容共用的 `SafeMarkdown`、`SafeLink`（`apps/web/components/safe-markdown.test.tsx`、`packages/core/src/safe-markdown.test.ts`）：HTML 只當文字、連結只允許 https 並加 `rel="noopener noreferrer"`；E2E `apps/web/e2e/candidates.spec.ts` 確認注入的腳本不執行 | 已驗收 |
 | S-09 | T21 | `packages/security/src/image.test.ts`（JPEG、PNG、WebP 移除 EXIF 與中繼資料、限制類型與大小）；`supabase/tests/12_photos.test.sql`（使用者不可直接寫入 Storage）；E2E `apps/web/e2e/photos.spec.ts`（上傳含 GPS 的照片後儲存的檔案沒有 EXIF） | 已驗收 |
 | S-10 | T12、T17 | T12：`redactSecrets`；T17：`redactSensitive`、`createLogger`（`packages/security/src/logger.test.ts`），Server Action 失敗時經遮罩 log；AI 請求紀錄（`ai_usage`）只記錄用量，不含內容；資料庫與 repository 的錯誤訊息不含值 | 已驗收 |
 | S-11 | T01 | lockfile 已納入；`.npmrc` `save-exact=true`；`strictDepBuilds: true` | 部分 |
@@ -54,7 +54,7 @@
 | S-13 | T04 | `tooling/verify-docker-image.sh`：非 root、無 .env、無 API key | 已驗收 |
 | S-14 | T02、T03、T14、T16、T18 | T02：test、typecheck、lint、build、依賴方向、gitleaks、依賴漏洞已啟用（PR #2、#3、#4）；T03：RLS 權限測試已啟用；main 分支保護已啟用（PR #5 為 blocked）；T14：AI 輸出 schema 驗證測試包含在 test；T16：SSRF 測試集包含在 test，並另列 CI 步驟；T18：prompt injection 回歸測試集包含在 test，並另列 CI 步驟。第 4 節列出的關卡全部啟用 | 已驗收 |
 | S-15 | 每個 Task | PR #1、#2 附 `/security-review` 結果 | 部分 |
-| S-16 | T19、T24 | T19：place_id 由伺服器以 Places 搜尋解析並比對名稱與位置，不符時回傳未解析（`google-maps.contract.test.ts`）；照片只依 place_id 取得。AI 輸出含圖片網址被拒、解析失敗的候選標為 Unverified 於 T24 | 部分 |
+| S-16 | T19、T24 | T19：place_id 由伺服器以 Places 搜尋解析並比對名稱與位置，不符時回傳未解析（`google-maps.contract.test.ts`）；照片只依 place_id 取得。T24：`gateRoleOutput` 拒絕含圖片網址的輸出（`containsImageUrl`）；`toCandidateRows` 由伺服器解析 place_id，失敗時為 null 且 Unverified；`add_research_candidates` 固定寫入 Unverified（`supabase/tests/14_research_candidates.test.sql`） | 已驗收 |
 | S-17 | T17、T19 | T17：payload builder 排除 place_id、地址、座標、當地名稱，三家 outbound 快照驗證；T19：解析只保存 place_id，不寫入 Google 名稱；詳情、評分與照片標示為不可儲存，只即時顯示；座標逾 30 日由排程清除（`supabase/tests/11_google_coordinates.test.sql`） | 已驗收 |
 
 ## 第 5 節 記憶

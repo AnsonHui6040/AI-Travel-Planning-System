@@ -57,6 +57,8 @@ const validItem = {
   sources: [{ url: "https://www.senso-ji.jp/", fetched_at: "2026-11-23T10:00:00+09:00", grade: "facility_official" }],
   generated_by: { provider: "anthropic", model: "claude-opus-5-5" },
   verified_by: null,
+  research_track: null,
+  research_job_id: null,
   lifecycle_status: "candidate",
   at_risk: false,
   standby: false,

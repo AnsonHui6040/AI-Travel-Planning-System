@@ -6,6 +6,9 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [workflow({ rootDir: "apps/web" })],
   test: {
+    // T24：builder 會打包所有 workflow（含使用工作區套件的 research-job），由 Node 直接載入；
+    // 測試 worker 先註冊模組 hook，讓 Node 能載入 TypeScript 原始碼（說明見 tooling/workflow-test-loader.mjs）
+    setupFiles: ["tooling/workflow-test-register.mjs"],
     include: ["apps/web/workflows/**/*.workflow.test.ts"],
     testTimeout: 60_000,
   },
