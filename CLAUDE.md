@@ -63,6 +63,7 @@
 - 即時資料（T22）：天氣用 Open-Meteo（座標只送小數第二位）；氣象廳警報讀 `bosai/warning/data/r8/`（舊的 `data/warning/` 已停止更新）；ODPT 只接 `JAPAN_ODPT_TRAIN_STATUS` 列出的基本ライセンス與 CC 資料集。路線狀態以 core 的 `routeLiveView` 顯示（沒有來源為「無即時資料」），異常營運以 `transitAtRiskChanges` 產生 At Risk 提案；官方運行情報頁的核實結果經 `acceptOfficialTransitReport`。
 - 旅行基線（T23）只經 `save_trip_baseline`、`confirm_trip_baseline`（擁有者 `atps_baseline_writer`）寫入；確認前 Server Action 以 core 的 `checkBaseline` 重新檢查，有矛盾不確認。authenticated 沒有 `trips` 的 UPDATE。確定性的評估場景放 `evals/baseline/`。
 - 多 AI 研究（T24）：Research A–D 以 `researchTrackInput` 只帶行程與基線，不讀其他方向結論；候選只經 `add_research_candidates`（service_role，擁有者 `atps_candidate_writer`）寫入，一律 Unverified。AI 輸出含圖片網址由 `gateRoleOutput` 拒絕。AI 與網頁內容一律以 `apps/web/components/safe-markdown.tsx` 的 `SafeMarkdown`、`SafeLink` 呈現。
+- 交叉核查（T25）：去重用 core 的 `findDuplicateGroups`，合併只經 `merge_duplicate_candidates`；核實結果先經 `crossCheck`（證據順序、Conflict、同一家上限）再經 `apply_verification` 寫入（擁有者 `atps_verification_writer`，資料庫再套一次同一家上限）。事實主張存 `fact_claims`，判定結果存 `facts`。確定性評估場景放 `evals/crosscheck/`。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。

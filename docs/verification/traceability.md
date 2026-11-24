@@ -105,8 +105,8 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 | E1 | 待建立 | 無 | TBD | 未驗收 |
 | E2 | 待建立 | 無 | TBD | 未驗收 |
 | E3 | 待建立 | 無 | TBD | 未驗收 |
-| E4 | 待建立 | 無 | TBD | 未驗收 |
-| E5 | 待建立 | 無 | TBD | 未驗收 |
+| E4 | `evals/crosscheck/E4.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-24-E4.md` PASS） | 不適用 | 已驗收 |
+| E5 | `evals/baseline/E5.json`（確定性規則） | 不需要（不呼叫 AI；`evals/src/baseline.test.ts` PASS） | 不適用 | 已驗收 |
 | E6 | `evals/scenarios/E6.json` | PASS（`docs/verification/evals/2026-11-23-E6.md`） | TBD | 部分 |
 | E7 | 待建立 | 無 | TBD | 未驗收 |
 | E8 | 待建立 | 無 | TBD | 未驗收 |

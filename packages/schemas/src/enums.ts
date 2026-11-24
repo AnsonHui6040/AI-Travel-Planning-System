@@ -44,4 +44,7 @@ export const jobStatus = z.enum(["queued", "running", "completed", "failed", "ca
 export const photoSource = z.enum(["user_upload", "wikimedia_commons"]);
 // T24：Research A（主要景點與官方資訊）、B（餐飲、咖啡、購物）、C（攝影、日出日落、夜景、季節活動）、D（冷門替代）
 export const researchTrack = z.enum(["A", "B", "C", "D"]);
+// T25：交叉核查的事實欄位：營業時間、休館日、門票、預約、交通服務
+export const factField = z.enum(["opening_hours", "closed_days", "admission", "reservation", "transport_service"]);
+export const factStatus = z.enum(["resolved", "conflict"]);
 export const completion = z.enum(["completed", "partial", "skipped"]);

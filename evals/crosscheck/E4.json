@@ -1,0 +1,61 @@
+{
+  "id": "E4",
+  "title": "兩個 AI 提供的營業時間不同",
+  "rule": "第 9.3 節 E4：依證據順序採用；無法判定時標示 Conflict 且不進入行程",
+  "cases": [
+    {
+      "title": "Research 引用旅遊部落格，Verification 引用設施官網",
+      "item": {
+        "generated_by": { "provider": "anthropic", "model": "claude-opus-5-5" },
+        "fact_claims": [
+          {
+            "field": "opening_hours",
+            "value": "10:00–18:00",
+            "source": { "url": "https://blog.example/senso-ji", "fetched_at": "2026-11-23T10:00:00+09:00", "grade": "reliable_third_party" },
+            "by": { "provider": "anthropic", "model": "claude-opus-5-5" }
+          }
+        ]
+      },
+      "verification": {
+        "status": "verified",
+        "verified_by": { "provider": "google", "model": "gemini-model" },
+        "facts": [
+          {
+            "field": "opening_hours",
+            "value": "09:00–17:00",
+            "source": { "url": "https://www.senso-ji.jp/", "fetched_at": "2026-11-24T10:00:00+09:00", "grade": "facility_official" },
+            "by": { "provider": "google", "model": "gemini-model" }
+          }
+        ]
+      },
+      "expect": { "status": "verified", "adopted": { "opening_hours": "09:00–17:00" }, "can_enter_draft": true }
+    },
+    {
+      "title": "兩個 AI 都只引用可靠第三方，營業時間不同",
+      "item": {
+        "generated_by": { "provider": "anthropic", "model": "claude-opus-5-5" },
+        "fact_claims": [
+          {
+            "field": "opening_hours",
+            "value": "10:00–18:00",
+            "source": { "url": "https://blog.example/cafe", "fetched_at": "2026-11-23T10:00:00+09:00", "grade": "reliable_third_party" },
+            "by": { "provider": "anthropic", "model": "claude-opus-5-5" }
+          }
+        ]
+      },
+      "verification": {
+        "status": "verified",
+        "verified_by": { "provider": "google", "model": "gemini-model" },
+        "facts": [
+          {
+            "field": "opening_hours",
+            "value": "11:00–19:00",
+            "source": { "url": "https://guide.example/cafe", "fetched_at": "2026-11-24T10:00:00+09:00", "grade": "reliable_third_party" },
+            "by": { "provider": "google", "model": "gemini-model" }
+          }
+        ]
+      },
+      "expect": { "status": "conflict", "adopted": { "opening_hours": null }, "can_enter_draft": false }
+    }
+  ]
+}

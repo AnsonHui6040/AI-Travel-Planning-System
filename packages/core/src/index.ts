@@ -16,3 +16,5 @@ export * from "./live-status";
 export * from "./baseline";
 export * from "./research";
 export * from "./safe-markdown";
+export * from "./dedupe";
+export * from "./cross-check";

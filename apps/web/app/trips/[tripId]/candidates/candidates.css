@@ -112,3 +112,12 @@
   font-size: 0.8rem;
   margin: 0;
 }
+
+.candidate .facts-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.candidate .facts-list .conflict {
+  color: #cf222e;
+}

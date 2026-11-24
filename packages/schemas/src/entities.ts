@@ -34,6 +34,28 @@ export const modelRef = z.strictObject({
   model: text(LIMITS.modelName),
 });
 
+// T25：AI 提出的事實主張（附來源）與依證據順序判定後的結果
+export const factClaim = z.strictObject({
+  field: E.factField,
+  value: text(200),
+  source: sourceRef,
+});
+
+export const factClaimRecord = z.strictObject({
+  field: E.factField,
+  value: text(200),
+  source: sourceRef,
+  by: modelRef,
+});
+
+export const resolvedFact = z.strictObject({
+  field: E.factField,
+  status: E.factStatus,
+  // conflict 時為 null
+  value: nullable(text(200)),
+  grade: nullable(E.sourceGrade),
+});
+
 export const availabilitySlot = z
   .strictObject({
     date: isoDate.optional(),
@@ -165,6 +187,9 @@ export const itineraryItemRow = z.strictObject({
   // T24：由哪個研究方向、哪個背景 job 產生（成員自行加入時為 null）
   research_track: nullable(E.researchTrack),
   research_job_id: nullable(uuid),
+  // T25：Research 與 Verification 的事實主張，與依證據順序判定的結果
+  fact_claims: z.array(factClaimRecord).max(50),
+  facts: z.array(resolvedFact).max(10),
   lifecycle_status: E.lifecycleStatus,
   at_risk: z.boolean(),
   standby: z.boolean(),
