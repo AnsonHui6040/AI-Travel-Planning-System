@@ -392,3 +392,15 @@ export async function createProposalAsAdmin(tripId: string, proposerId: string, 
   if (result.error) throw new Error("建立測試提案失敗");
   return String(result.data.id);
 }
+
+// T35：把項目排入指定日期與時段（已鎖定）
+export async function scheduleItemAsAdmin(tripId: string, itemId: string, date: string, start: string, end: string): Promise<void> {
+  const admin = adminClient();
+  const item = await admin
+    .from("itinerary_items")
+    .update({ verification_status: "verified", lifecycle_status: "locked", scheduled_date: date, scheduled_start: start, scheduled_end: end })
+    .eq("id", itemId);
+  if (item.error) throw new Error("設定測試項目失敗");
+  const trip = await admin.from("trips").update({ status: "locked" }).eq("id", tripId);
+  if (trip.error) throw new Error("設定行程狀態失敗");
+}
