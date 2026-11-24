@@ -296,3 +296,25 @@ export async function markBaselineConfirmedAsAdmin(tripId: string): Promise<void
   const result = await adminClient().from("trip_baselines").update({ confirmed_at: new Date().toISOString() }).eq("trip_id", tripId);
   if (result.error) throw new Error("確認測試基線失敗");
 }
+
+// T30：以研究 job 經 set_item_availability 寫入營業時段（依名稱指定）
+export async function setAvailabilityAsAdmin(
+  tripId: string,
+  initiatorId: string,
+  itemName: string,
+  availability: Array<{ weekday?: number; date?: string; start: string; end: string }>,
+): Promise<void> {
+  const admin = adminClient();
+  const item = await admin.from("itinerary_items").select("id").eq("trip_id", tripId).eq("name_zh", itemName).single();
+  if (item.error) throw new Error("找不到測試候選");
+  const job = await admin
+    .from("background_jobs")
+    .insert({ kind: "research", initiator_id: initiatorId, trip_id: tripId, status: "running" })
+    .select("id")
+    .single();
+  if (job.error) throw new Error("建立測試研究 job 失敗");
+  const applied = await admin.rpc("set_item_availability", { p_job: job.data.id, p_item: item.data.id, p_availability: availability, p_reservation: "none" });
+  if (applied.error) throw new Error("寫入測試營業時段失敗");
+  const done = await admin.from("background_jobs").update({ status: "completed" }).eq("id", job.data.id);
+  if (done.error) throw new Error("更新測試研究 job 失敗");
+}

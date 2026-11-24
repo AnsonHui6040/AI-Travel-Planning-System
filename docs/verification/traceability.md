@@ -39,7 +39,7 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| S-01 | T09、T18 | T09：`packages/schemas/src/change.test.ts`（提案 schema）、`supabase/tests/05_apply_change.test.sql`（只有 `atps_change_writer` 可寫入正式行程表）；T18：`packages/core/src/output-gate.test.ts`（AI 提案只能是需要批准的種類、只能操作已知項目）、回歸測試集 `packages/ai/src/injection/`（21 筆，沒有批准或正式行程寫入） | 已驗收 |
+| S-01 | T09、T18 | T09：`packages/schemas/src/change.test.ts`（提案 schema）、`supabase/tests/05_apply_change.test.sql`（只有 `atps_change_writer` 可寫入正式行程表）；T18：`packages/core/src/output-gate.test.ts`（AI 提案只能是需要批准的種類、只能操作已知項目）、回歸測試集 `packages/ai/src/injection/`（21 筆，沒有批准或正式行程寫入）；T30：每日批准只經 `atps_change_writer` 擁有的 `approve_day`（`supabase/tests/19_feasibility_lock.test.sql`） | 已驗收 |
 | S-02 | T06、T14 | T06：`packages/schemas/src/schemas.test.ts`（拒絕未知欄位、格式與上下限）；T14：五個角色的 strict 輸出 schema（`packages/schemas/src/roles.test.ts`）、不符即丟棄並記錄、回傳原因與欄位（`packages/core/src/role-runner.test.ts`）；畫面顯示與重試隨各 job 畫面 | 部分 |
 | S-03 | T18、T24 | T18：`packages/security/src/untrusted.test.ts`（資料區塊、偽造標記中和）；回歸測試集 `packages/ai/src/injection/`（七類各 3 筆）；網頁與搜尋結果只產生候選並附來源（`researchCandidate` 的 sources 必填）。T24：Research A–D 的輸入只含行程與基線的資料區塊，不讀其他方向的結論（`packages/core/src/research.test.ts`）；Research 的資料範圍只有基線 | 已驗收 |
 | S-04 | T14 | `packages/ai/src/roles.test.ts`（五個角色的工具）、`packages/core/src/role-runner.test.ts`（只把內建搜尋交給 AI）、T13 adapter 拒絕清單以外的工具 | 已驗收 |
@@ -104,7 +104,7 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 |---|---|---|---|---|
 | E1 | 待建立 | 無 | TBD | 未驗收 |
 | E2 | 待建立 | 無 | TBD | 未驗收 |
-| E3 | 待建立 | 無 | TBD | 未驗收 |
+| E3 | `evals/feasibility/E3.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-24-E3.md` PASS） | 不適用 | 已驗收 |
 | E4 | `evals/crosscheck/E4.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-24-E4.md` PASS） | 不適用 | 已驗收 |
 | E5 | `evals/baseline/E5.json`（確定性規則） | 不需要（不呼叫 AI；`evals/src/baseline.test.ts` PASS） | 不適用 | 已驗收 |
 | E6 | `evals/scenarios/E6.json` | PASS（`docs/verification/evals/2026-11-23-E6.md`） | TBD | 部分 |

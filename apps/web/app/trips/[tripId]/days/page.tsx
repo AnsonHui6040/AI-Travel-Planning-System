@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import type { DraftEntry } from "@atps/core";
-import { loadDayDraft, type CardItem, type TravelInfo } from "../../../../lib/server/day-draft";
+import { FEASIBILITY_LABELS, isDayBlocked, type DraftEntry } from "@atps/core";
+import { loadDayDraft, type CardItem, type DayStatus, type TravelInfo } from "../../../../lib/server/day-draft";
+import { ApproveDayForm } from "./approve-day-form";
 import "../../../settings/settings.css";
 import "./days.css";
 
@@ -20,6 +21,22 @@ const MODE_LABELS: Record<string, string> = {
   bus: "公車",
   taxi: "計程車與叫車",
   drive: "自駕",
+};
+
+const DAY_STATUS_LABELS: Record<DayStatus, string> = {
+  draft: "草案",
+  approved: "已批准",
+  day_ready: "Day Ready",
+  in_progress: "進行中",
+  completed: "已完成",
+};
+
+const TRIP_STATUS_LABELS: Record<string, string> = {
+  planning: "規劃中",
+  locked: "已鎖定",
+  in_progress: "進行中",
+  ended: "已結束",
+  archived: "已封存",
 };
 
 const weekday = (date: string) =>
@@ -111,15 +128,22 @@ export default async function DaysPage({ params }: { params: Promise<{ tripId: s
   return (
     <main className="settings days">
       <h1>每日時段草案</h1>
-      <p className="trip-line">{view.tripName}</p>
+      <p className="trip-line">
+        {view.tripName}（{TRIP_STATUS_LABELS[view.tripStatus] ?? view.tripStatus}）
+      </p>
       <p className="muted">
-        依固定活動、時段敏感活動、高優先景點、餐飲、彈性活動的順序排入，只使用 Verified 與 Partially Verified 的候選。這是草案，批准與鎖定前不會改動行程。
+        依固定活動、時段敏感活動、高優先景點、餐飲、彈性活動的順序排入，只使用 Verified 與 Partially Verified 的候選，並核查營業時間、休館日、交通時間與固定活動前後的緩衝。未通過的項目留在
+        Candidate List。草案在批准前不會改動行程；所有日期都批准後行程鎖定。
       </p>
       {view.days.map((day) => {
         const placed = day.entries.flatMap((e) => (e.kind === "item" ? [e.item_id] : []));
+        const nameOf = (id: string | null) => (id ? (view.items[id]?.nameZh ?? "") : "");
         return (
           <section key={day.date} aria-label={day.date}>
-            <h2>{weekday(day.date)}</h2>
+            <h2>
+              {weekday(day.date)}
+              <span className="day-status">{DAY_STATUS_LABELS[day.status]}</span>
+            </h2>
             {day.entries.length === 0 ? <p className="muted">這天還沒有可排入的項目。</p> : null}
             {day.entries.map((entry) => {
               if (entry.kind === "fixed") {
@@ -138,8 +162,33 @@ export default async function DaysPage({ params }: { params: Promise<{ tripId: s
             {day.backups.length > 0 ? (
               <p className="muted">Backup：{day.backups.map((id) => view.items[id]?.nameZh ?? "").join("、")}</p>
             ) : null}
-            {day.unplaced.length > 0 ? (
-              <p className="muted">放不下、留在 Candidate List：{day.unplaced.map((id) => view.items[id]?.nameZh ?? "").join("、")}</p>
+            {day.issues.length > 0 ? (
+              <ul className="day-issues" aria-label={`${day.date} 提醒`}>
+                {day.issues.map((issue) => (
+                  <li key={`${issue.check}-${issue.item_id ?? ""}`}>
+                    {issue.item_id ? `${nameOf(issue.item_id)}：` : ""}
+                    {FEASIBILITY_LABELS[issue.check]}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {day.returned.length > 0 ? (
+              <p className="muted">
+                未通過可行性驗證、回到地理分區（留在 Candidate List）：
+                {day.returned
+                  .map((r) => `${nameOf(r.item_id)}${r.checks.length > 0 ? `（${r.checks.map((c) => FEASIBILITY_LABELS[c]).join("、")}）` : "（當天放不下）"}`)
+                  .join("、")}
+              </p>
+            ) : null}
+            {view.canEdit && placed.length > 0 ? (
+              // 批准後仍保留同一個元件，才能顯示結果訊息
+              <ApproveDayForm
+                tripId={tripId}
+                date={day.date}
+                baseVersion={view.baseVersion}
+                label={weekday(day.date)}
+                mode={!view.canApprove || day.status !== "draft" ? "hidden" : isDayBlocked(day.issues, day.date) ? "blocked" : "ready"}
+              />
             ) : null}
           </section>
         );

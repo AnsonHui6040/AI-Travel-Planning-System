@@ -191,6 +191,16 @@ export function verificationDeps(jobId: string): VerificationDeps {
         p_verified_by: write.verifiedBy,
       });
       if (error) throw new Error("寫入核實結果失敗");
+      // T30：營業時段與預約需求，供可行性驗證
+      if (write.availability.length > 0 || write.reservation !== "none") {
+        const slots = await service.rpc("set_item_availability", {
+          p_job: id,
+          p_item: write.itemId,
+          p_availability: write.availability,
+          p_reservation: write.reservation,
+        });
+        if (slots.error) throw new Error("寫入營業時段失敗");
+      }
     },
   };
 }

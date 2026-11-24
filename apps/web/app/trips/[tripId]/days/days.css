@@ -23,6 +23,35 @@
 .days h2 {
   font-size: 1.05rem;
   margin: 0 0 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.day-status {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #57606a;
+}
+
+.day-issues {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.approve-day {
+  margin-top: 0.75rem;
+}
+
+.approve-day p {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+}
+
+.approve-day .error {
+  color: #cf222e;
 }
 
 .days .fixed-row {

@@ -82,12 +82,21 @@ export interface DraftInput {
   items: readonly DraftItem[];
   // 由 from 到 to 的交通分鐘數（含緩衝）；沒有估算時回傳 null
   travelMinutes: (fromId: string, toId: string) => number | null;
+  // T30：營業時段（null 為未知，不限制；空陣列為休館）
+  openWindows?: (itemId: string, date: string) => ReadonlyArray<readonly [string, string]> | null;
+  // T30：可行性驗證未通過、回到地理分區的項目
+  skip?: (itemId: string) => boolean;
+  // T30：只排這些日期（已批准的日期不重排）
+  dates?: readonly string[];
+  // T30：固定活動前後另加的緩衝分鐘數
+  fixedBuffer?: number;
 }
 
 export function draftDays(input: DraftInput): DayDraft[] {
   const { baseline } = input;
-  const days = dates(baseline.start_date, baseline.end_date);
-  const eligible = input.items.filter((i) => canEnterDraft(i.verification_status));
+  const all = dates(baseline.start_date, baseline.end_date);
+  const days = input.dates ? all.filter((d) => input.dates?.includes(d)) : all;
+  const eligible = input.items.filter((i) => canEnterDraft(i.verification_status) && !input.skip?.(i.id));
   const primary = eligible.filter((i) => i.candidate_role !== "backup");
 
   // 分區依候選數排序，輪流分配到每一天
@@ -100,9 +109,24 @@ export function draftDays(input: DraftInput): DayDraft[] {
   const rank = (i: DraftItem) => SCHEDULE_ORDER.indexOf(categorizeForSchedule(i));
   const dayStart = toMin(DAY_START);
   const dayEnd = toMin(DAY_END);
+  const buffer = input.fixedBuffer ?? 0;
+  const isFixed = (id: string) => id.startsWith("fixed:");
+  // 兩個時段之間需要的分鐘數：交通，碰到固定活動時再加緩衝
+  const gap = (from: string, to: string) =>
+    (input.travelMinutes(from, to) ?? DEFAULT_TRAVEL_MINUTES) + (isFixed(from) || isFixed(to) ? buffer : 0);
 
   return days.map((date, dayIndex) => {
     const zones = zonesOf[dayIndex] ?? [];
+    // 營業時段內最早可開始的時間；未知時不限制
+    const openStart = (item: DraftItem, start: number, stay: number): number | null => {
+      const windows = input.openWindows?.(item.id, date);
+      if (!windows) return start;
+      for (const [from, to] of [...windows].sort((a, b) => a[0].localeCompare(b[0]))) {
+        const s = Math.max(start, toMin(from));
+        if (s + stay <= toMin(to)) return s;
+      }
+      return null;
+    };
     const fixed: Slot[] = baseline.fixed_activities
       .filter((a) => a.date === date)
       .map((a, k) => ({ id: `fixed:${k}`, start: toMin(a.start), end: a.end ? toMin(a.end) : toMin(a.start) + 60 }));
@@ -120,19 +144,21 @@ export function draftDays(input: DraftInput): DayDraft[] {
       const sorted = [...timeline].sort((a, b) => a.start - b.start);
       // 每個空檔的最早開始時間：一天開始，或前一個項目結束加交通
       const options = [
-        { start: dayStart, travel: 0, limit: sorted[0]?.start ?? dayEnd },
+        { start: dayStart, travel: 0, next: sorted[0] },
         ...sorted.map((slot, k) => {
           const travel = input.travelMinutes(slot.id, item.id) ?? DEFAULT_TRAVEL_MINUTES;
-          return { start: slot.end + travel, travel, limit: sorted[k + 1]?.start ?? dayEnd };
+          return { start: slot.end + gap(slot.id, item.id), travel, next: sorted[k + 1] };
         }),
       ];
-      const fits = (start: number, limit: number) => start >= dayStart && start + stay <= Math.min(limit, dayEnd);
+      // 結束後須留下到下一個時段的交通（T30：碰到固定活動時再加緩衝）
+      const fits = (start: number, next: Slot | undefined) =>
+        start >= dayStart && start + stay <= Math.min(next ? next.start - gap(item.id, next.id) : dayEnd, dayEnd);
       let chosen: { start: number; travel: number } | null = null;
       if (item.type === "restaurant") {
         for (const [from, to] of MEAL_WINDOWS) {
           for (const o of options) {
-            const start = Math.max(o.start, toMin(from));
-            if (start <= toMin(to) && fits(start, o.limit)) {
+            const start = openStart(item, Math.max(o.start, toMin(from)), stay);
+            if (start !== null && start <= toMin(to) && fits(start, o.next)) {
               chosen = { start, travel: o.travel };
               break;
             }
@@ -141,8 +167,13 @@ export function draftDays(input: DraftInput): DayDraft[] {
         }
       }
       if (!chosen) {
-        const o = options.find((x) => fits(x.start, x.limit));
-        if (o) chosen = { start: o.start, travel: o.travel };
+        for (const o of options) {
+          const start = openStart(item, o.start, stay);
+          if (start !== null && fits(start, o.next)) {
+            chosen = { start, travel: o.travel };
+            break;
+          }
+        }
       }
       if (!chosen) {
         unplaced.push(item.id);
@@ -160,9 +191,9 @@ export function draftDays(input: DraftInput): DayDraft[] {
       const prev = sorted[k - 1];
       const next = sorted[k + 1];
       const stay = slot.end - slot.start;
-      const earliest = prev ? prev.end + (input.travelMinutes(prev.id, slot.id) ?? DEFAULT_TRAVEL_MINUTES) : dayStart;
+      const earliest = prev ? prev.end + gap(prev.id, slot.id) : dayStart;
       // 最晚開始：下一個項目開始前，扣掉停留與到下一站的交通
-      const latest = next ? next.start - (input.travelMinutes(slot.id, next.id) ?? DEFAULT_TRAVEL_MINUTES) - stay : dayEnd - stay;
+      const latest = next ? next.start - gap(slot.id, next.id) - stay : dayEnd - stay;
       return {
         kind: "item",
         item_id: slot.id,

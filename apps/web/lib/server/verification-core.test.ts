@@ -111,12 +111,44 @@ describe("runVerificationChunk", () => {
         claims: [{ field: "opening_hours", value: "09:00–17:00", source: official, by: { provider: "google", model: "gemini-model" } }],
         sources: [official],
         verifiedBy: { provider: "google", model: "gemini-model" },
+        availability: [],
+        reservation: "none",
       },
     ]);
     // 候選資料以資料區塊傳入（S-03），含 Research 的主張與來源
     expect(requests[0]?.input).toContain("[資料開始");
     expect(requests[0]?.input).toContain("10:00–18:00");
     expect(requests[0]?.input).toContain(A);
+  });
+
+  it("T30：核實通過時寫入營業時段與預約需求；Conflict 時不寫入營業時段", async () => {
+    const third = src("https://guide.example/senso", "reliable_third_party");
+    const slots = [{ weekday: 2, start: "09:00", end: "17:00" }];
+    const output = {
+      results: [
+        { item_id: A, status: "verified", findings: "官網", sources: [official], facts: [], availability: slots, reservation: "required" },
+      ],
+    };
+    const ok = verificationDeps(output);
+    await runVerificationChunk(ok.deps, { jobId: JOB, itemIds: [A], role: roleSpec("verification") });
+    expect(ok.writes.map((w) => [w.availability, w.reservation])).toEqual([[slots, "required"]]);
+
+    const conflict = {
+      results: [
+        {
+          item_id: A,
+          status: "verified",
+          findings: "兩個來源不同",
+          sources: [third],
+          facts: [{ field: "opening_hours", value: "11:00–19:00", source: third }],
+          availability: slots,
+          reservation: "none",
+        },
+      ],
+    };
+    const bad = verificationDeps(conflict);
+    await runVerificationChunk(bad.deps, { jobId: JOB, itemIds: [A], role: roleSpec("verification") });
+    expect(bad.writes.map((w) => [w.status, w.availability])).toEqual([["conflict", []]]);
   });
 
   it("E4：同等級來源不一致時寫入 Conflict", async () => {

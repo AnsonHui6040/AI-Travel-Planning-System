@@ -1,4 +1,5 @@
 import {
+  canEnterDraft,
   crossCheck,
   findDuplicateGroups,
   handleRoleRun,
@@ -13,6 +14,7 @@ import {
   type RoleSpec,
   type VerificationStatus,
 } from "@atps/core";
+import type { RoleOutputs } from "@atps/schemas";
 import { composeRoleInput } from "@atps/security";
 
 // T25：合併、去重、交叉核查的伺服器邏輯。
@@ -21,6 +23,7 @@ import { composeRoleInput } from "@atps/security";
 // 再與 Research 的事實主張依證據順序交叉判定（crossCheck），只寫入核實結果。
 
 type SourceRef = ResearchCandidate["sources"][number];
+type AvailabilitySlot = RoleOutputs["verification"]["results"][number]["availability"][number];
 
 export interface CandidateForCheck {
   id: string;
@@ -61,6 +64,9 @@ export interface VerificationWrite {
   claims: FactClaimRecord[];
   sources: SourceRef[];
   verifiedBy: ModelRef;
+  // T30：只在核實通過（Verified、Partially Verified）時寫入營業時段
+  availability: AvailabilitySlot[];
+  reservation: "none" | "recommended" | "required";
 }
 
 export interface VerificationContext {
@@ -87,7 +93,7 @@ export interface VerificationChunkRun {
 export const VERIFICATION_CHUNK_SIZE = 10;
 
 const TASK =
-  "Verification：逐項核對資料區塊中的候選。以官方資訊優先，核對營業時間、休館日、門票、預約與交通服務；每個候選輸出 item_id、核實狀態、發現、來源，以及核對到的事實（各附來源網址、取得時間與來源等級）。無法確認時標示 unverified，來源互相矛盾時標示 conflict。";
+  "Verification：逐項核對資料區塊中的候選。以官方資訊優先，核對營業時間、休館日、門票、預約與交通服務；每個候選輸出 item_id、核實狀態、發現、來源，以及核對到的事實（各附來源網址、取得時間與來源等級）。另輸出營業時段 availability（依星期 weekday 0–6，星期日為 0，或指定日期 date；休館日不列）與預約需求 reservation（none、recommended、required）。無法確認時標示 unverified，來源互相矛盾時標示 conflict。";
 
 function candidateData(candidates: readonly CandidateForCheck[]): string {
   const data = candidates.map((c) => ({
@@ -129,6 +135,8 @@ export async function runVerificationChunk(deps: VerificationDeps, run: Verifica
           claims,
           sources: r.sources,
           verifiedBy,
+          availability: canEnterDraft(checked.status) ? r.availability : [],
+          reservation: r.reservation,
         });
       }
     },

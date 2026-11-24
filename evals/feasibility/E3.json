@@ -1,0 +1,49 @@
+{
+  "id": "E3",
+  "title": "研究候選咖啡店於 Day 3 公休",
+  "rule": "第 9.3 節 E3：留在 Candidate List，不進入 Day 3",
+  "baseline": {
+    "start_date": "2026-12-01",
+    "end_date": "2026-12-03",
+    "timezone": "Asia/Tokyo",
+    "flights": [],
+    "lodgings": [],
+    "companions": 1,
+    "stamina_note": null,
+    "budget": null,
+    "fixed_activities": [],
+    "paid_items": [],
+    "must_visit": [],
+    "excluded": [],
+    "transport_preferences": [],
+    "photography_needs": null
+  },
+  "items": [
+    { "key": "senso-ji", "name_zh": "淺草寺", "type": "attraction", "zone": "asakusa", "priority": 5 },
+    { "key": "kaminarimon", "name_zh": "雷門", "type": "attraction", "zone": "asakusa", "priority": 4 },
+    { "key": "nakamise", "name_zh": "仲見世通", "type": "shopping", "zone": "asakusa" },
+    { "key": "meiji-jingu", "name_zh": "明治神宮", "type": "attraction", "zone": "harajuku", "priority": 5 },
+    { "key": "takeshita", "name_zh": "竹下通", "type": "shopping", "zone": "harajuku" },
+    {
+      "key": "kissa",
+      "name_zh": "純喫茶咖啡店",
+      "type": "restaurant",
+      "zone": "kichijoji",
+      "availability": [
+        { "weekday": 0, "start": "08:00", "end": "20:00" },
+        { "weekday": 1, "start": "08:00", "end": "20:00" },
+        { "weekday": 2, "start": "08:00", "end": "20:00" },
+        { "weekday": 3, "start": "08:00", "end": "20:00" },
+        { "weekday": 5, "start": "08:00", "end": "20:00" },
+        { "weekday": 6, "start": "08:00", "end": "20:00" }
+      ]
+    },
+    { "key": "inokashira", "name_zh": "井之頭恩賜公園", "type": "attraction", "zone": "kichijoji", "priority": 4 }
+  ],
+  "expect": [
+    { "key": "kissa", "placed_on": null, "returned_for": "closed_day" },
+    { "key": "inokashira", "placed_on": "2026-12-03" },
+    { "key": "senso-ji", "placed_on": "2026-12-01" },
+    { "key": "meiji-jingu", "placed_on": "2026-12-02" }
+  ]
+}
