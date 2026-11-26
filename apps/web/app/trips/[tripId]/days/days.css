@@ -5,23 +5,23 @@
 
 .days .trip-line {
   margin: 0 0 0.5rem;
-  color: #57606a;
+  color: var(--muted);
 }
 
 .days .muted {
-  color: #57606a;
-  font-size: 0.9rem;
+  color: var(--muted);
+  font-size: var(--fs-body);
   margin: 0.5rem 0;
 }
 
 .days section {
-  border-top: 1px solid #d0d7de;
+  border-top: 1px dashed var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
 
 .days h2 {
-  font-size: 1.05rem;
+  font-size: var(--fs-h2);
   margin: 0 0 0.5rem;
   display: flex;
   flex-wrap: wrap;
@@ -30,15 +30,15 @@
 }
 
 .day-status {
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   font-weight: 500;
-  color: #57606a;
+  color: var(--muted);
 }
 
 .day-issues {
   margin: 0.5rem 0;
   padding-left: 1.25rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-body);
 }
 
 .approve-day {
@@ -47,17 +47,17 @@
 
 .approve-day p {
   margin: 0.4rem 0 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-body);
 }
 
 .approve-day .error {
-  color: #cf222e;
+  color: var(--accent);
 }
 
 .days .fixed-row {
   margin: 0.5rem 0;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #eaeef2;
+  border-bottom: 1px dashed var(--line);
   font-weight: 600;
 }
 
@@ -66,7 +66,7 @@
   grid-template-columns: 7rem minmax(0, 1fr);
   gap: 0.75rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #eaeef2;
+  border-bottom: 1px dashed var(--line);
   overflow-wrap: anywhere;
 }
 
@@ -74,7 +74,7 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   display: block;
 }
 
@@ -83,8 +83,8 @@
 }
 
 .day-photo figcaption {
-  font-size: 0.7rem;
-  color: #57606a;
+  font-size: var(--fs-small);
+  color: var(--muted);
 }
 
 .photo-fallback {
@@ -93,13 +93,13 @@
   gap: 0.25rem;
   aspect-ratio: 4 / 3;
   padding: 0.5rem;
-  border: 1px solid #d0d7de;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-small);
 }
 
 .day-body h3 {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   margin: 0 0 0.4rem;
 }
 
@@ -111,13 +111,13 @@
 }
 
 .day-body dt {
-  font-size: 0.75rem;
-  color: #57606a;
+  font-size: var(--fs-small);
+  color: var(--muted);
 }
 
 .day-body dd {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-body);
 }
 
 @media (max-width: 600px) {

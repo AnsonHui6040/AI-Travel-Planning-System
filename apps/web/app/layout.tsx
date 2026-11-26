@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { ServiceWorkerRegistration } from "../components/service-worker";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "旅行規劃",
@@ -14,7 +15,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1f2328",
+  // 與 globals.css 的 --bg 一致，深淺色跟隨系統
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fbf3e8" },
+    { media: "(prefers-color-scheme: dark)", color: "#100904" },
+  ],
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

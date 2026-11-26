@@ -5,21 +5,21 @@
 
 .readonly .trip-line {
   margin: 0 0 0.5rem;
-  color: #57606a;
+  color: var(--muted);
 }
 
 .readonly .muted {
-  color: #57606a;
+  color: var(--muted);
 }
 
 .readonly section {
-  border-top: 1px solid #d0d7de;
+  border-top: 1px dashed var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
 
 .readonly h2 {
-  font-size: 1.05rem;
+  font-size: var(--fs-h2);
   margin: 0 0 0.5rem;
 }
 
@@ -34,18 +34,18 @@
   grid-template-columns: 7rem minmax(0, 1fr) auto;
   gap: 0.25rem 1rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #eaeef2;
+  border-bottom: 1px dashed var(--line);
   overflow-wrap: anywhere;
 }
 
 .readonly-items .name small {
   display: block;
-  color: #57606a;
+  color: var(--muted);
 }
 
 .readonly-items .status {
-  color: #57606a;
-  font-size: 0.9rem;
+  color: var(--muted);
+  font-size: var(--fs-body);
 }
 
 @media (max-width: 600px) {
@@ -55,7 +55,7 @@
 
   .readonly-items .time {
     grid-column: 1 / -1;
-    color: #57606a;
-    font-size: 0.9rem;
+    color: var(--muted);
+    font-size: var(--fs-body);
   }
 }

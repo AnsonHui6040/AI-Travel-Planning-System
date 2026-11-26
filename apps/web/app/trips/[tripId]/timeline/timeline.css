@@ -6,17 +6,17 @@
 .timeline .trip-line,
 .timeline .muted,
 .timeline-state {
-  color: #57606a;
+  color: var(--muted);
 }
 
 .timeline section {
-  border-top: 1px solid #d0d7de;
+  border-top: 1px dashed var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
 
 .timeline h2 {
-  font-size: 1.05rem;
+  font-size: var(--fs-h2);
   margin: 0 0 0.5rem;
 }
 
@@ -37,7 +37,7 @@
 }
 
 .timeline-row {
-  border-bottom: 1px solid #d8dee4;
+  border-bottom: 1px dashed var(--line);
   padding: 0.6rem 0;
 }
 
@@ -49,30 +49,30 @@
 }
 
 .timeline-head h3 {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   margin: 0;
 }
 
 .timeline-outcome {
-  font-size: 0.85rem;
-  color: #57606a;
+  font-size: var(--fs-small);
+  color: var(--muted);
 }
 
 .timeline-row.completed .timeline-outcome {
-  color: #1a7f37;
+  color: var(--text);
 }
 
 .timeline-row.skipped .timeline-outcome,
 .timeline-row.not_recorded .timeline-outcome {
-  color: #9a6700;
+  color: var(--accent);
 }
 
 .timeline-visited {
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   padding: 0 0.35rem;
-  border: 1px solid #1a7f37;
-  border-radius: 4px;
-  color: #1a7f37;
+  border: 1px solid var(--text);
+  border-radius: var(--radius-pill);
+  color: var(--text);
 }
 
 .timeline-times {
@@ -83,8 +83,8 @@
 }
 
 .timeline-times dt {
-  font-size: 0.8rem;
-  color: #57606a;
+  font-size: var(--fs-small);
+  color: var(--muted);
 }
 
 .timeline-times dd {
@@ -93,8 +93,8 @@
 
 .timeline-delta {
   margin-left: 0.5rem;
-  font-size: 0.85rem;
-  color: #57606a;
+  font-size: var(--fs-small);
+  color: var(--muted);
 }
 
 .timeline-record {
@@ -108,7 +108,7 @@
 .timeline-record label {
   display: flex;
   flex-direction: column;
-  font-size: 0.85rem;
+  font-size: var(--fs-small);
 }
 
 .timeline-record p,
@@ -118,35 +118,8 @@
 }
 
 .timeline .error {
-  color: #cf222e;
+  color: var(--accent);
 }
-
-@media (prefers-color-scheme: dark) {
-  .timeline .trip-line,
-  .timeline .muted,
-  .timeline-state,
-  .timeline-outcome,
-  .timeline-times dt,
-  .timeline-delta {
-    color: #9198a1;
-  }
-
-  .timeline section,
-  .timeline-row {
-    border-color: #3d444d;
-  }
-
-  .timeline-row.completed .timeline-outcome,
-  .timeline-visited {
-    color: #3fb950;
-    border-color: #3fb950;
-  }
-
-  .timeline .error {
-    color: #f85149;
-  }
-}
-
 .timeline-next {
   display: flex;
   flex-wrap: wrap;
