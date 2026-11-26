@@ -79,6 +79,7 @@
 - Incident Mode（T38）：core 的 `planIncident`（純函式）計算分級、Current State Snapshot、重算範圍（只到下一個 Hard Constraint，最遲到達為開始前 15 分鐘）與最多三個替代方案（同區域、鄰近區域、交換今日順序、使用另一日候選、刪減活動），附交通與比較表。伺服器以使用者 session 讀取資料重新計算，只經 `start_incident`（擁有者 `atps_change_writer`）建立即時分支（同一 base version 的待批准提案），不改動行程；批准經 `/proposals` 的 `approve_proposal`。行程鎖定後，trigger `sync_lifecycle_with_schedule` 讓候選排入某日成為已修改、移回候選清單成為已核實。確定性評估場景放 `evals/incident/`。
 - 移回候選清單（T38 修正）：行程鎖定後已排入的項目經提案移回候選清單時，trigger `sync_lifecycle_with_schedule` 設為待核實、未核實（Conflict 維持），須經 `apply_verification` 重新核實才會再被選用。
 - Actual Timeline（T39）：成員以本人 session 寫入 `actual_timeline_entries`（trigger `check_actual_timeline_entry` 檢查同一行程、時間不晚於現在、該日未完成）；core 的 `actualTimeline` 計算 Planned vs Actual，只經 `produce_actual_timeline`（擁有者 `atps_change_writer`）保存於 `days.actual_timeline`。只有最後一筆紀錄為完成的項目成為已完成（資料庫依紀錄重新判斷），該日進入已完成；最後一日產生後行程進入已結束。
+- 旅後（T40）：旅後狀態只經 `set_post_trip_status`（擁有者 `atps_change_writer`，行程須為已結束）；需要標記的是排入過或有紀錄的項目，去過（最後一筆為完成）才可標完成或不推薦，沒去過只可標略過、取消或再訪；全部標記後行程封存。MEM-04 比較報告由 core 的 `postTripReport` 以各日 `days.actual_timeline` 計算，不寫入記憶。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。

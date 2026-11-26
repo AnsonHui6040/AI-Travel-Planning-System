@@ -64,7 +64,7 @@
 | MEM-01 | T41 | 待建立 | 未驗收 |
 | MEM-02 | T41 | 待建立 | 未驗收 |
 | MEM-03 | T41 | 待建立 | 未驗收 |
-| MEM-04 | T40 | 待建立 | 未驗收 |
+| MEM-04 | T40 | `packages/core/src/post-trip.test.ts`（報告六項欄位齊全與各項計算）；E2E `apps/web/e2e/post-trip.spec.ts`；旅後提案依此報告產生於 T41 | 已驗收 |
 | MEM-05 | T41 | 待建立 | 未驗收 |
 | MEM-06 | T06、T41 | T06：`supabase/tests/04_entity_permissions.test.sql`（記憶只限本人存取）；payload 排除於 T41 | 部分 |
 | MEM-07 | T41 | 待建立 | 未驗收 |

@@ -28,3 +28,4 @@ export * from "./morning-check";
 export * from "./departure";
 export * from "./incident";
 export * from "./actual-timeline";
+export * from "./post-trip";

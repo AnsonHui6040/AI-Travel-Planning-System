@@ -89,6 +89,12 @@ export default async function TimelinePage({ params, searchParams }: { params: P
       <p className="timeline-state">
         {view.produced ? "已產生，內容不再變動。" : "尚未產生。以下是目前紀錄的預覽，產生前可繼續記錄。"}
       </p>
+      {view.produced ? (
+        <p className="timeline-next">
+          <Link href={`/trips/${tripId}/post-trip`}>旅後回顧</Link>
+          <span className="muted">最後一日產生後，標記旅後狀態並查看 Planned vs Actual 比較報告</span>
+        </p>
+      ) : null}
       <section aria-label="Planned vs Actual">
         <h2>Planned vs Actual</h2>
         <p className="timeline-summary">
