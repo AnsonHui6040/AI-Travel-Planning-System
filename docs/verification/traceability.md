@@ -102,7 +102,7 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 
 | 場景 | 場景檔 | 錄製回應 | 真 AI 5 次 | 狀態 |
 |---|---|---|---|---|
-| E1 | 待建立 | 無 | TBD | 未驗收 |
+| E1 | 前段：`evals/morning/E1.json`（錄製的預報，確定性規則）；後段（三個方案、只修改 13:00–17:00、未經批准不寫入）於 T38 | 前段不需要（不呼叫 AI；`docs/verification/evals/2026-11-26-E1-morning.md` PASS） | 後段 TBD | 部分 |
 | E2 | 待建立 | 無 | TBD | 未驗收 |
 | E3 | `evals/feasibility/E3.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-24-E3.md` PASS） | 不適用 | 已驗收 |
 | E4 | `evals/crosscheck/E4.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-24-E4.md` PASS） | 不適用 | 已驗收 |

@@ -188,7 +188,10 @@ export function TodayBody({ pack, canEdit, offline }: { pack: DayPack; canEdit: 
         {pack.backups.length === 0 ? <p className="muted">沒有 Backup。</p> : null}
         <ul className="today-plain">
           {pack.backups.map((b) => (
-            <li key={b.id}>{b.name}</li>
+            <li key={b.id}>
+              {b.name}
+              {b.standby ? "（Standby）" : ""}
+            </li>
           ))}
         </ul>
       </section>

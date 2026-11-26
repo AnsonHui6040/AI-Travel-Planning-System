@@ -16,7 +16,10 @@ const input: DayPackInput = {
   ],
   fixed: [{ name: "和服體驗", start: "13:00", end: "15:00" }],
   travelMinutes: (from, to) => (from === "a" && to === "b" ? 20 : null),
-  backups: [{ id: "x", name_zh: "淺草文化觀光中心" }],
+  backups: [
+    { id: "x", name_zh: "淺草文化觀光中心", standby: false },
+    { id: "y", name_zh: "淺草演藝廳", standby: true },
+  ],
   photos: [{ item_id: "a", url: "/api/photos/trip/a.jpg", credit: "使用者" }],
 };
 
@@ -30,7 +33,11 @@ describe("buildDayPack", () => {
     ]);
     expect(pack.entries[0]).toMatchObject({ name: "淺草寺", nameLocal: "浅草寺", address: "台東區淺草 2-3-1", atRisk: true, verificationStatus: "partially_verified" });
     expect(pack.fixed).toEqual([{ name: "和服體驗", start: "13:00", end: "15:00" }]);
-    expect(pack.backups).toEqual([{ id: "x", name: "淺草文化觀光中心" }]);
+    // T36：Morning Check 提升的 Standby 排在前面
+    expect(pack.backups).toEqual([
+      { id: "y", name: "淺草演藝廳", standby: true },
+      { id: "x", name: "淺草文化觀光中心", standby: false },
+    ]);
     expect(pack.photos).toEqual([{ itemId: "a", url: "/api/photos/trip/a.jpg", credit: "使用者" }]);
     expect(pack).toMatchObject({ format: 1, tripId: input.tripId, date: "2026-12-10", baseVersion: 4, generatedAt: input.generatedAt });
   });

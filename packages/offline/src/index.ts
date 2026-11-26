@@ -25,7 +25,7 @@ export interface DayPackInput {
   fixed: ReadonlyArray<{ name: string; start: string; end: string }>;
   // 含緩衝的交通分鐘數；沒有估算時為 null
   travelMinutes: (fromId: string, toId: string) => number | null;
-  backups: ReadonlyArray<{ id: string; name_zh: string }>;
+  backups: ReadonlyArray<{ id: string; name_zh: string; standby: boolean }>;
   photos: ReadonlyArray<{ item_id: string; url: string; credit: string }>;
 }
 
@@ -53,7 +53,8 @@ export interface DayPack {
   generatedAt: string;
   entries: PackEntry[];
   fixed: Array<{ name: string; start: string; end: string }>;
-  backups: Array<{ id: string; name: string }>;
+  // T36：Standby（Morning Check 提升）排在前面
+  backups: Array<{ id: string; name: string; standby: boolean }>;
   photos: Array<{ itemId: string; url: string; credit: string }>;
 }
 
@@ -108,7 +109,9 @@ export function buildDayPack(input: DayPackInput): DayPack {
     generatedAt: input.generatedAt,
     entries,
     fixed: fixed.map((f) => ({ name: f.name, start: f.start, end: f.end })),
-    backups: input.backups.map((b) => ({ id: b.id, name: b.name_zh })),
+    backups: [...input.backups]
+      .sort((a, b) => Number(b.standby) - Number(a.standby))
+      .map((b) => ({ id: b.id, name: b.name_zh, standby: b.standby })),
     // 只保存站內的照片網址（經 /api/photos 同源提供，S-09）
     photos: input.photos.filter((p) => p.url.startsWith("/api/photos/")).map((p) => ({ itemId: p.item_id, url: p.url, credit: p.credit })),
   };

@@ -466,6 +466,16 @@ export const tripInvitationRow = z.strictObject({
   created_at: offsetDateTime,
 });
 
+// T36：Morning Check 的結果
+export const morningCheckRow = z.strictObject({
+  id: uuid,
+  trip_id: uuid,
+  date: isoDate,
+  result: z.record(z.string(), z.unknown()),
+  checked_by: uuid,
+  created_at: offsetDateTime,
+});
+
 export const tableSchemas = {
   profiles: profileRow,
   trips: tripRow,
@@ -487,6 +497,7 @@ export const tableSchemas = {
   zones: zoneRow,
   reverify_runs: reverifyRunRow,
   trip_invitations: tripInvitationRow,
+  morning_checks: morningCheckRow,
   feature_flags: featureFlagRow,
   ai_role_settings: aiRoleSettingRow,
   ai_usage: aiUsageRow,
