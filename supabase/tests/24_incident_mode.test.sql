@@ -3,7 +3,7 @@
 -- 批准其中一個方案後其餘失效（commit_proposal）。
 -- O：Owner；C：Companion；V：Viewer
 begin;
-select plan(19);
+select plan(20);
 
 insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-0000000000c1', 'io@example.test', 'authenticated', 'authenticated'),
@@ -28,6 +28,7 @@ create function pg_temp.item(p_id uuid, p_trip uuid, p_life text, p_date date, p
 $$;
 -- 13:00 戶外攝影、候選室內博物館、另一個行程的項目
 select pg_temp.item('c2000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'locked', '2026-12-10', '13:00', '15:00');
+update public.itinerary_items set last_verified_at = '2026-12-01T00:00:00Z' where id = 'c2000000-0000-0000-0000-000000000001';
 select pg_temp.item('c2000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000001', 'verified', null, null, null);
 select pg_temp.item('c2000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', 'verified', null, null, null);
 
@@ -120,10 +121,13 @@ select is(public.approve_proposal((select id from public.proposals where trip_id
 reset role;
 select results_eq($$select scheduled_date::text, scheduled_start::text from public.itinerary_items
   where id = 'c2000000-0000-0000-0000-000000000002'$$, $$values ('2026-12-10', '13:20:00')$$, '批准後候選排入時段');
-select results_eq($$select id::text, lifecycle_status::text from public.itinerary_items
+select results_eq($$select id::text, lifecycle_status::text, verification_status::text from public.itinerary_items
   where id in ('c2000000-0000-0000-0000-000000000001', 'c2000000-0000-0000-0000-000000000002') order by id$$,
-  $$values ('c2000000-0000-0000-0000-000000000001', 'verified'), ('c2000000-0000-0000-0000-000000000002', 'modified')$$,
-  '生命週期隨排程同步：移回候選清單為已核實，候選排入為已修改');
+  $$values ('c2000000-0000-0000-0000-000000000001', 'pending_verification', 'unverified'),
+    ('c2000000-0000-0000-0000-000000000002', 'modified', 'verified')$$,
+  '生命週期隨排程同步：移回候選清單須重新核實（待核實、未核實），候選排入為已修改');
+select results_eq($$select last_verified_at = '2026-12-01T00:00:00Z'::timestamptz from public.itinerary_items
+  where id = 'c2000000-0000-0000-0000-000000000001'$$, $$values (true)$$, '移回候選清單保留上次核實的紀錄');
 select results_eq($$select status::text from public.proposals where trip_id = 'c1000000-0000-0000-0000-000000000001'
   and change ->> 'summary' = '大雨，刪減活動'$$,
   $$values ('invalidated')$$, '同一即時分支的其他方案失效');
