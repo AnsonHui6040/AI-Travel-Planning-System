@@ -1,0 +1,168 @@
+/* T38：Incident Mode */
+.settings.incident {
+  max-width: 56rem;
+}
+
+.incident .trip-line,
+.incident .muted {
+  color: #57606a;
+}
+
+.incident section {
+  border-top: 1px solid #d0d7de;
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+}
+
+.incident h2 {
+  font-size: 1.05rem;
+  margin: 0 0 0.5rem;
+}
+
+.incident-level {
+  margin-left: 0.5rem;
+  padding: 0 0.4rem;
+  border: 1px solid #cf222e;
+  border-radius: 4px;
+  color: #cf222e;
+  font-size: 0.85rem;
+}
+
+.incident-form {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 28rem;
+}
+
+.incident-form label {
+  display: grid;
+  gap: 0.2rem;
+}
+
+/* 依事件種類顯示欄位（不受控表單） */
+.incident-form .f-item,
+.incident-form .f-delay,
+.incident-form .f-rain,
+.incident-form .f-flight {
+  display: none;
+}
+
+.incident-form:has(option[value="long_queue"]:checked) .f-item,
+.incident-form:has(option[value="attraction_closed"]:checked) .f-item,
+.incident-form:has(option[value="rail_disruption"]:checked) .f-item,
+.incident-form:has(option[value="slot_cancelled"]:checked) .f-item,
+.incident-form:has(option[value="delay"]:checked) .f-delay,
+.incident-form:has(option[value="heavy_rain"]:checked) .f-rain,
+.incident-form:has(option[value="flight_shift"]:checked) .f-flight {
+  display: grid;
+}
+
+.incident-location {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+}
+
+.incident-form .error {
+  color: #cf222e;
+}
+
+.incident-snapshot,
+.incident-transport {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.25rem 1rem;
+  margin: 0;
+}
+
+.incident-snapshot div,
+.incident-transport div {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.incident-snapshot dt,
+.incident-transport dt {
+  min-width: 6.5rem;
+  color: #57606a;
+}
+
+.incident-snapshot dd,
+.incident-transport dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.incident-warnings {
+  color: #9a6700;
+}
+
+/* 390 寬度也不水平捲動（R7）：固定欄寬並允許換行 */
+.incident-compare {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.incident-compare th,
+.incident-compare td {
+  border-bottom: 1px solid #eaeef2;
+  padding: 0.35rem 0.3rem;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.incident-compare thead th {
+  font-weight: 600;
+}
+
+.incident-compare tbody th {
+  width: 5.5rem;
+  color: #57606a;
+  font-weight: 400;
+}
+
+.incident-compare .proposal-status {
+  display: block;
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: #57606a;
+}
+
+.incident-options {
+  padding-left: 1.2rem;
+}
+
+.incident-options li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eaeef2;
+}
+
+.incident-options .summary {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.incident-options .meta {
+  margin: 0.2rem 0;
+  color: #57606a;
+}
+
+.incident-recent {
+  padding-left: 1.2rem;
+}
+
+@media (max-width: 480px) {
+  .incident-compare {
+    font-size: 0.8rem;
+  }
+
+  .incident-compare tbody th {
+    width: 4.2rem;
+  }
+}

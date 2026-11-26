@@ -86,6 +86,7 @@ export function DeparturePanel({ pack, index, now }: { pack: DayPack; index: num
       {result.incident ? (
         <p className="departure-incident" role="alert">
           建議進入 Incident Mode（{result.incident.level}，{INCIDENT_LABELS[result.incident.type] ?? result.incident.type}）
+          <a href={`/trips/${pack.tripId}/incident?date=${pack.date}`}>進入 Incident Mode</a>
         </p>
       ) : (
         <p className="muted">照原定行程前往</p>

@@ -225,3 +225,16 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* T38：Incident Mode 入口 */
+.today-incident {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  align-items: baseline;
+}
+
+.departure-incident a {
+  display: inline-block;
+  margin-left: 0.5rem;
+}
