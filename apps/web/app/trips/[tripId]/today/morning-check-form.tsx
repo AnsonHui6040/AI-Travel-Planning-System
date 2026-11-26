@@ -11,7 +11,7 @@ export function MorningCheckForm({ tripId, date, label }: { tripId: string; date
     <form action={action} className="morning-form">
       <input type="hidden" name="tripId" value={tripId} />
       <input type="hidden" name="date" value={date} />
-      <button type="submit" disabled={pending}>
+      <button className="primary" type="submit" disabled={pending}>
         {pending ? "檢查中…" : label}
       </button>
       {state ? (

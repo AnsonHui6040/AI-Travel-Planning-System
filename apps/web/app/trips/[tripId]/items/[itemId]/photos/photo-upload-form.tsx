@@ -77,7 +77,7 @@ export function PhotoUploadForm({ tripId, itemId }: { tripId: string; itemId: st
           </>
         ) : null}
         <div className="key-actions">
-          <button type="submit" name="intent" value="save">
+          <button className="primary" type="submit" name="intent" value="save">
             上傳
           </button>
         </div>

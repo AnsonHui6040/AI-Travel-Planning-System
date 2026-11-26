@@ -59,7 +59,7 @@ export function MyInfoForms({ tripId, own }: { tripId: string; own: OwnField[] }
                 ))}
               </div>
               <div className="key-actions">
-                <button type="submit" name="intent" value="save">
+                <button className="primary" type="submit" name="intent" value="save">
                   儲存
                 </button>
               </div>

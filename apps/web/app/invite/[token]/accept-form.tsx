@@ -8,7 +8,7 @@ export function AcceptInviteForm({ token }: { token: string }) {
   return (
     <form action={action}>
       <input type="hidden" name="token" value={token} />
-      <button type="submit" disabled={pending}>
+      <button className="primary" type="submit" disabled={pending}>
         加入行程
       </button>
       {state ? <p role="status">{state.message}</p> : null}

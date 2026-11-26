@@ -53,7 +53,7 @@ export function AiSettingsForms({ settings }: { settings: Setting[] }) {
           <form key={p.id} action={action}>
             <input type="hidden" name="intent" value="models" />
             <input type="hidden" name="provider" value={p.id} />
-            <button type="submit" disabled={pending}>
+            <button className="secondary" type="submit" disabled={pending}>
               取得 {p.name} 模型清單
             </button>
           </form>
@@ -109,7 +109,7 @@ export function AiSettingsForms({ settings }: { settings: Setting[] }) {
                 <input id={`${s.role}-tokens`} name="max_tokens" type="number" inputMode="numeric" defaultValue={s.maxTokens} />
               </div>
               <div className="key-actions">
-                <button type="submit" value="save">
+                <button className="primary" type="submit" value="save">
                   儲存
                 </button>
               </div>

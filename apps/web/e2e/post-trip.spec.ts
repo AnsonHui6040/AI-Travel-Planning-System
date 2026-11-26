@@ -15,6 +15,12 @@ const DATE = "2026-11-20";
 const noHorizontalScroll = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 
 test("行程結束後標記旅後狀態並查看比較報告；全部標記後行程封存", async ({ page, context, baseURL }) => {
+  // 不可逆操作先確認（Astryx）：記錄確認訊息並接受
+  const confirms: string[] = [];
+  page.on("dialog", (d) => {
+    confirms.push(d.message());
+    void d.accept();
+  });
   const owner = await signInAsNewUser(context, baseURL ?? "");
   const tripId = await createTrip(owner.userId, "東京一日");
   const temple = await createItem(tripId, { name_zh: "淺草寺" });

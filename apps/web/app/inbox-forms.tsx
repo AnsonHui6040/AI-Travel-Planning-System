@@ -9,7 +9,7 @@ export function MarkAllReadForm() {
   const [state, action, pending] = useActionState(markAllRead, null);
   return (
     <form action={action} className="inline-form">
-      <button type="submit" disabled={pending}>
+      <button className="ghost" type="submit" disabled={pending}>
         全部標為已讀
       </button>
       {state && !state.ok ? <p role="status">{state.message}</p> : null}
@@ -23,7 +23,7 @@ export function ReverifyToggle({ tripId, enabled }: { tripId: string; enabled: b
     <form action={action} className="inline-form">
       <input type="hidden" name="tripId" value={tripId} />
       <input type="hidden" name="value" value={enabled ? "off" : "on"} />
-      <button type="submit" disabled={pending}>
+      <button className="secondary" type="submit" disabled={pending}>
         {enabled ? "關閉旅前自動再核實" : "開啟旅前自動再核實"}
       </button>
       {state ? (

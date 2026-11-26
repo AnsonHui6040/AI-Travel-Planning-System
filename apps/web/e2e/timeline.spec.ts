@@ -14,6 +14,12 @@ const DATE = "2026-11-20";
 const noHorizontalScroll = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 
 test("記錄實際時間與完成狀態，產生 Planned vs Actual：未完成的景點不會標為已去過", async ({ page, context, baseURL }) => {
+  // 不可逆操作先確認（Astryx）：記錄確認訊息並接受
+  const confirms: string[] = [];
+  page.on("dialog", (d) => {
+    confirms.push(d.message());
+    void d.accept();
+  });
   const owner = await signInAsNewUser(context, baseURL ?? "");
   const tripId = await createTrip(owner.userId, "東京一日");
   const temple = await createItem(tripId, { name_zh: "淺草寺" });
@@ -52,6 +58,7 @@ test("記錄實際時間與完成狀態，產生 Planned vs Actual：未完成�
 
   await page.getByRole("button", { name: "結束今天，產生 Actual Timeline" }).click();
   await expect(page.getByText("已產生，內容不再變動。")).toBeVisible();
+  expect(confirms).toEqual(["結束今天並產生 Actual Timeline？產生後這天不能再記錄。"]);
 
   const rows = page.locator(".timeline-row");
   await expect(rows.filter({ hasText: "淺草寺" })).toContainText("已去過");

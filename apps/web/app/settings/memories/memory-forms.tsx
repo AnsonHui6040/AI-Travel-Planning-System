@@ -58,7 +58,7 @@ export function NewMemoryForm({ catalog, tripId }: { catalog: string[]; tripId?:
         單位（可留空）
         <input name="unit" maxLength={20} />
       </label>
-      <button type="submit" disabled={pending}>
+      <button className="primary" type="submit" disabled={pending}>
         {pending ? "儲存中…" : "新增"}
       </button>
       <Status state={state} />
@@ -85,15 +85,21 @@ export function EditMemoryForm({ memory }: { memory: { id: string; layer: string
           單位
           <input name="unit" defaultValue={memory.unit ?? ""} maxLength={20} />
         </label>
-        <button type="submit" disabled={pending}>
+        <button className="secondary" type="submit" disabled={pending}>
           儲存
         </button>
         <Status state={state} />
       </form>
-      <form action={del} aria-label={`刪除 ${memory.item}`}>
+      <form
+        action={del}
+        aria-label={`刪除 ${memory.item}`}
+        onSubmit={(event) => {
+          if (!window.confirm(`刪除「${memory.item}」？刪除後 AI 不會再使用，無法復原。`)) event.preventDefault();
+        }}
+      >
         <input type="hidden" name="id" value={memory.id} />
         <input type="hidden" name="tripId" value={memory.tripId ?? ""} />
-        <button type="submit" disabled={deleting}>
+        <button className="danger" type="submit" disabled={deleting}>
           刪除
         </button>
         <Status state={delState} />
@@ -105,12 +111,20 @@ export function EditMemoryForm({ memory }: { memory: { id: string; layer: string
 export function ProposalDecisionForm({ id, item }: { id: string; item: string }) {
   const [state, action, pending] = useActionState(decideProposal, null);
   return (
-    <form action={action} className="memory-decision" aria-label={`決定 ${item}`}>
+    <form
+      action={action}
+      className="memory-decision"
+      aria-label={`決定 ${item}`}
+      onSubmit={(event) => {
+        const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+        if (submitter?.value === "reject" && !window.confirm(`否決「${item}」？否決後不會寫入記憶。`)) event.preventDefault();
+      }}
+    >
       <input type="hidden" name="id" value={id} />
-      <button type="submit" name="decision" value="approve" disabled={pending}>
+      <button className="secondary" type="submit" name="decision" value="approve" disabled={pending}>
         批准
       </button>
-      <button type="submit" name="decision" value="reject" disabled={pending}>
+      <button className="danger" type="submit" name="decision" value="reject" disabled={pending}>
         否決
       </button>
       <Status state={state} />
@@ -123,7 +137,7 @@ export function GenerateProposalsForm({ tripId }: { tripId: string }) {
   return (
     <form action={action} className="memory-generate">
       <input type="hidden" name="tripId" value={tripId} />
-      <button type="submit" disabled={pending}>
+      <button className="primary" type="submit" disabled={pending}>
         {pending ? "產生中…" : "產生旅後記憶提案"}
       </button>
       <Status state={state} />

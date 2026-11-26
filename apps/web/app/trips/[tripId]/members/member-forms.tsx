@@ -33,7 +33,7 @@ function ActionButton({
       {Object.entries(fields).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
-      <button type="submit" disabled={pending}>
+      <button className={confirmText ? "danger" : "secondary"} type="submit" disabled={pending}>
         {label}
       </button>
       {state ? (

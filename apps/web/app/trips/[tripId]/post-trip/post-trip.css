@@ -9,7 +9,7 @@
 }
 
 .post-trip section {
-  border-top: 1px dashed var(--line);
+  border-top: 1px solid var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
@@ -42,7 +42,7 @@ ol.post-trip-report {
 }
 
 .post-trip-items > li {
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px solid var(--line);
   padding: 0.6rem 0;
 }
 
@@ -69,7 +69,7 @@ ol.post-trip-report {
 .post-trip-current {
   padding: 0 0.35rem;
   border: 1px solid var(--muted);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
 }
 
 .post-trip-form {

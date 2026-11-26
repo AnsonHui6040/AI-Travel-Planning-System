@@ -44,6 +44,17 @@ describe.each([
     expect(contrast(t[fg] as string, t[bg] as string)).toBeGreaterThanOrEqual(4.5);
   });
 
+  // 按鈕填色（Astryx）：secondary 為文字色 10%、danger 為點綴色 8%，疊在底色上
+  it("按鈕文字對按鈕填色至少 4.5:1", () => {
+    const mix = (fg: string, bg: string, pct: number) =>
+      "#" +
+      [1, 3, 5]
+        .map((i) => Math.round(parseInt(fg.slice(i, i + 2), 16) * pct + parseInt(bg.slice(i, i + 2), 16) * (1 - pct)).toString(16).padStart(2, "0"))
+        .join("");
+    expect(contrast(t.text as string, mix(t.text as string, t.bg as string, 0.1))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(t.accent as string, mix(t.accent as string, t.bg as string, 0.08))).toBeGreaterThanOrEqual(4.5);
+  });
+
   it("控制項邊框對底色至少 3:1（WCAG 1.4.11）", () => {
     expect(contrast(t["line-strong"] as string, t.bg as string)).toBeGreaterThanOrEqual(3);
   });

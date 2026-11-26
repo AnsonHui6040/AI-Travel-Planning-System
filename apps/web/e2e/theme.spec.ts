@@ -68,5 +68,12 @@ for (const scheme of ["light", "dark"] as const) {
     }
     await page.goto(`/trips/${tripId}/today?date=${DATE}`);
     await expect(page.getByRole("navigation", { name: "行程" }).getByRole("link", { name: "今天" })).toHaveAttribute("aria-current", "page");
+    // Astryx：每個畫面只有一個主要按鈕；控制項 10px 圓角、沒有外框
+    await expect(page.locator("main button.primary")).toHaveCount(1);
+    const shape = await page.locator("main button").first().evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { radius: s.borderTopLeftRadius, border: s.borderTopWidth };
+    });
+    expect(shape).toEqual({ radius: "10px", border: "0px" });
   });
 }

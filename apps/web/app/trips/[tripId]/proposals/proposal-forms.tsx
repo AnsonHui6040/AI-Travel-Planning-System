@@ -26,14 +26,19 @@ export function ProposalDecision({
           <form action={approve}>
             <input type="hidden" name="tripId" value={tripId} />
             <input type="hidden" name="proposalId" value={proposalId} />
-            <button type="submit" disabled={approving || rejecting}>
+            <button className="secondary" type="submit" disabled={approving || rejecting}>
               批准
             </button>
           </form>
-          <form action={reject}>
+          <form
+            action={reject}
+            onSubmit={(event) => {
+              if (!window.confirm("否決這個提案？否決後無法復原。")) event.preventDefault();
+            }}
+          >
             <input type="hidden" name="tripId" value={tripId} />
             <input type="hidden" name="proposalId" value={proposalId} />
-            <button type="submit" disabled={approving || rejecting}>
+            <button className="danger" type="submit" disabled={approving || rejecting}>
               否決
             </button>
           </form>

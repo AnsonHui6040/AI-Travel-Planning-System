@@ -208,10 +208,10 @@ export function BaselineForm({ tripId, saved }: { tripId: string; saved: TripBas
                     </select>
                   </Field>
                 </div>
-                <button type="button" onClick={() => remove("flights", f.key)}>刪除航班 {i + 1}</button>
+                <button className="danger" type="button" onClick={() => remove("flights", f.key)}>刪除航班 {i + 1}</button>
               </div>
             ))}
-            <button
+            <button className="secondary"
               type="button"
               onClick={() => set("flights", [...state.flights, { key: key(), label: "", depLocal: "", depOffset: "+08:00", arrLocal: "", arrOffset: "+09:00" }])}
             >
@@ -240,10 +240,10 @@ export function BaselineForm({ tripId, saved }: { tripId: string; saved: TripBas
                     <input id={`l-time-${l.key}`} type="time" value={l.checkInTime} onChange={(e) => update("lodgings", l.key, { checkInTime: e.target.value })} />
                   </Field>
                 </div>
-                <button type="button" onClick={() => remove("lodgings", l.key)}>刪除住宿 {i + 1}</button>
+                <button className="danger" type="button" onClick={() => remove("lodgings", l.key)}>刪除住宿 {i + 1}</button>
               </div>
             ))}
-            <button
+            <button className="secondary"
               type="button"
               onClick={() => set("lodgings", [...state.lodgings, { key: key(), name: "", area: "", checkIn: state.start, checkOut: state.end, checkInTime: "" }])}
             >
@@ -276,10 +276,10 @@ export function BaselineForm({ tripId, saved }: { tripId: string; saved: TripBas
                   <input type="checkbox" checked={a.paid} onChange={(e) => update("activities", a.key, { paid: e.target.checked })} />
                   已付款
                 </label>
-                <button type="button" onClick={() => remove("activities", a.key)}>刪除固定活動 {i + 1}</button>
+                <button className="danger" type="button" onClick={() => remove("activities", a.key)}>刪除固定活動 {i + 1}</button>
               </div>
             ))}
-            <button
+            <button className="secondary"
               type="button"
               onClick={() => set("activities", [...state.activities, { key: key(), name: "", area: "", date: state.start, start: "", end: "", paid: false }])}
             >
@@ -334,7 +334,7 @@ export function BaselineForm({ tripId, saved }: { tripId: string; saved: TripBas
           <form action={saveAction} className="key-actions sticky-actions">
             <input type="hidden" name="tripId" value={tripId} />
             <input type="hidden" name="data" value={json} />
-            <button type="submit" name="intent" value="save">
+            <button className="secondary" type="submit" name="intent" value="save">
               儲存草稿
             </button>
           </form>
@@ -355,7 +355,7 @@ export function BaselineForm({ tripId, saved }: { tripId: string; saved: TripBas
         )}
         <form action={confirmAction} className="confirm-form">
           <input type="hidden" name="tripId" value={tripId} />
-          <button type="submit" name="intent" value="save" disabled={dirty || conflicts > 0 || !checked || saving || confirming}>
+          <button className="primary" type="submit" name="intent" value="save" disabled={dirty || conflicts > 0 || !checked || saving || confirming}>
             確認 Trip Baseline v1
           </button>
           <p className="muted">

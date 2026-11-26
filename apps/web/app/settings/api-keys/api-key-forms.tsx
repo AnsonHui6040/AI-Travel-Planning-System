@@ -31,7 +31,15 @@ export function ApiKeyForms({ keys }: { keys: KeySummary[] }) {
         const saved = keys.find((k) => k.provider === p.id);
         const inputId = `key-${p.id}`;
         return (
-          <form key={p.id} action={action} className="key-row">
+          <form
+            key={p.id}
+            action={action}
+            className="key-row"
+            onSubmit={(event) => {
+              const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+              if (submitter?.value === "delete" && !window.confirm(`刪除 ${p.name} 的 API key？刪除後無法復原。`)) event.preventDefault();
+            }}
+          >
             <fieldset disabled={pending}>
               <legend>{p.name}</legend>
               <p className="key-use">{p.use}</p>
@@ -56,11 +64,11 @@ export function ApiKeyForms({ keys }: { keys: KeySummary[] }) {
                 maxLength={512}
               />
               <div className="key-actions">
-                <button type="submit" name="intent" value="save">
+                <button className="secondary" type="submit" name="intent" value="save">
                   儲存
                 </button>
                 {saved ? (
-                  <button type="submit" name="intent" value="delete" formNoValidate>
+                  <button className="danger" type="submit" name="intent" value="delete" formNoValidate>
                     刪除
                   </button>
                 ) : null}

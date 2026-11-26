@@ -33,7 +33,7 @@ export function PostTripStatusForm({
           ))}
         </select>
       </label>
-      <button type="submit" disabled={pending}>
+      <button className="secondary" type="submit" disabled={pending}>
         {pending ? "儲存中…" : "儲存"}
       </button>
       {state ? (
