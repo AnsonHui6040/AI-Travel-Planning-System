@@ -74,6 +74,10 @@ export default async function TodayPage({ params, searchParams }: { params: Prom
               <span className="muted">延誤、休館、大雨或提早完成時，產生替代方案</span>
             </p>
           ) : null}
+          <p className="today-incident">
+            <Link href={`/trips/${tripId}/timeline?date=${view.pack.date}`}>Actual Timeline</Link>
+            <span className="muted">記錄實際到達、離開與完成狀態，結束今天時產生 Planned vs Actual</span>
+          </p>
           <SavePack pack={view.pack} />
           <TodayBody pack={view.pack} canEdit={view.canEdit} offline={false} />
         </>

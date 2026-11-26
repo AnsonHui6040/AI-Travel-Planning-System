@@ -215,6 +215,10 @@ export const dayRow = z.strictObject({
   status: E.dayStatus,
   offline_pack_version: int(0, 1_000_000),
   created_at: offsetDateTime,
+  // T39：Planned vs Actual（core 的 actualTimeline）
+  actual_timeline: nullable(json),
+  timeline_produced_at: nullable(offsetDateTime),
+  timeline_produced_by: nullable(uuid),
 });
 
 export const mobilityEstimate = z.strictObject({
