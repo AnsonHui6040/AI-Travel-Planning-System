@@ -146,3 +146,9 @@
     color: #f85149;
   }
 }
+
+.timeline-next {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+}
