@@ -70,7 +70,10 @@ describe("第 2.6 節 Incident 分級表", () => {
     [{ type: "long_queue" }, "L2"],
     [{ type: "attraction_closed" }, "L3"],
     [{ type: "rail_disruption" }, "L3"],
+    // T38：現場大雨使戶外行程無法進行，重排至下一個 Hard Constraint 為止（重排半日）
+    [{ type: "heavy_rain" }, "L3"],
     [{ type: "flight_cancelled" }, "L4"],
+    [{ type: "flight_shift" }, "L4"],
     [{ type: "extreme_weather" }, "L4"],
   ] as const)("%j 為 %s", (incident, level) => {
     expect(classifyIncident(incident)).toBe(level);
