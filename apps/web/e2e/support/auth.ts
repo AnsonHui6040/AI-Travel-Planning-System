@@ -415,3 +415,9 @@ export async function setItemFieldsAsAdmin(itemId: string, fields: Record<string
   const result = await adminClient().from("itinerary_items").update(fields).eq("id", itemId);
   if (result.error) throw new Error("設定測試項目失敗");
 }
+
+// T39：設定行程欄位（例如日期與狀態）
+export async function setTripFieldsAsAdmin(tripId: string, fields: Record<string, unknown>): Promise<void> {
+  const result = await adminClient().from("trips").update(fields).eq("id", tripId);
+  if (result.error) throw new Error("設定測試行程失敗");
+}
