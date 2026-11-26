@@ -43,6 +43,33 @@
   }
 }
 
+/* 樣板頁（/styleguide）並排深淺色用：數值與上方兩組相同（tooling/ui-tokens.test.ts 檢查一致） */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #fbf3e8;
+  --surface: #f3e6d4;
+  --text: #100904;
+  --muted: #5c4f42;
+  --line: #d9c8b3;
+  --line-strong: #6c5f51;
+  --accent: #b34100;
+  --solid: #382416;
+  --on-solid: #ffedd7;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #100904;
+  --surface: #1c120a;
+  --text: #ffedd7;
+  --muted: #a8988a;
+  --line: #40372e;
+  --line-strong: #6c5f51;
+  --accent: #dc5000;
+  --solid: #382416;
+  --on-solid: #ffedd7;
+}
+
 html {
   background: var(--bg);
 }

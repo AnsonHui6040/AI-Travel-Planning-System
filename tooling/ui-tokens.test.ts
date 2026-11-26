@@ -16,8 +16,19 @@ function tokens(block: string): Record<string, string> {
 }
 
 const darkStart = globals.indexOf("@media (prefers-color-scheme: dark)");
+const forcedLight = globals.indexOf('[data-theme="light"]');
+const forcedDark = globals.indexOf('[data-theme="dark"]');
 const light = tokens(globals.slice(0, darkStart));
-const dark = { ...light, ...tokens(globals.slice(darkStart)) };
+const dark = { ...light, ...tokens(globals.slice(darkStart, forcedLight)) };
+
+// 樣板頁的並排主題必須與系統深淺色相同
+describe("樣板頁的強制主題", () => {
+  it("[data-theme] 的數值與系統深淺色一致", () => {
+    const pick = (t: Record<string, string>) => Object.fromEntries(Object.entries(t).filter(([k]) => !k.startsWith("fs-")));
+    expect(tokens(globals.slice(forcedLight, forcedDark))).toEqual(pick(light));
+    expect(tokens(globals.slice(forcedDark, globals.indexOf("html {")))).toEqual(pick(dark));
+  });
+});
 
 function luminance(hex: string): number {
   const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));

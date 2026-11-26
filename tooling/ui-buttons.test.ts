@@ -29,6 +29,8 @@ const buttons: Found[] = files.flatMap((file) => {
 const variantOf = (attrs: string) => {
   const m = /className=(?:"([^"]*)"|\{([^}]*)\})/.exec(attrs);
   const text = m?.[1] ?? m?.[2] ?? "";
+  // 樣板頁以型別限定為四種變體的欄位指定（className={b.variant}）
+  if (/^\w+\.variant$/.test(text.trim())) return "typed";
   return text.match(/\b(primary|secondary|ghost|danger)\b/)?.[1] ?? null;
 };
 
