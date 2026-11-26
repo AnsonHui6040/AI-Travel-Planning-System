@@ -206,7 +206,8 @@ interface Ctx {
 }
 
 function context(input: IncidentPlanInput): Ctx {
-  const nowMin = Math.round((input.now.getTime() - zonedMidnight(input.date, input.timezone).getTime()) / 60_000);
+  // 在當天開始之前進入（例如前一晚預先處理）時，以 00:00 計算
+  const nowMin = Math.max(0, Math.round((input.now.getTime() - zonedMidnight(input.date, input.timezone).getTime()) / 60_000));
   const today = input.items
     .filter(isSlotted)
     .filter((i) => i.scheduled_date === input.date)

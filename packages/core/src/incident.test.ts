@@ -325,6 +325,15 @@ describe("E8：航班改一天", () => {
   });
 });
 
+describe("時間邊界", () => {
+  it("在當天開始之前進入時，以 00:00 計算", () => {
+    const plan = planIncident(base({ now: new Date("2026-11-26T10:00:00+09:00") }));
+    expect(plan.snapshot.time).toBe("00:00");
+    expect(plan.snapshot.completed).toEqual([]);
+    expect(plan.scope.itemIds).toEqual(["d3-photo", "d3-walk"]);
+  });
+});
+
 describe("輸入檢查", () => {
   it("觸發項目不在當天行程時拋出錯誤", () => {
     expect(() => planIncident(base({ trigger: { type: "attraction_closed", itemId: "d4-shrine" } }))).toThrow();

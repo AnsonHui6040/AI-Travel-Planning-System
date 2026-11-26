@@ -45,6 +45,8 @@ test("出現偏差（延誤 15 分鐘）時建議進入 Incident Mode（L1）", 
   const panel = first.locator("details.departure");
   await expect(panel).toContainText("預計到達雷門11:15（延誤 15 分鐘）");
   await expect(panel.getByRole("alert")).toHaveText("建議進入 Incident Mode（L1，延誤）");
+  // T38：由離開前檢查進入 Incident Mode
+  await expect(panel.getByRole("link", { name: "進入 Incident Mode" })).toHaveAttribute("href", /\/incident\?date=2026-12-10$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await capture(page, "late");
 

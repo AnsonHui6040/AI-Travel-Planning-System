@@ -3,7 +3,7 @@
 -- 批准其中一個方案後其餘失效（commit_proposal）。
 -- O：Owner；C：Companion；V：Viewer
 begin;
-select plan(18);
+select plan(19);
 
 insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-0000000000c1', 'io@example.test', 'authenticated', 'authenticated'),
@@ -105,21 +105,27 @@ select results_eq($$select count(*)::int, count(distinct live_branch_id)::int, m
   $$values (2, 1, 7, true, true)$$, '兩個方案為同一即時分支、同一 base version 的待批准提案');
 select results_eq($$select (i.snapshot -> 'alternatives' -> 0 ->> 'proposalId')::uuid = p.id
   from public.incidents i join public.proposals p on p.live_branch_id = i.live_branch_id
-  where p.change ->> 'summary' like '%博物館%'$$, $$values (true)$$, '比較表對應到提案');
+  where i.trip_id = 'c1000000-0000-0000-0000-000000000001' and p.change ->> 'summary' like '%博物館%'$$, $$values (true)$$, '比較表對應到提案');
 select results_eq($$select scheduled_date::text, current_version from public.itinerary_items i join public.trips t on t.id = i.trip_id
   where i.id = 'c2000000-0000-0000-0000-000000000001'$$, $$values ('2026-12-10', 7)$$, '未經批准不寫入：項目與版本不變');
 select results_eq($$select count(*) > 0, bool_and(recipient_id <> '00000000-0000-0000-0000-0000000000c2')
-  from public.notifications where kind = 'incident_started'$$, $$values (true, true)$$,
+  from public.notifications where kind = 'incident_started' and trip_id = 'c1000000-0000-0000-0000-000000000001'$$, $$values (true, true)$$,
   '通知其他成員（進入者本人除外）');
 
 -- 批准同區域方案：寫入並建立新版本，同一分支的其他方案失效
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000c1');
-select is(public.approve_proposal((select id from public.proposals where change ->> 'summary' like '%博物館%')) ->> 'outcome',
+select is(public.approve_proposal((select id from public.proposals where trip_id = 'c1000000-0000-0000-0000-000000000001'
+  and change ->> 'summary' like '%博物館%')) ->> 'outcome',
   'applied', 'Owner 批准方案');
 reset role;
 select results_eq($$select scheduled_date::text, scheduled_start::text from public.itinerary_items
   where id = 'c2000000-0000-0000-0000-000000000002'$$, $$values ('2026-12-10', '13:20:00')$$, '批准後候選排入時段');
-select results_eq($$select status::text from public.proposals where change ->> 'summary' = '大雨，刪減活動'$$,
+select results_eq($$select id::text, lifecycle_status::text from public.itinerary_items
+  where id in ('c2000000-0000-0000-0000-000000000001', 'c2000000-0000-0000-0000-000000000002') order by id$$,
+  $$values ('c2000000-0000-0000-0000-000000000001', 'verified'), ('c2000000-0000-0000-0000-000000000002', 'modified')$$,
+  '生命週期隨排程同步：移回候選清單為已核實，候選排入為已修改');
+select results_eq($$select status::text from public.proposals where trip_id = 'c1000000-0000-0000-0000-000000000001'
+  and change ->> 'summary' = '大雨，刪減活動'$$,
   $$values ('invalidated')$$, '同一即時分支的其他方案失效');
 
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000c2');

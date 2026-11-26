@@ -29,7 +29,7 @@
 | C-05 | T12 | `08_api_keys.test.sql`：A 沒有 key 時 A 的 job 不借用 B 的；Server Action 忽略表單傳入的擁有者；功能降級於各功能 Task | 已驗收 |
 | C-06 | T11、T12 | T12 實作 `api_key`；`plan_oauth` 以 T11 的 `CredentialProvider`（`available: false`）預留 | 已驗收 |
 | C-07 | T13 | `packages/ai/src/providers.contract.test.ts`：只連官方 HTTPS 端點、逾時分類、限流後以退避重試成功；T19：Google Maps 只連 `places.googleapis.com`、設逾時、拒絕 redirect，限流時回報錯誤不自動重試；T22：Open-Meteo、ODPT 只連固定官方端點、設逾時、拒絕 redirect、回應上限 2 MB（`packages/data-sources/src/live-data.contract.test.ts`） | 已驗收 |
-| C-08 | T14、T38 | T14：`packages/core/src/role-runner.test.ts`（故障時不自動切換，回傳下一順位）；詢問畫面於 T24 起的 job 畫面與 T38 | 部分 |
+| C-08 | T14、T38 | T14：`packages/core/src/role-runner.test.ts`（故障時不自動切換，回傳下一順位）；詢問畫面於 T24 起的 job 畫面。T38：Incident Mode 以 core 的 `planIncident` 確定性計算，不呼叫 AI，沒有供應商故障的情況；離線包的 Backup 與 Standby 仍顯示於當日行程 | 部分 |
 | C-09 | T03 | `supabase/tests/01_rls_enabled.test.sql`、`02_trip_permissions.test.sql`（anon 無權限）；伺服器端只用 anon key | 部分 |
 | C-10 | T33 | `supabase/tests/22_readonly_links.test.sql`：token 由 `create_readonly_link` 產生（256 位元），資料庫只存 SHA-256；期限 1–30 天；撤銷、過期後讀不到；Owner 不能自行寫入 token（`04_entity_permissions.test.sql`）；E2E 撤銷後無法存取 | 已驗收 |
 | C-11 | T03 | `apps/web/lib/server/guard.test.ts`；`supabase/tests/03_rate_limit.test.sql`；`apps/web/e2e/guard.spec.ts` | 已驗收 |
@@ -78,7 +78,7 @@
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
 | SH-01 | T03、T33 | `supabase/tests/02_trip_permissions.test.sql`（Owner、Companion、Viewer）；T33：唯讀連結（`22_readonly_links.test.sql`、E2E `apps/web/e2e/readonly.spec.ts`） | 已驗收 |
-| SH-02 | T03、T17、T32 | 權限表每一格對應的測試見 `docs/verification/T32.md`「權限表」；已實作的動作全部有 Owner、Companion、Viewer 三欄的測試。唯讀連結欄於 T33，Morning Check、Incident Mode、記錄活動完成於對應 Task | 部分 |
+| SH-02 | T03、T17、T32 | 權限表每一格對應的測試見 `docs/verification/T32.md`「權限表」；已實作的動作全部有 Owner、Companion、Viewer 三欄的測試。唯讀連結欄於 T33，Morning Check 於 T36；Incident Mode 於 T38（Owner、Companion 可進入，Viewer 與非成員被拒：`24_incident_mode.test.sql`、E2E `apps/web/e2e/incident.spec.ts`）；記錄活動完成於對應 Task | 部分 |
 | SH-03 | T12、T32 | `08_api_keys.test.sql`：job 只解密發起人本人的 key（C-05）；T32：加入行程不取得任何 key 的使用權，AI 動作仍由發起人的 key 執行；T31 的排程 job 只在 Owner 開啟時使用 Owner 的 key（`20_reverify.test.sql`） | 已驗收 |
 | SH-04 | T07、T09、T10A、T34 | T07：`packages/core/src/states.test.ts`；T09：`supabase/tests/05_apply_change.test.sql`（同一 base version 的第二個提案批准時失效）；T10A：`supabase/tests/06_restore_version.test.sql`（base version 不符時復原失敗、復原前的提案批准時失效）；T34：`apps/web/e2e/proposals.spec.ts` 兩個瀏覽器同時批准基於同一版本的兩個提案，只有一個套用、另一個顯示失效（連續執行 4 次結果一致）；真機 R6 TBD | 部分 |
 | SH-05 | T34、T35 | `packages/offline/src/offline.test.ts`（佇列轉為待批准提案並保留排入時的 base version、依序送出、網路失敗保留其餘）；`apps/web/lib/server/offline-sync-core.test.ts`（同步端點只建立待批准提案、權限、格式）；E2E `apps/web/e2e/today.spec.ts`（離線修改排入佇列，恢復網路後成為待批准提案，批准時依 T34 檢查版本）；真機 R3 TBD | 部分 |
@@ -102,14 +102,14 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 
 | 場景 | 場景檔 | 錄製回應 | 真 AI 5 次 | 狀態 |
 |---|---|---|---|---|
-| E1 | 前段：`evals/morning/E1.json`（錄製的預報，確定性規則）；後段（三個方案、只修改 13:00–17:00、未經批准不寫入）於 T38 | 前段不需要（不呼叫 AI；`docs/verification/evals/2026-11-26-E1-morning.md` PASS） | 後段 TBD | 部分 |
-| E2 | 待建立 | 無 | TBD | 未驗收 |
+| E1 | 前段：`evals/morning/E1.json`（錄製的預報，確定性規則）；後段：`evals/incident/E1.json`（確定性規則；未經批准不寫入另以 `24_incident_mode.test.sql` 與 E2E 驗證） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-26-E1-morning.md`、`2026-11-26-E1-incident.md` PASS） | 不適用 | 已驗收 |
+| E2 | `evals/incident/E2.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-26-E2-incident.md` PASS） | 不適用 | 已驗收 |
 | E3 | `evals/feasibility/E3.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-24-E3.md` PASS） | 不適用 | 已驗收 |
 | E4 | `evals/crosscheck/E4.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-24-E4.md` PASS） | 不適用 | 已驗收 |
 | E5 | `evals/baseline/E5.json`（確定性規則） | 不需要（不呼叫 AI；`evals/src/baseline.test.ts` PASS） | 不適用 | 已驗收 |
-| E6 | `evals/scenarios/E6.json` | PASS（`docs/verification/evals/2026-11-23-E6.md`） | TBD | 部分 |
+| E6 | Live Planner：`evals/scenarios/E6.json`；Incident Mode：`evals/incident/E6.json`（確定性規則） | PASS（`docs/verification/evals/2026-11-23-E6.md`）；Incident Mode 不需要（`2026-11-26-E6-incident.md` PASS） | Live Planner TBD | 部分 |
 | E7 | 待建立 | 無 | TBD | 未驗收 |
-| E8 | 待建立 | 無 | TBD | 未驗收 |
+| E8 | `evals/incident/E8.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-26-E8-incident.md` PASS） | 不適用 | 已驗收 |
 | E9 | `evals/zoning/E9.json` | PASS（`docs/verification/evals/2026-11-24-E9.md`） | TBD | 部分 |
 
 ## 沒有負責 Task 的規則

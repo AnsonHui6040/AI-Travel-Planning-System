@@ -33,7 +33,7 @@ const ROWS: Array<[string, (c: ComparisonRow) => string]> = [
   ["新活動", (c) => c.newActivity.join("、") || "留空"],
   ["到達時間", (c) => c.arrival ?? "—"],
   ["最遲離開", (c) => c.leaveBy ?? "—"],
-  ["成本", (c) => cost(c.cost)],
+  ["成本", (c) => (c.newActivity.length === 0 ? "—" : cost(c.cost))],
   ["步行", (c) => minutes(c.walkMinutes)],
   ["轉乘", (c) => (c.transfers === null ? "無資料" : `${c.transfers} 次`)],
   ["行李適合度", (c) => (c.luggageFit ? LEVEL3[c.luggageFit] : "無資料")],

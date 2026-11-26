@@ -84,3 +84,31 @@ alter function public.start_incident(uuid, public.incident_level, jsonb, integer
 revoke create on schema public from atps_change_writer;
 revoke all on function public.start_incident(uuid, public.incident_level, jsonb, integer, jsonb) from public, anon, authenticated, service_role;
 grant execute on function public.start_incident(uuid, public.incident_level, jsonb, integer, jsonb) to authenticated;
+
+-- 行程鎖定後，生命週期隨排程同步（第 2.5 節）：候選經提案排入某一天為已修改；
+-- 已排入的項目經提案移回候選清單（刪減活動、航班改期）為已核實（未核實者回到待核實），可再被選用。
+-- 同一個更新已自行設定生命週期時（例如 approve_day）不介入。
+create function private.sync_lifecycle_with_schedule() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  if new.lifecycle_status is distinct from old.lifecycle_status
+     or not exists (select 1 from public.trips t where t.id = new.trip_id and t.status in ('locked', 'in_progress')) then
+    return new;
+  end if;
+  if old.scheduled_date is null and new.scheduled_date is not null
+     and old.lifecycle_status in ('candidate', 'pending_verification', 'verified')
+     and old.verification_status in ('verified', 'partially_verified') then
+    new.lifecycle_status := 'modified';
+  elsif old.scheduled_date is not null and new.scheduled_date is null
+     and old.lifecycle_status in ('approved', 'locked', 'change_proposed', 'modified') then
+    new.lifecycle_status := case when old.verification_status in ('verified', 'partially_verified')
+      then 'verified' else 'pending_verification' end;
+  end if;
+  return new;
+end;
+$$;
+revoke all on function private.sync_lifecycle_with_schedule() from public, anon, authenticated, service_role;
+grant execute on function private.sync_lifecycle_with_schedule() to atps_change_writer;
+
+create trigger sync_lifecycle_with_schedule before update of scheduled_date on public.itinerary_items
+  for each row execute function private.sync_lifecycle_with_schedule();

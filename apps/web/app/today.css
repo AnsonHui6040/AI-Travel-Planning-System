@@ -234,7 +234,6 @@
   align-items: baseline;
 }
 
-.departure-incident a {
-  display: inline-block;
-  margin-left: 0.5rem;
+.departure-incident-link {
+  margin: 0.25rem 0 0;
 }
