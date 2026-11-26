@@ -5,21 +5,21 @@
 
 .proposals .trip-line {
   margin: 0 0 0.5rem;
-  color: #57606a;
+  color: var(--muted);
 }
 
 .proposals .muted {
-  color: #57606a;
+  color: var(--muted);
 }
 
 .proposals section {
-  border-top: 1px solid #d0d7de;
+  border-top: 1px dashed var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
 
 .proposals h2 {
-  font-size: 1.05rem;
+  font-size: var(--fs-h2);
   margin: 0 0 0.5rem;
 }
 
@@ -31,7 +31,7 @@
 
 .proposal-list li {
   padding: 0.6rem 0;
-  border-bottom: 1px solid #eaeef2;
+  border-bottom: 1px dashed var(--line);
   overflow-wrap: anywhere;
 }
 
@@ -44,28 +44,28 @@
   display: inline-block;
   margin-right: 0.5rem;
   padding: 0 0.4rem;
-  border: 1px solid #d0d7de;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-small);
   font-weight: 500;
 }
 
 .proposal-status.pending {
-  border-color: #9a6700;
-  color: #9a6700;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .proposal-list .version {
   display: inline-block;
   margin-right: 0.5rem;
   font-variant-numeric: tabular-nums;
-  color: #57606a;
+  color: var(--muted);
 }
 
 .proposal-list .meta {
   margin: 0.25rem 0 0;
-  color: #57606a;
-  font-size: 0.9rem;
+  color: var(--muted);
+  font-size: var(--fs-body);
 }
 
 .proposal-decision {
@@ -83,16 +83,16 @@
 .proposal-decision p {
   flex-basis: 100%;
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-body);
 }
 
 .proposal-decision .error {
-  color: #cf222e;
+  color: var(--accent);
 }
 
 .live-notice {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d0d7de;
-  border-radius: 4px;
-  background: #f6f8fa;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
 }

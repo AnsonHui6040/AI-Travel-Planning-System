@@ -1,0 +1,197 @@
+/* 介面方向 A：ORYZO 工作版（docs/verification/ui-review-2026-11-27.md）。
+   深淺色跟隨系統；所有頁面的顏色、字級、圓角只用這裡的變數。對比由 tooling/ui-tokens.test.ts 檢查。 */
+
+:root {
+  color-scheme: light dark;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+
+  /* 淺色：暖紙 */
+  --bg: #fbf3e8;
+  --surface: #f3e6d4;
+  --text: #100904;
+  --muted: #5c4f42;
+  --line: #d9c8b3;
+  --line-strong: #6c5f51;
+  --accent: #b34100;
+  --solid: #382416;
+  --on-solid: #ffedd7;
+
+  --fs-small: 15px;
+  --fs-body: 17px;
+  --fs-h3: 17px;
+  --fs-h2: 20px;
+  --fs-h1: 28px;
+
+  --radius-pill: 999px;
+  --radius-card: 12px;
+  --control: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 深色：ORYZO */
+    --bg: #100904;
+    --surface: #1c120a;
+    --text: #ffedd7;
+    --muted: #a8988a;
+    --line: #40372e;
+    --line-strong: #6c5f51;
+    --accent: #dc5000;
+    --solid: #382416;
+    --on-solid: #ffedd7;
+  }
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+main {
+  font-family: var(--font);
+  color: var(--text);
+}
+
+h1 {
+  font-size: var(--fs-h1);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  line-height: 1.3;
+  /* 英文標籤全大寫（MORNING CHECK）；中文不受影響 */
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+h3 {
+  font-size: var(--fs-h3);
+  font-weight: 500;
+}
+
+a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-style: dashed;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+button,
+.pill-link {
+  font: inherit;
+  font-size: var(--fs-body);
+  font-weight: 500;
+  min-height: var(--control);
+  padding: 0 1.25rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.pill-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  font-size: var(--fs-body);
+  min-height: var(--control);
+  box-sizing: border-box;
+  padding: 0 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--text);
+}
+
+textarea {
+  padding: 0.5rem 0.75rem;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  min-height: 0;
+  accent-color: var(--solid);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+[role="status"].error,
+.error {
+  color: var(--accent);
+}
+
+/* 行程內分頁 */
+.trip-nav {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1rem 1rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.trip-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control);
+  padding: 0 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.trip-nav a[aria-current="page"] {
+  background: var(--solid);
+  border-color: var(--solid);
+  color: var(--on-solid);
+}
+
+@media (max-width: 480px) {
+  .trip-nav {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .trip-nav a {
+    justify-content: center;
+    padding: 0;
+  }
+}

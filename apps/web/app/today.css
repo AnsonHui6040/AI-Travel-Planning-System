@@ -5,23 +5,23 @@
 
 .today .trip-line {
   margin: 0 0 0.5rem;
-  color: #57606a;
+  color: var(--muted);
 }
 
 .today .muted {
-  color: #57606a;
-  font-size: 0.9rem;
+  color: var(--muted);
+  font-size: var(--fs-body);
   margin: 0.25rem 0;
 }
 
 .today section {
-  border-top: 1px solid #d0d7de;
+  border-top: 1px dashed var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
 
 .today h2 {
-  font-size: 1.05rem;
+  font-size: var(--fs-h2);
   margin: 0 0 0.5rem;
 }
 
@@ -39,9 +39,9 @@
 .offline-banner,
 .today-message {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d0d7de;
-  border-radius: 4px;
-  background: #f6f8fa;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
 }
 
 .today-list {
@@ -55,7 +55,7 @@
   grid-template-columns: 6.5rem minmax(0, 1fr);
   gap: 0.75rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #eaeef2;
+  border-bottom: 1px dashed var(--line);
   overflow-wrap: anywhere;
 }
 
@@ -66,7 +66,7 @@
 
 .today-main h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--fs-body);
 }
 
 .today-leave {
@@ -81,13 +81,13 @@
 
 .today-photo img {
   width: 100%;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   display: block;
 }
 
 .today-photo figcaption {
-  font-size: 0.75rem;
-  color: #57606a;
+  font-size: var(--fs-small);
+  color: var(--muted);
 }
 
 .today-edit {
@@ -101,7 +101,7 @@
 .today-edit label {
   display: flex;
   flex-direction: column;
-  font-size: 0.85rem;
+  font-size: var(--fs-small);
 }
 
 .today-edit input {
@@ -123,9 +123,9 @@
 /* T36：Morning Check */
 .today .day-status {
   margin-left: 0.5rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   font-weight: 500;
-  color: #57606a;
+  color: var(--muted);
 }
 
 .morning-checks {
@@ -139,8 +139,8 @@
   grid-template-columns: 6.5rem 3rem minmax(0, 1fr);
   gap: 0.25rem 0.75rem;
   padding: 0.35rem 0;
-  border-bottom: 1px solid #eaeef2;
-  font-size: 0.9rem;
+  border-bottom: 1px dashed var(--line);
+  font-size: var(--fs-body);
   overflow-wrap: anywhere;
 }
 
@@ -149,21 +149,21 @@
 }
 
 .morning-checks li.attention .morning-status {
-  color: #9a6700;
+  color: var(--accent);
   font-weight: 600;
 }
 
 .morning-checks li.no_data .morning-status {
-  color: #57606a;
+  color: var(--muted);
 }
 
 .morning-form p {
   margin: 0.4rem 0 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-body);
 }
 
 .morning-form .error {
-  color: #cf222e;
+  color: var(--accent);
 }
 
 @media (max-width: 600px) {
@@ -173,7 +173,7 @@
 
   .morning-checks .morning-detail {
     grid-column: 1 / -1;
-    color: #57606a;
+    color: var(--muted);
   }
 }
 
@@ -181,8 +181,8 @@
 .departure {
   margin: 0.5rem 0;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d0d7de;
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
 }
 
 .departure summary {
@@ -198,26 +198,26 @@
 }
 
 .departure dt {
-  font-size: 0.75rem;
-  color: #57606a;
+  font-size: var(--fs-small);
+  color: var(--muted);
 }
 
 .departure dd {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-body);
 }
 
 .departure-notes {
   margin: 0.5rem 0 0;
   padding-left: 1.25rem;
-  font-size: 0.85rem;
-  color: #57606a;
+  font-size: var(--fs-small);
+  color: var(--muted);
 }
 
 .departure-incident {
   margin: 0.5rem 0 0;
   font-weight: 700;
-  color: #cf222e;
+  color: var(--accent);
 }
 
 @media (max-width: 600px) {
@@ -231,7 +231,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 0.75rem;
-  align-items: baseline;
+  align-items: center;
 }
 
 .departure-incident-link {

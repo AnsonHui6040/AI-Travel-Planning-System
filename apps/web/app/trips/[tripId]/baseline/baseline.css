@@ -5,12 +5,12 @@
 
 .baseline .trip-line {
   margin: 0 0 1rem;
-  color: #57606a;
+  color: var(--muted);
 }
 
 .baseline .muted {
-  color: #57606a;
-  font-size: 0.9rem;
+  color: var(--muted);
+  font-size: var(--fs-body);
   margin: 0.25rem 0;
 }
 
@@ -39,17 +39,17 @@
 }
 
 .baseline-form section {
-  border-top: 1px solid #d0d7de;
+  border-top: 1px dashed var(--line);
   padding: 1rem 0;
 }
 
 .baseline h2 {
-  font-size: 1.05rem;
+  font-size: var(--fs-h2);
   margin: 0 0 0.75rem;
 }
 
 .baseline h3 {
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   margin: 0.75rem 0 0.25rem;
 }
 
@@ -63,10 +63,9 @@
 .baseline textarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 0.5rem 0.6rem;
   font: inherit;
-  border: 1px solid #8c959f;
-  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
   resize: vertical;
 }
 
@@ -83,8 +82,8 @@
 }
 
 .baseline .row-card {
-  border: 1px solid #d0d7de;
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
   padding: 0.75rem;
   margin-bottom: 0.75rem;
 }
@@ -100,19 +99,19 @@
 
 .baseline .choices legend {
   float: none;
-  font-size: 0.9rem;
+  font-size: var(--fs-body);
   font-weight: 400;
   margin-bottom: 0.25rem;
 }
 
 .baseline .sticky-actions {
-  border-top: 1px solid #d0d7de;
+  border-top: 1px dashed var(--line);
   padding-top: 1rem;
 }
 
 .baseline-panel {
-  border: 1px solid #d0d7de;
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
 }
@@ -137,7 +136,7 @@
   grid-template-columns: auto 1fr;
   gap: 0.5rem;
   padding: 0.4rem 0;
-  border-bottom: 1px solid #eaeef2;
+  border-bottom: 1px dashed var(--line);
 }
 
 .baseline .issues li:last-child {
@@ -145,24 +144,23 @@
 }
 
 .baseline .issues.conflict strong {
-  color: #b42318;
+  color: var(--accent);
 }
 
 .baseline .issues.warning strong {
-  color: #9a6700;
+  color: var(--accent);
 }
 
 .baseline .confirm-form button {
   width: 100%;
-  background: #1f2328;
-  border-color: #1f2328;
-  color: #fff;
-  padding: 0.6rem 1rem;
+  background: var(--solid);
+  border-color: var(--solid);
+  color: var(--on-solid);
 }
 
 .baseline .confirm-form button:disabled {
-  background: #d0d7de;
-  border-color: #d0d7de;
-  color: #57606a;
+  background: var(--line);
+  border-color: var(--line);
+  color: var(--muted);
   cursor: not-allowed;
 }
