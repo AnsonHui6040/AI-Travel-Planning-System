@@ -1,0 +1,241 @@
+{
+  "id": "E1",
+  "title": "Morning Check 預報午後大雨（前段：At Risk 與 Standby）",
+  "rule": "第 9.3 節 E1 前段：Morning Check 將戶外攝影標示 At Risk 並將附近室內候選提升為 Standby；已付款活動保留",
+  "date": "2026-12-10",
+  "baseline": {
+    "start_date": "2026-12-08",
+    "end_date": "2026-12-12",
+    "timezone": "Asia/Tokyo",
+    "flights": [],
+    "lodgings": [
+      {
+        "name": "新宿飯店",
+        "area": "新宿",
+        "check_in": "2026-12-08",
+        "check_out": "2026-12-13",
+        "check_in_time": "15:00"
+      }
+    ],
+    "companions": 1,
+    "stamina_note": null,
+    "budget": null,
+    "fixed_activities": [
+      {
+        "name": "晚餐（已付款）",
+        "area": "新宿",
+        "date": "2026-12-10",
+        "start": "19:00",
+        "end": "21:00",
+        "paid": true
+      }
+    ],
+    "paid_items": [
+      "晚餐（已付款）"
+    ],
+    "must_visit": [],
+    "excluded": [],
+    "transport_preferences": [],
+    "photography_needs": "隅田川與晴空塔"
+  },
+  "items": [
+    {
+      "key": "museum",
+      "name_zh": "江戶東京博物館",
+      "type": "attraction",
+      "zone": "asakusa",
+      "weather_dependency": "low",
+      "start": "10:00",
+      "end": "11:30"
+    },
+    {
+      "key": "lunch",
+      "name_zh": "淺草午餐",
+      "type": "restaurant",
+      "zone": "asakusa",
+      "weather_dependency": "low",
+      "start": "12:00",
+      "end": "12:45"
+    },
+    {
+      "key": "photo",
+      "name_zh": "隅田川攝影",
+      "type": "photography",
+      "zone": "asakusa",
+      "weather_dependency": "high",
+      "start": "13:00",
+      "end": "15:00"
+    },
+    {
+      "key": "walk",
+      "name_zh": "上野公園散步",
+      "type": "attraction",
+      "zone": "ueno",
+      "weather_dependency": "high",
+      "start": "09:00",
+      "end": "09:40"
+    }
+  ],
+  "candidates": [
+    {
+      "key": "tourist-center",
+      "name_zh": "淺草文化觀光中心",
+      "zone": "asakusa",
+      "weather_dependency": "low"
+    },
+    {
+      "key": "engei",
+      "name_zh": "淺草演藝廳",
+      "zone": "asakusa",
+      "weather_dependency": "low"
+    },
+    {
+      "key": "sumida-park",
+      "name_zh": "隅田公園",
+      "zone": "asakusa",
+      "weather_dependency": "high"
+    },
+    {
+      "key": "ueno-museum",
+      "name_zh": "國立西洋美術館",
+      "zone": "ueno",
+      "weather_dependency": "low"
+    }
+  ],
+  "forecast": [
+    {
+      "time": "2026-12-10T00:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T01:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T02:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T03:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T04:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T05:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T06:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T07:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T08:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T09:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T10:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T11:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T12:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T13:00",
+      "precipitationProbability": 90,
+      "precipitationMm": 6.5
+    },
+    {
+      "time": "2026-12-10T14:00",
+      "precipitationProbability": 90,
+      "precipitationMm": 6.5
+    },
+    {
+      "time": "2026-12-10T15:00",
+      "precipitationProbability": 90,
+      "precipitationMm": 6.5
+    },
+    {
+      "time": "2026-12-10T16:00",
+      "precipitationProbability": 90,
+      "precipitationMm": 6.5
+    },
+    {
+      "time": "2026-12-10T17:00",
+      "precipitationProbability": 90,
+      "precipitationMm": 6.5
+    },
+    {
+      "time": "2026-12-10T18:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T19:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T20:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T21:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T22:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    },
+    {
+      "time": "2026-12-10T23:00",
+      "precipitationProbability": 10,
+      "precipitationMm": 0
+    }
+  ],
+  "expect": {
+    "at_risk": [
+      "photo"
+    ],
+    "standby": [
+      "tourist-center",
+      "engei"
+    ],
+    "unaffected": [
+      "museum",
+      "lunch",
+      "walk"
+    ]
+  }
+}

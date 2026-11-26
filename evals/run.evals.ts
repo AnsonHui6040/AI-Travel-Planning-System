@@ -5,18 +5,21 @@ import {
   parseBaselineScenario,
   parseCrossCheckScenario,
   parseFeasibilityScenario,
+  parseMorningScenario,
   parseZoningScenario,
   parseRecording,
   parseScenario,
   renderBaselineReport,
   renderCrossCheckReport,
   renderFeasibilityReport,
+  renderMorningReport,
   renderZoningReport,
   renderReport,
   replayInvoker,
   runBaselineScenario,
   runCrossCheckScenario,
   runFeasibilityScenario,
+  runMorningScenario,
   runZoningScenario,
   runScenario,
 } from "./src/index";
@@ -55,9 +58,23 @@ const feasibilityFiles = readdirSync(join(import.meta.dirname, "feasibility"))
   .filter((f) => f.endsWith(".json"))
   .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
 
+// T36：Morning Check 場景（錄製的預報，確定性規則）
+const morningFiles = readdirSync(join(import.meta.dirname, "morning"))
+  .filter((f) => f.endsWith(".json"))
+  .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
+
 it("有要執行的場景", () => {
-  expect(files.length + baselineFiles.length + crossCheckFiles.length + zoningFiles.length + feasibilityFiles.length).toBeGreaterThan(0);
+  expect(files.length + baselineFiles.length + crossCheckFiles.length + zoningFiles.length + feasibilityFiles.length + morningFiles.length).toBeGreaterThan(0);
 });
+
+for (const file of morningFiles) {
+  it(`評估 ${file}`, () => {
+    const report = runMorningScenario(parseMorningScenario(read(join(import.meta.dirname, "morning", file))));
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(join(outDir, `${date}-${report.scenario.id}-morning.md`), renderMorningReport(report, { date }));
+    expect(report.passed).toBe(true);
+  });
+}
 
 for (const file of feasibilityFiles) {
   it(`評估 ${file}`, () => {

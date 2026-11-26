@@ -404,3 +404,14 @@ export async function scheduleItemAsAdmin(tripId: string, itemId: string, date: 
   const trip = await admin.from("trips").update({ status: "locked" }).eq("id", tripId);
   if (trip.error) throw new Error("設定行程狀態失敗");
 }
+
+// T36：設定每日狀態（例如已批准）與營業時段
+export async function setDayStatusAsAdmin(tripId: string, date: string, status: "draft" | "approved" | "day_ready"): Promise<void> {
+  const result = await adminClient().from("days").upsert({ trip_id: tripId, date, status }, { onConflict: "trip_id,date" });
+  if (result.error) throw new Error("設定測試每日狀態失敗");
+}
+
+export async function setItemFieldsAsAdmin(itemId: string, fields: Record<string, unknown>): Promise<void> {
+  const result = await adminClient().from("itinerary_items").update(fields).eq("id", itemId);
+  if (result.error) throw new Error("設定測試項目失敗");
+}

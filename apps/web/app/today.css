@@ -119,3 +119,60 @@
     gap: 0.25rem;
   }
 }
+
+/* T36：Morning Check */
+.today .day-status {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #57606a;
+}
+
+.morning-checks {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.morning-checks li {
+  display: grid;
+  grid-template-columns: 6.5rem 3rem minmax(0, 1fr);
+  gap: 0.25rem 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #eaeef2;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.morning-checks .morning-name {
+  font-weight: 600;
+}
+
+.morning-checks li.attention .morning-status {
+  color: #9a6700;
+  font-weight: 600;
+}
+
+.morning-checks li.no_data .morning-status {
+  color: #57606a;
+}
+
+.morning-form p {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+}
+
+.morning-form .error {
+  color: #cf222e;
+}
+
+@media (max-width: 600px) {
+  .morning-checks li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .morning-checks .morning-detail {
+    grid-column: 1 / -1;
+    color: #57606a;
+  }
+}

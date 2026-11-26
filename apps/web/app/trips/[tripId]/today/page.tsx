@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TodayBody } from "../../../../components/today-body";
 import { loadToday } from "../../../../lib/server/today";
+import { MORNING_CHECK_LABELS, type MorningCheckName } from "@atps/core";
+import { MorningCheckForm } from "./morning-check-form";
 import { SavePack } from "./save-pack";
 import "../../../settings/settings.css";
 import "../../../today.css";
@@ -10,6 +12,9 @@ import "../../../today.css";
 
 export const metadata: Metadata = { title: "當日行程" };
 export const dynamic = "force-dynamic";
+
+const CHECK_STATUS: Record<string, string> = { ok: "正常", attention: "留意", no_data: "無資料" };
+const DAY_STATUS: Record<string, string> = { approved: "已批准", day_ready: "Day Ready", in_progress: "進行中", completed: "已完成" };
 
 export default async function TodayPage({ params, searchParams }: { params: Promise<{ tripId: string }>; searchParams: Promise<{ date?: string }> }) {
   const { tripId } = await params;
@@ -41,6 +46,28 @@ export default async function TodayPage({ params, searchParams }: { params: Prom
       ) : null}
       {view.pack ? (
         <>
+          <section aria-label="Morning Check" className="morning">
+            <h2>
+              Morning Check
+              <span className="day-status">{DAY_STATUS[view.dayStatus ?? ""] ?? "尚未批准"}</span>
+            </h2>
+            {view.morning ? (
+              <ul className="morning-checks">
+                {view.morning.checks.map((c) => (
+                  <li key={c.check} className={c.status}>
+                    <span className="morning-name">{MORNING_CHECK_LABELS[c.check as MorningCheckName] ?? c.check}</span>
+                    <span className="morning-status">{CHECK_STATUS[c.status] ?? c.status}</span>
+                    <span className="morning-detail">{c.detail}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="muted">今天還沒有執行 Morning Check。檢查天氣、警報、交通、固定活動、預約、營業、第一段交通、行李、同行者與 Backup。</p>
+            )}
+            {view.canEdit && (view.dayStatus === "approved" || view.dayStatus === "day_ready") ? (
+              <MorningCheckForm tripId={tripId} date={view.pack.date} label={view.morning ? "再次執行 Morning Check" : "執行 Morning Check"} />
+            ) : null}
+          </section>
           <SavePack pack={view.pack} />
           <TodayBody pack={view.pack} canEdit={view.canEdit} offline={false} />
         </>

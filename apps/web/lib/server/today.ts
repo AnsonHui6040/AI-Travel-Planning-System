@@ -11,7 +11,16 @@ const SCHEDULED_STATES = ["approved", "locked", "change_proposed", "modified"];
 export type TodayView =
   | { state: "signed_out" }
   | { state: "not_found" }
-  | { state: "ok"; tripName: string; canEdit: boolean; dates: string[]; pack: DayPack | null };
+  | {
+      state: "ok";
+      tripName: string;
+      canEdit: boolean;
+      dates: string[];
+      pack: DayPack | null;
+      // T36
+      dayStatus: string | null;
+      morning: { checks: Array<{ check: string; status: string; detail: string }>; createdAt: string } | null;
+    };
 
 function localToday(timezone: string): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
@@ -38,7 +47,7 @@ export async function loadToday(tripId: string, requestedDate: string | undefine
   const dates = [...new Set((rows ?? []).map((r) => String(r.scheduled_date)))].sort();
   const today = localToday(timezone);
   const date = requestedDate && dates.includes(requestedDate) ? requestedDate : dates.includes(today) ? today : dates[0];
-  if (!date) return { state: "ok", tripName: String(trip.name), canEdit, dates, pack: null };
+  if (!date) return { state: "ok", tripName: String(trip.name), canEdit, dates, pack: null, dayStatus: null, morning: null };
 
   const dayRows = (rows ?? []).filter((r) => r.scheduled_date === date && r.scheduled_start && r.scheduled_end);
   const ids = dayRows.map((r) => String(r.id));
@@ -57,13 +66,15 @@ export async function loadToday(tripId: string, requestedDate: string | undefine
     const chosen = estimates.data.find((e) => e.mode === mode);
     if (chosen) segments.set(`${String(s.from_item_id)}>${String(s.to_item_id)}`, chosen.total_minutes);
   }
+  // Backup 與 Morning Check 提升的 Standby（尚未排入的已核實候選）
   const { data: backups } = await session
     .from("itinerary_items")
-    .select("id, name_zh")
+    .select("id, name_zh, standby")
     .eq("trip_id", tripId)
-    .eq("candidate_role", "backup")
+    .is("scheduled_date", null)
+    .or("candidate_role.eq.backup,standby.eq.true")
     .in("verification_status", ["verified", "partially_verified"])
-    .limit(10);
+    .limit(20);
   const { data: photos } = ids.length > 0 ? await session.from("photos").select("item_id, storage_path, author").eq("trip_id", tripId).in("item_id", ids).limit(50) : { data: [] };
 
   const pack = buildDayPack({
@@ -84,8 +95,26 @@ export async function loadToday(tripId: string, requestedDate: string | undefine
     })),
     fixed,
     travelMinutes: (from, to) => segments.get(`${from}>${to}`) ?? null,
-    backups: (backups ?? []).map((b) => ({ id: String(b.id), name_zh: String(b.name_zh) })),
+    backups: (backups ?? []).map((b) => ({ id: String(b.id), name_zh: String(b.name_zh), standby: b.standby === true })),
     photos: (photos ?? []).map((p) => ({ item_id: String(p.item_id), url: `/api/photos/${String(p.storage_path)}`, credit: String(p.author) })),
   });
-  return { state: "ok", tripName: String(trip.name), canEdit, dates, pack };
+  const { data: day } = await session.from("days").select("status").eq("trip_id", tripId).eq("date", date).maybeSingle();
+  const { data: check } = await session
+    .from("morning_checks")
+    .select("result, created_at")
+    .eq("trip_id", tripId)
+    .eq("date", date)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const checks = (check?.result as { checks?: unknown } | undefined)?.checks;
+  const morning = Array.isArray(checks)
+    ? {
+        checks: checks
+          .filter((c): c is { check: string; status: string; detail: string } => typeof c === "object" && c !== null && "check" in c)
+          .map((c) => ({ check: String(c.check), status: String(c.status), detail: String(c.detail) })),
+        createdAt: String(check?.created_at),
+      }
+    : null;
+  return { state: "ok", tripName: String(trip.name), canEdit, dates, pack, dayStatus: (day?.status as string | undefined) ?? null, morning };
 }
