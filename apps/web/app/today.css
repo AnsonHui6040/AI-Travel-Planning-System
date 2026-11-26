@@ -176,3 +176,52 @@
     color: #57606a;
   }
 }
+
+/* T37：離開前檢查 */
+.departure {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+}
+
+.departure summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.departure dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 1rem;
+  margin: 0.5rem 0 0;
+}
+
+.departure dt {
+  font-size: 0.75rem;
+  color: #57606a;
+}
+
+.departure dd {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.departure-notes {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.85rem;
+  color: #57606a;
+}
+
+.departure-incident {
+  margin: 0.5rem 0 0;
+  font-weight: 700;
+  color: #cf222e;
+}
+
+@media (max-width: 600px) {
+  .departure dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

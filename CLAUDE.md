@@ -75,6 +75,7 @@
 - 共同批准（T34）：批准與否決經 `/trips/[tripId]/proposals` 的 Server Action，以 core 的 `applyChange` 與 `SupabaseChangeWriter`（使用者 session）執行，批准者取自 session。Realtime 由瀏覽器以 anon key 與本人 session 訂閱 `notifications`（訂閱前先 `realtime.setAuth`，否則 RLS 不推送）；CSP 的 `connect-src` 只另外允許 `NEXT_PUBLIC_SUPABASE_URL`。`packages/db` 讀取 `itinerary_items` 時把 Postgres 的 `HH:MM:SS` 轉為 `HH:MM`。
 - 離線（T35，D11、SH-05）：當日包與佇列的計算在 `@atps/offline`（純函式）；瀏覽器端 IndexedDB 在 `apps/web/lib/client/offline-store.ts`。`public/sw.js` 只快取 `/offline-today`、`/_next/static`、`/api/photos`、`/icons`，`/trips/<id>/today` 離線時改回應 `/offline-today`；API 與 Server Action 不快取。離線修改只經 `/api/trips/[tripId]/offline-proposals` 建立待批准提案。
 - Morning Check（T36）：core 的 `morningCheck` 計算十項（天氣、警報、交通、固定活動、預約、營業、第一段交通、行李、同行者、Backup），沒有資料標示「無資料」不當作通過；只經 `complete_morning_check`（擁有者 `atps_change_writer`，Owner、Companion）寫入：At Risk 以 approved_fact_invalidated 提案自動套用、Standby 提升候選、該日進入 Day Ready、結果存 `morning_checks`。確定性評估場景放 `evals/morning/`。
+- 離開前檢查（T37）：core 的 `departureCheck`（純函式，瀏覽器端以當日包計算，離線可用）；偏差依決策 0004 的 `classifyDelay` 分級，L1 以上建議進入 Incident Mode。E2E 以 Playwright 的 `page.clock` 模擬旅行當天。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。
