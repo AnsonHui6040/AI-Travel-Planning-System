@@ -1,5 +1,5 @@
 import { checkProviderAdapter, type KeyTester, type ProviderAdapter, type ProviderRequest } from "@atps/core";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   ProviderError,
   createAnthropicAdapter,
@@ -210,6 +210,17 @@ describe.each(CASES)("ProviderAdapter 共用契約：$name", (c) => {
   it("超過逾時分類為逾時（C-07）", async () => {
     const { opts } = options(["hang"], { timeoutMs: 50 });
     expect((await failure(c.create(opts).generate(request(), credential))).kind).toBe("timeout");
+  });
+
+  // Node 的 timer 可能比 Date.now() 早約 1ms 觸發。固定時鐘重現這個落差
+  it("系統時鐘落後於逾時計時器時仍分類為逾時（C-07）", async () => {
+    const { opts } = options(["hang"], { timeoutMs: 50 });
+    const clock = vi.spyOn(Date, "now").mockReturnValue(NOW.getTime());
+    try {
+      expect((await failure(c.create(opts).generate(request(), credential))).kind).toBe("timeout");
+    } finally {
+      clock.mockRestore();
+    }
   });
 
   it("限流時以退避重試後成功（C-07）", async () => {

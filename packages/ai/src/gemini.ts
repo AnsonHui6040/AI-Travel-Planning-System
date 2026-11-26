@@ -8,27 +8,39 @@ import { KEY_TEST_TIMEOUT_MS, citations, requireApiKey, settings, useSearch, typ
 // 與 Google 搜尋並用需 Gemini 3 以上的模型（T14 選擇模型時確認）。
 const ID = "gemini";
 
-function client(options: ProviderOptions, apiKey: string, overrides: { timeoutMs?: number; attempts?: number } = {}) {
+function client(
+  options: ProviderOptions,
+  apiKey: string,
+  fetch: typeof globalThis.fetch,
+  overrides: { timeoutMs?: number; attempts?: number } = {},
+) {
   const s = settings(options);
   return new GoogleGenAI({
     apiKey,
     httpOptions: {
       timeout: overrides.timeoutMs ?? s.timeoutMs,
       retryOptions: { attempts: overrides.attempts ?? s.maxRetries + 1, initialDelay: 1, maxDelay: 30 },
-      ...(s.fetch ? { fetch: s.fetch } : {}),
+      fetch,
     },
   });
 }
 
-// SDK 逾時以 AbortError 呈現；以計時判斷是否為逾時
-async function withTimeoutKind<T>(timeoutMs: number, run: () => Promise<T>): Promise<T> {
-  const started = Date.now();
+// SDK 逾時只拋 AbortError。每次嘗試有自己的 signal，adapter 不傳入取消用的 signal，
+// 所以最後一次嘗試的 signal 已中止即代表逾時。不比較時鐘：timer 可能比 Date.now() 早觸發。
+// 注入 fetch 後 SDK 不再停用 Undici 的 300 秒逾時；它超過本專案的逾時設定，且同樣分類為逾時。
+async function withTimeoutKind<T>(
+  options: ProviderOptions,
+  run: (fetch: typeof globalThis.fetch) => Promise<T>,
+): Promise<T> {
+  let signal: AbortSignal | null | undefined;
+  const fetch: typeof globalThis.fetch = (input, init) => {
+    signal = init?.signal;
+    return options.fetch ? options.fetch(input, init) : globalThis.fetch(input, init);
+  };
   try {
-    return await run();
+    return await run(fetch);
   } catch (error) {
-    if (classifyProviderError(error) === "interrupted" && Date.now() - started >= timeoutMs) {
-      throw new ProviderError("timeout", ID);
-    }
+    if (signal?.aborted && classifyProviderError(error) === "interrupted") throw new ProviderError("timeout", ID);
     throw error;
   }
 }
@@ -42,8 +54,8 @@ export function createGeminiAdapter(options: ProviderOptions = {}): ProviderAdap
     const schema = toProviderSchema(request.outputSchema, "gemini");
 
     try {
-      const response = await withTimeoutKind(s.timeoutMs, () =>
-        client(options, apiKey).models.generateContent({
+      const response = await withTimeoutKind(options, (fetch) =>
+        client(options, apiKey, fetch).models.generateContent({
           model: request.model,
           contents: request.input,
           config: {
@@ -90,9 +102,9 @@ const MAX_MODELS = 200;
 export async function listGeminiModels(apiKey: string, options: ProviderOptions = {}): Promise<string[]> {
   const timeoutMs = options.timeoutMs ?? KEY_TEST_TIMEOUT_MS;
   try {
-    return await withTimeoutKind(timeoutMs, async () => {
+    return await withTimeoutKind(options, async (fetch) => {
       const ids: string[] = [];
-      const pager = await client(options, apiKey, { timeoutMs }).models.list({ config: { pageSize: 100 } });
+      const pager = await client(options, apiKey, fetch, { timeoutMs }).models.list({ config: { pageSize: 100 } });
       for await (const model of pager) {
         if (model.name && (model.supportedActions ?? []).includes("generateContent")) {
           ids.push(model.name.replace(/^models\//, ""));
@@ -113,8 +125,8 @@ export function createGeminiKeyTester(options: ProviderOptions = {}): KeyTester 
     async test(secret) {
       const timeoutMs = options.timeoutMs ?? KEY_TEST_TIMEOUT_MS;
       try {
-        await withTimeoutKind(timeoutMs, () =>
-          client(options, secret, { timeoutMs, attempts: 1 }).models.list({ config: { pageSize: 1 } }),
+        await withTimeoutKind(options, (fetch) =>
+          client(options, secret, fetch, { timeoutMs, attempts: 1 }).models.list({ config: { pageSize: 1 } }),
         );
         return { ok: true };
       } catch (error) {
