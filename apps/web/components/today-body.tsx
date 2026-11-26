@@ -3,6 +3,7 @@
 import { drainQueue, enqueue, isPackDay, leaveCountdown, type DayPack, type QueuedChange } from "@atps/offline";
 import { useCallback, useEffect, useState } from "react";
 import { loadQueue, saveQueue } from "../lib/client/offline-store";
+import { DeparturePanel } from "./departure-panel";
 
 // T35：當日行程（線上與離線共用）。最遲離開倒數每分鐘更新；修改先排入佇列，有網路時送出為待批准提案（SH-05）
 
@@ -113,7 +114,7 @@ export function TodayBody({ pack, canEdit, offline }: { pack: DayPack; canEdit: 
       ) : null}
       {queue.length > 0 ? <p className="muted">佇列中有 {queue.length} 項修改尚未送出</p> : null}
       <ol className="today-list">
-        {pack.entries.map((entry) => {
+        {pack.entries.map((entry, index) => {
           // 倒數只在當天顯示
           const minutes = isPackDay(pack, now) ? leaveCountdown(pack, entry, now) : null;
           const photo = pack.photos.find((p) => p.itemId === entry.itemId);
@@ -140,6 +141,8 @@ export function TodayBody({ pack, canEdit, offline }: { pack: DayPack; canEdit: 
                   {STATUS_LABELS[entry.verificationStatus] ?? entry.verificationStatus}
                   {entry.atRisk ? "，At Risk" : ""}
                 </p>
+                {/* T37：只在當天顯示離開前檢查 */}
+                {isPackDay(pack, now) ? <DeparturePanel pack={pack} index={index} now={now} /> : null}
                 {canEdit ? (
                   editing === entry.itemId ? (
                     <div className="today-edit">
