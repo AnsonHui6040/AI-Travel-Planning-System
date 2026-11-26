@@ -298,7 +298,8 @@ export const versionRow = z.strictObject({
 export const incidentRow = z.strictObject({
   id: uuid,
   trip_id: uuid,
-  level: E.incidentLevel,
+  // T38：提早完成、取消時段等現場變更不分級
+  level: nullable(E.incidentLevel),
   snapshot: json,
   available_minutes: nullable(int(0, 1440)),
   live_branch_id: uuid,

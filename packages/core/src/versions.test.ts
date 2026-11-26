@@ -49,6 +49,20 @@ describe("第 2.7 節 Major 與 Minor 判定", () => {
     ).toBe("major");
   });
 
+  // T38：候選清單沒有日期；把候選排入某一天或把項目移回候選清單屬同一天內的單一景點改變
+  it("候選排入某一天、項目移回候選清單為 Minor", () => {
+    const withCandidate = [...items, { id: "x", scheduled_date: null }];
+    expect(
+      classifyVersionKind(
+        [
+          { op: "schedule_item", itemId: "a", date: null, start: null, end: null },
+          { op: "schedule_item", itemId: "x", date: "2026-12-01", start: "10:00", end: "11:00" },
+        ],
+        withCandidate,
+      ),
+    ).toBe("minor");
+  });
+
   it("同時影響兩天以上為 Major", () => {
     expect(
       classifyVersionKind(

@@ -72,6 +72,7 @@ describe("notificationLabel", () => {
   it("顯示通知種類；未知種類顯示通用文字", () => {
     expect(notificationLabel("proposal_applied")).toBe("行程已更新");
     expect(notificationLabel("trip_locked")).toBe("行程已鎖定");
+    expect(notificationLabel("incident_started")).toBe("進入 Incident Mode，有替代方案待批准");
     expect(notificationLabel("something_else")).toBe("行程有新消息");
   });
 });

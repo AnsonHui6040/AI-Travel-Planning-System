@@ -68,7 +68,10 @@ export type IncidentInput =
   | { type: "long_queue" }
   | { type: "attraction_closed" }
   | { type: "rail_disruption" }
+  // T38：現場大雨使戶外行程無法進行
+  | { type: "heavy_rain" }
   | { type: "flight_cancelled" }
+  | { type: "flight_shift" }
   | { type: "extreme_weather" };
 
 export function classifyIncident(incident: IncidentInput): IncidentLevel | "none" {
@@ -79,8 +82,10 @@ export function classifyIncident(incident: IncidentInput): IncidentLevel | "none
       return "L2";
     case "attraction_closed":
     case "rail_disruption":
+    case "heavy_rain":
       return "L3";
     case "flight_cancelled":
+    case "flight_shift":
     case "extreme_weather":
       return "L4";
   }

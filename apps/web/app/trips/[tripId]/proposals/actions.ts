@@ -9,13 +9,20 @@ import { proposalsActionDeps } from "../../../../lib/server/proposals";
 export async function approveProposal(_previous: ProposalActionResult | null, form: FormData): Promise<ProposalActionResult> {
   const result = await approveProposalAction(await proposalsActionDeps(), form.get("proposalId"));
   const tripId = form.get("tripId");
-  if (typeof tripId === "string") revalidatePath(`/trips/${tripId}/proposals`);
+  if (typeof tripId === "string") {
+    revalidatePath(`/trips/${tripId}/proposals`);
+    // T38：Incident Mode 的即時分支在批准後更新狀態
+    revalidatePath(`/trips/${tripId}/incident`, "layout");
+  }
   return result;
 }
 
 export async function rejectProposal(_previous: ProposalActionResult | null, form: FormData): Promise<ProposalActionResult> {
   const result = await rejectProposalAction(await proposalsActionDeps(), form.get("proposalId"));
   const tripId = form.get("tripId");
-  if (typeof tripId === "string") revalidatePath(`/trips/${tripId}/proposals`);
+  if (typeof tripId === "string") {
+    revalidatePath(`/trips/${tripId}/proposals`);
+    revalidatePath(`/trips/${tripId}/incident`, "layout");
+  }
   return result;
 }

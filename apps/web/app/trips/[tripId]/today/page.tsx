@@ -68,6 +68,12 @@ export default async function TodayPage({ params, searchParams }: { params: Prom
               <MorningCheckForm tripId={tripId} date={view.pack.date} label={view.morning ? "再次執行 Morning Check" : "執行 Morning Check"} />
             ) : null}
           </section>
+          {view.canEdit ? (
+            <p className="today-incident">
+              <Link href={`/trips/${tripId}/incident?date=${view.pack.date}`}>Incident Mode</Link>
+              <span className="muted">延誤、休館、大雨或提早完成時，產生替代方案</span>
+            </p>
+          ) : null}
           <SavePack pack={view.pack} />
           <TodayBody pack={view.pack} canEdit={view.canEdit} offline={false} />
         </>

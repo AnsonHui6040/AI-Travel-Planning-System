@@ -1,0 +1,221 @@
+{
+  "id": "E2",
+  "title": "15:40 晴空塔提早完成",
+  "rule": "第 9.3 節 E2：只從 Candidate List 選擇；顯示最遲離開時間；不自動加入行程",
+  "date": "2026-12-09",
+  "timezone": "Asia/Tokyo",
+  "now": "15:40",
+  "tripDates": [
+    "2026-12-08",
+    "2026-12-09",
+    "2026-12-10",
+    "2026-12-11",
+    "2026-12-12"
+  ],
+  "trigger": {
+    "type": "early_finish"
+  },
+  "weather": null,
+  "items": [
+    {
+      "key": "sensoji",
+      "name_zh": "淺草寺",
+      "type": "attraction",
+      "zone": "asakusa",
+      "weather_dependency": "medium",
+      "date": "2026-12-09",
+      "start": "09:00",
+      "end": "10:30"
+    },
+    {
+      "key": "skytree",
+      "name_zh": "晴空塔",
+      "type": "attraction",
+      "zone": "oshiage",
+      "weather_dependency": "low",
+      "date": "2026-12-09",
+      "start": "13:00",
+      "end": "16:30",
+      "priority": 5,
+      "stay": 210
+    },
+    {
+      "key": "monja",
+      "name_zh": "月島文字燒",
+      "type": "restaurant",
+      "zone": "tsukishima",
+      "weather_dependency": "low",
+      "date": "2026-12-09",
+      "start": "18:30",
+      "end": "20:00",
+      "stay": 90
+    },
+    {
+      "key": "d3-photo",
+      "name_zh": "隅田川攝影",
+      "type": "photography",
+      "zone": "asakusa",
+      "weather_dependency": "high",
+      "date": "2026-12-10",
+      "start": "13:00",
+      "end": "15:00"
+    },
+    {
+      "key": "aquarium",
+      "name_zh": "墨田水族館",
+      "type": "attraction",
+      "zone": "oshiage",
+      "weather_dependency": "low",
+      "date": null,
+      "start": null,
+      "end": null,
+      "priority": 4,
+      "stay": 90,
+      "cost": {
+        "amount": 2500,
+        "currency": "JPY"
+      }
+    },
+    {
+      "key": "postal",
+      "name_zh": "郵政博物館",
+      "type": "attraction",
+      "zone": "oshiage",
+      "weather_dependency": "low",
+      "date": null,
+      "start": null,
+      "end": null,
+      "stay": 60,
+      "cost": {
+        "amount": 300,
+        "currency": "JPY"
+      }
+    },
+    {
+      "key": "day-trip",
+      "name_zh": "整日陶藝體驗",
+      "type": "activity",
+      "zone": "oshiage",
+      "weather_dependency": "low",
+      "date": null,
+      "start": null,
+      "end": null,
+      "stay": 300
+    },
+    {
+      "key": "conflict-shop",
+      "name_zh": "營業時間矛盾的店",
+      "type": "shopping",
+      "zone": "oshiage",
+      "weather_dependency": "low",
+      "date": null,
+      "start": null,
+      "end": null,
+      "verification_status": "conflict",
+      "priority": 5
+    },
+    {
+      "key": "kiyosumi",
+      "name_zh": "清澄庭園",
+      "type": "attraction",
+      "zone": "kiyosumi",
+      "weather_dependency": "medium",
+      "date": null,
+      "start": null,
+      "end": null,
+      "stay": 60
+    }
+  ],
+  "segments": [
+    {
+      "from": "skytree",
+      "to": "aquarium",
+      "estimates": [
+        {
+          "mode": "walk",
+          "door_to_door_minutes": 3,
+          "price": null,
+          "walk_minutes": 3,
+          "transfers": 0,
+          "luggage_friendliness": "medium",
+          "comfort": "medium",
+          "delay_risk": "low",
+          "source_urls": [
+            "https://www.gotokyo.org/"
+          ],
+          "buffer_minutes": 10,
+          "total_minutes": 13
+        }
+      ]
+    },
+    {
+      "from": "aquarium",
+      "to": "monja",
+      "estimates": [
+        {
+          "mode": "rail",
+          "door_to_door_minutes": 25,
+          "price": {
+            "amount": 220,
+            "currency": "JPY"
+          },
+          "walk_minutes": 8,
+          "transfers": 1,
+          "luggage_friendliness": "medium",
+          "comfort": "medium",
+          "delay_risk": "low",
+          "source_urls": [
+            "https://www.tokyometro.jp/"
+          ],
+          "buffer_minutes": 15,
+          "total_minutes": 40
+        }
+      ]
+    }
+  ],
+  "judges": [
+    {
+      "type": "only_candidates"
+    },
+    {
+      "type": "requires_approval"
+    },
+    {
+      "type": "change_kind",
+      "allowed": [
+        "add_candidate_to_gap"
+      ]
+    },
+    {
+      "type": "dates_unchanged",
+      "dates": [
+        "2026-12-08",
+        "2026-12-10",
+        "2026-12-11",
+        "2026-12-12"
+      ]
+    },
+    {
+      "type": "items_preserved",
+      "itemIds": [
+        "skytree",
+        "monja"
+      ]
+    },
+    {
+      "type": "proposal_count",
+      "min": 1,
+      "max": 3
+    },
+    {
+      "type": "leave_by_shown"
+    },
+    {
+      "type": "comparison_complete"
+    },
+    {
+      "type": "level",
+      "level": "none"
+    }
+  ]
+}

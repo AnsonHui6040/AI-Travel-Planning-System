@@ -1,0 +1,119 @@
+{
+  "id": "E8",
+  "title": "回程航班提前一天",
+  "rule": "第 9.3 節 E8：分類為 Major；產生整趟重算提案；需批准",
+  "date": "2026-12-10",
+  "timezone": "Asia/Tokyo",
+  "now": "08:30",
+  "tripDates": [
+    "2026-12-08",
+    "2026-12-09",
+    "2026-12-10",
+    "2026-12-11",
+    "2026-12-12"
+  ],
+  "trigger": {
+    "type": "flight_shift",
+    "newFirstDate": "2026-12-08",
+    "newLastDate": "2026-12-11"
+  },
+  "weather": null,
+  "items": [
+    {
+      "key": "d3-sensoji",
+      "name_zh": "淺草寺",
+      "type": "attraction",
+      "zone": "asakusa",
+      "weather_dependency": "medium",
+      "date": "2026-12-10",
+      "start": "09:00",
+      "end": "10:30"
+    },
+    {
+      "key": "d4-meiji",
+      "name_zh": "明治神宮",
+      "type": "attraction",
+      "zone": "harajuku",
+      "weather_dependency": "medium",
+      "date": "2026-12-11",
+      "start": "10:00",
+      "end": "11:30"
+    },
+    {
+      "key": "d5-tsukiji",
+      "name_zh": "築地場外市場",
+      "type": "restaurant",
+      "zone": "tsukiji",
+      "weather_dependency": "low",
+      "date": "2026-12-12",
+      "start": "08:00",
+      "end": "09:30"
+    },
+    {
+      "key": "d5-sushi",
+      "name_zh": "壽司教室（已付款）",
+      "type": "activity",
+      "zone": "tsukiji",
+      "weather_dependency": "low",
+      "date": "2026-12-12",
+      "start": "10:00",
+      "end": "12:00",
+      "hard": true,
+      "stay": 120,
+      "cost": {
+        "amount": 12000,
+        "currency": "JPY"
+      }
+    },
+    {
+      "key": "d5-ginza",
+      "name_zh": "銀座散步",
+      "type": "attraction",
+      "zone": "ginza",
+      "weather_dependency": "medium",
+      "date": "2026-12-12",
+      "start": "13:00",
+      "end": "15:00"
+    }
+  ],
+  "judges": [
+    {
+      "type": "level",
+      "level": "L4"
+    },
+    {
+      "type": "scope_kind",
+      "kind": "whole_trip"
+    },
+    {
+      "type": "version_kind",
+      "kind": "major"
+    },
+    {
+      "type": "change_kind",
+      "allowed": [
+        "major_version"
+      ]
+    },
+    {
+      "type": "requires_approval"
+    },
+    {
+      "type": "proposal_count",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "type": "dates_unchanged",
+      "dates": [
+        "2026-12-08",
+        "2026-12-09",
+        "2026-12-10",
+        "2026-12-11"
+      ]
+    },
+    {
+      "type": "comparison_complete"
+    }
+  ]
+}
