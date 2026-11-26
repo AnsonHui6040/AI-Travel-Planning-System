@@ -5,6 +5,7 @@ import {
   parseBaselineScenario,
   parseCrossCheckScenario,
   parseFeasibilityScenario,
+  parseIncidentScenario,
   parseMorningScenario,
   parseZoningScenario,
   parseRecording,
@@ -12,6 +13,7 @@ import {
   renderBaselineReport,
   renderCrossCheckReport,
   renderFeasibilityReport,
+  renderIncidentReport,
   renderMorningReport,
   renderZoningReport,
   renderReport,
@@ -19,6 +21,7 @@ import {
   runBaselineScenario,
   runCrossCheckScenario,
   runFeasibilityScenario,
+  runIncidentScenario,
   runMorningScenario,
   runZoningScenario,
   runScenario,
@@ -63,9 +66,25 @@ const morningFiles = readdirSync(join(import.meta.dirname, "morning"))
   .filter((f) => f.endsWith(".json"))
   .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
 
+// T38：Incident Mode 場景（確定性規則）
+const incidentFiles = readdirSync(join(import.meta.dirname, "incident"))
+  .filter((f) => f.endsWith(".json"))
+  .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
+
 it("有要執行的場景", () => {
-  expect(files.length + baselineFiles.length + crossCheckFiles.length + zoningFiles.length + feasibilityFiles.length + morningFiles.length).toBeGreaterThan(0);
+  expect(
+    files.length + baselineFiles.length + crossCheckFiles.length + zoningFiles.length + feasibilityFiles.length + morningFiles.length + incidentFiles.length,
+  ).toBeGreaterThan(0);
 });
+
+for (const file of incidentFiles) {
+  it(`評估 ${file}`, () => {
+    const report = runIncidentScenario(parseIncidentScenario(read(join(import.meta.dirname, "incident", file))));
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(join(outDir, `${date}-${report.scenario.id}-incident.md`), renderIncidentReport(report, { date }));
+    expect(report.passed).toBe(true);
+  });
+}
 
 for (const file of morningFiles) {
   it(`評估 ${file}`, () => {

@@ -7,3 +7,4 @@ export { parseCrossCheckScenario, renderCrossCheckReport, runCrossCheckScenario,
 export { parseZoningScenario, renderZoningReport, runZoningScenario, type ZoningScenario, type ZoningScenarioReport } from "./zoning";
 export { parseFeasibilityScenario, renderFeasibilityReport, runFeasibilityScenario, type FeasibilityScenario, type FeasibilityScenarioReport } from "./feasibility";
 export { parseMorningScenario, renderMorningReport, runMorningScenario, type MorningScenario, type MorningScenarioReport } from "./morning";
+export { parseIncidentScenario, renderIncidentReport, runIncidentScenario, type IncidentScenario, type IncidentScenarioReport } from "./incident";

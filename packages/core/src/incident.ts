@@ -570,11 +570,12 @@ function comparisonOf(ctx: Ctx, draft: Draft, targets: readonly Slotted[]): Comp
     (affectsTomorrow ? 1 : 0) -
     (travelMinutes > DEFAULT_TRAVEL_MINUTES ? 1 : 0);
 
-  const nextAfter = first ? ctx.today.find((i) => toMin(i.scheduled_start) >= first.end && !draft.operations.some((o) => o.itemId === i.id)) : undefined;
+  const last = [...draft.added].sort((a, b) => a.start - b.start).at(-1);
+  const nextAfter = last ? ctx.today.find((i) => toMin(i.scheduled_start) >= last.end && !draft.operations.some((o) => o.itemId === i.id)) : undefined;
   return {
     newActivity: [...draft.added].sort((a, b) => a.start - b.start).map((a) => a.item.name_zh),
     arrival: first ? toHhmm(first.start) : null,
-    leaveBy: first ? toHhmm(leaveByFor(ctx, first.item.id, nextAfter ?? null)) : null,
+    leaveBy: last ? toHhmm(leaveByFor(ctx, last.item.id, nextAfter ?? null)) : null,
     cost,
     walkMinutes: draft.transport?.recommended.walkMinutes ?? null,
     transfers: draft.transport?.recommended.transfers ?? null,
