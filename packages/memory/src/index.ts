@@ -4,3 +4,5 @@ import type { MemoryReader } from "@atps/core";
 export const emptyMemoryReader: MemoryReader = {
   read: async () => [],
 };
+
+export * from "./merge";

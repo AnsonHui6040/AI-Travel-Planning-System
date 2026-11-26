@@ -13,6 +13,7 @@ import {
   type RoleSetting,
   type RoleSpec,
 } from "@atps/core";
+import { memoryBlockContent, type MergedMemory } from "@atps/memory";
 import { composeRoleInput } from "@atps/security";
 import { uuid, type TripBaselineData } from "@atps/schemas";
 
@@ -85,6 +86,8 @@ export interface ResearchJobContext {
   setting: RoleSetting;
   // 發起人的 API key：輸出含有時拒絕（S-02）
   forbiddenValues: string[];
+  // T41：目前成員合併後的記憶（MEM-07、MEM-08；不含來源成員），依角色記憶範圍放入資料區塊（MEM-11）
+  memories?: MergedMemory[];
 }
 
 export interface ResearchTrackDeps extends RoleRunDeps {
@@ -107,6 +110,8 @@ export async function runResearchTrack(deps: ResearchTrackDeps, run: ResearchTra
   if (!context) return { status: "rejected", reason: "schema", detail: "研究 job 不存在或已沒有權限" };
 
   const { task, blocks } = researchTrackInput(run.track, { trip: context.trip, baseline: context.baseline });
+  const memory = memoryBlockContent(context.memories ?? [], run.role.memoryScope);
+  const allBlocks = memory ? [...blocks, { kind: "member_preference" as const, source: "成員記憶", content: memory }] : blocks;
   const entry = context.setting.chain[run.providerIndex ?? 0];
   const generatedBy = { provider: entry?.provider ?? "anthropic", model: entry?.model ?? "" };
 
@@ -131,7 +136,7 @@ export async function runResearchTrack(deps: ResearchTrackDeps, run: ResearchTra
     {
       role: run.role,
       setting: context.setting,
-      input: composeRoleInput(task, blocks),
+      input: composeRoleInput(task, allBlocks),
       ownerId: context.initiatorId,
       jobId: run.jobId,
       ...(run.providerIndex === undefined ? {} : { providerIndex: run.providerIndex }),

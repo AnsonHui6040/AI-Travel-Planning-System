@@ -30,6 +30,12 @@ describe("gateRoleOutput", () => {
     expect(gateRoleOutput("research", { candidates: [candidate] }, ctx)).toMatchObject({ ok: true, role: "research" });
   });
 
+  // T41、MEM-03：AI 沒有記憶寫入權；任何角色的輸出夾帶記憶都在 schema 檢查被拒絕
+  it.each(["research", "verification", "transport", "master_planner", "live_planner"] as const)("%s：輸出夾帶記憶時拒絕", (role) => {
+    const memory = { layer: "personal", kind: "constraint", item: "每日步行上限", value: "20", unit: "公里" };
+    expect(gateRoleOutput(role, { candidates: [], proposals: [], memories: [memory] }, ctx)).toMatchObject({ ok: false, reason: "schema" });
+  });
+
   it("Planner：需要批准的提案通過", () => {
     expect(gateRoleOutput("live_planner", { proposals: [proposal("minor_non_incident")] }, ctx)).toMatchObject({ ok: true });
   });

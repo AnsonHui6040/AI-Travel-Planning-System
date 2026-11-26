@@ -52,6 +52,11 @@ export default async function HomePage() {
               </ul>
             )}
           </section>
+          <nav aria-label="設定" className="home-settings">
+            <Link href="/settings/memories">記憶</Link>
+            <Link href="/settings/ai">AI 設定</Link>
+            <Link href="/settings/api-keys">API key</Link>
+          </nav>
         </>
       ) : null}
     </main>

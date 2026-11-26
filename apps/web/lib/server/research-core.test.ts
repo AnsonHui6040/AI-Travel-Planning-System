@@ -1,3 +1,4 @@
+import { mergeMemories } from "@atps/memory";
 import { roleSpec } from "@atps/ai";
 import { defaultRoleSetting, type ProviderAdapter, type ProviderRequest } from "@atps/core";
 import type { TripBaselineData } from "@atps/schemas";
@@ -143,6 +144,34 @@ describe("runResearchTrack", () => {
     expect(requests[0]?.input).toContain("[資料開始");
     expect(stored[0]?.[0]).toMatchObject({ name_zh: "淺草寺", place_id: "ChIJ_senso", verification_status: "unverified" });
     expect(stored[0]?.[0]).toMatchObject({ generated_by: { provider: "anthropic", model: "claude-opus-5-5" } });
+  });
+
+  // T41：MEM-07、MEM-08、MEM-11；刪除的記憶不會由讀取端回傳，因此不出現在 payload
+  it("成員記憶依角色記憶範圍放入成員偏好資料區塊；刪除後不出現在 payload", async () => {
+    const memories = mergeMemories([
+      { layer: "personal", kind: "constraint", item: "每日步行上限", value: "12", unit: "公里" },
+      { layer: "personal", kind: "constraint", item: "每日步行上限", value: "8", unit: "公里" },
+      { layer: "planning_rules", kind: "preference", item: "喜歡的活動類型", value: "古書店巡禮", unit: null },
+    ]);
+    const base = await trackDeps({ candidates: [] }).deps.loadContext(JOB);
+    if (!base) throw new Error("沒有測試資料");
+    const withMemory = trackDeps({ candidates: [] }, { loadContext: async () => ({ ...base, memories }) });
+    await runResearchTrack(withMemory.deps, { jobId: JOB, track: "A", role: roleSpec("research") });
+    const input = withMemory.requests[0]?.input ?? "";
+    expect(input).toContain("種類：成員偏好");
+    expect(input).toContain("每日步行上限：8 公里（成員間有不同設定，已取最保守值）");
+    expect(input).not.toContain("12 公里");
+    expect(input).toContain("古書店巡禮");
+
+    // 角色沒有記憶範圍時不放入
+    const noScope = trackDeps({ candidates: [] }, { loadContext: async () => ({ ...base, memories }) });
+    await runResearchTrack(noScope.deps, { jobId: JOB, track: "A", role: { ...roleSpec("research"), memoryScope: { layers: [], kinds: [] } } });
+    expect(noScope.requests[0]?.input).not.toContain("成員偏好");
+
+    // 刪除「古書店巡禮」後重新讀取：payload 不再出現
+    const after = trackDeps({ candidates: [] }, { loadContext: async () => ({ ...base, memories: memories.filter((m) => m.value !== "古書店巡禮") }) });
+    await runResearchTrack(after.deps, { jobId: JOB, track: "A", role: roleSpec("research") });
+    expect(after.requests[0]?.input).not.toContain("古書店巡禮");
   });
 
   it("含圖片網址的輸出被拒，不寫入", async () => {

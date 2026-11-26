@@ -1,4 +1,5 @@
 import "server-only";
+import { mergeMemories, type MemoryEntry, type MergedMemory } from "@atps/memory";
 import { adapterFor, defaultProviders } from "@atps/ai";
 import { segmentPairs, type AiProvider, type AiRole, type ApiKeyProvider, type RoleSetting } from "@atps/core";
 import { createGoogleMapsClient } from "@atps/data-sources";
@@ -51,6 +52,25 @@ async function loadJob(service: Service, keys: Keys, id: string, role: AiRole, k
   };
 }
 
+// T41：目前成員的個人、Planning Rules 與本趟 context（MEM-07、MEM-09、MEM-10），合併後不含來源成員（MEM-08）
+async function tripMemories(service: Service, tripId: string): Promise<MergedMemory[]> {
+  const { data: members } = await service.from("trip_members").select("user_id").eq("trip_id", tripId).limit(50);
+  const ids = (members ?? []).map((m) => String(m.user_id));
+  if (ids.length === 0) return [];
+  const { data: rows } = await service.from("memories").select("layer, kind, item, value, unit, trip_id").in("owner_id", ids).order("created_at").limit(500);
+  return mergeMemories(
+    (rows ?? [])
+      .filter((r) => r.layer !== "trip_context" || r.trip_id === tripId)
+      .map((r) => ({
+        layer: r.layer as MemoryEntry["layer"],
+        kind: r.kind as MemoryEntry["kind"],
+        item: String(r.item),
+        value: String(r.value),
+        unit: (r.unit as string | null) ?? null,
+      })),
+  );
+}
+
 export function researchTrackDeps(jobId: string): ResearchTrackDeps {
   const service = createSupabaseServiceClient();
   const keys = new SupabaseKeyDecryptor(service);
@@ -72,7 +92,7 @@ export function researchTrackDeps(jobId: string): ResearchTrackDeps {
       const { data: stored } = await service.from("trip_baselines").select("data, confirmed_at").eq("trip_id", base.tripId).eq("version", 1).maybeSingle();
       const baseline = stored?.confirmed_at ? tripBaselineData.safeParse(stored.data) : null;
       if (!baseline?.success) return null;
-      return { ...base, baseline: baseline.data };
+      return { ...base, baseline: baseline.data, memories: await tripMemories(service, base.tripId) };
     },
     resolvePlace: async (query) => {
       const key = await googleMapsKey();

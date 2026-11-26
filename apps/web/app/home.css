@@ -57,3 +57,10 @@
     font-size: 0.9rem;
   }
 }
+
+.home-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 1.5rem;
+}

@@ -38,6 +38,7 @@ export const transportMode = z.enum(["walk", "rail", "bus", "taxi", "drive"]);
 export const aiRole = z.enum(["research", "verification", "transport", "master_planner", "live_planner"]);
 export const memoryLayer = z.enum(["personal", "planning_rules", "trip_context"]);
 export const memoryKind = z.enum(["constraint", "preference"]);
+export const memoryProposalStatus = z.enum(["pending", "approved", "rejected"]);
 export const memorySource = z.enum(["manual", "post_trip_proposal"]);
 export const keyProvider = z.enum(["anthropic", "google_ai", "openai", "google_maps", "odpt"]);
 export const jobStatus = z.enum(["queued", "running", "completed", "failed", "cancelled"]);
