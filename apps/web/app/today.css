@@ -15,7 +15,7 @@
 }
 
 .today section {
-  border-top: 1px dashed var(--line);
+  border-top: 1px solid var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
@@ -40,7 +40,7 @@
 .today-message {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: var(--surface);
 }
 
@@ -55,7 +55,7 @@
   grid-template-columns: 6.5rem minmax(0, 1fr);
   gap: 0.75rem;
   padding: 0.75rem 0;
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px solid var(--line);
   overflow-wrap: anywhere;
 }
 
@@ -81,7 +81,7 @@
 
 .today-photo img {
   width: 100%;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   display: block;
 }
 
@@ -139,7 +139,7 @@
   grid-template-columns: 6.5rem 3rem minmax(0, 1fr);
   gap: 0.25rem 0.75rem;
   padding: 0.35rem 0;
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px solid var(--line);
   font-size: var(--fs-body);
   overflow-wrap: anywhere;
 }
@@ -182,7 +182,7 @@
   margin: 0.5rem 0;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
 }
 
 .departure summary {

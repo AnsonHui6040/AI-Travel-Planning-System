@@ -93,12 +93,12 @@ export function IncidentForm({ tripId, date, items }: { tripId: string; date: st
         </select>
       </label>
       <p className="incident-location">
-        <button type="button" onClick={locate}>
+        <button className="secondary" type="button" onClick={locate}>
           取得目前位置
         </button>
         <span>目前位置：{location}</span>
       </p>
-      <button type="submit" disabled={pending}>
+      <button className="primary" type="submit" disabled={pending}>
         {pending ? "計算中…" : "產生替代方案"}
       </button>
       {state && !state.ok ? (

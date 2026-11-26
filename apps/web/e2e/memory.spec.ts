@@ -23,6 +23,12 @@ const DATE = "2026-11-20";
 const noHorizontalScroll = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 
 test("手動記憶、共同行程合併取最保守值且不顯示來源成員、刪除後不再使用；旅後提案經本人批准才寫入", async ({ page, context, baseURL }) => {
+  // 不可逆操作先確認（Astryx）：記錄確認訊息並接受
+  const confirms: string[] = [];
+  page.on("dialog", (d) => {
+    confirms.push(d.message());
+    void d.accept();
+  });
   const owner = await signInAsNewUser(context, baseURL ?? "");
   const companion = await createUserAsAdmin();
   const tripId = await createTrip(owner.userId, "東京一日", [{ userId: companion.userId, role: "companion" }]);
@@ -59,6 +65,7 @@ test("手動記憶、共同行程合併取最保守值且不顯示來源成員�
   await page.goto("/settings/memories");
   await page.getByRole("form", { name: "刪除 每日步行上限" }).getByRole("button", { name: "刪除" }).click();
   await expect(page.getByRole("region", { name: "個人偏好" })).toContainText("沒有記憶。");
+  expect(confirms).toEqual(["刪除「每日步行上限」？刪除後 AI 不會再使用，無法復原。"]);
   await page.goto(`/trips/${tripId}/memories`);
   await expect(page.getByRole("region", { name: "合併後的限制" }).locator(".memory-conflict")).toHaveCount(0);
 

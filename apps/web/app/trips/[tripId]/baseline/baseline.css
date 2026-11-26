@@ -39,7 +39,7 @@
 }
 
 .baseline-form section {
-  border-top: 1px dashed var(--line);
+  border-top: 1px solid var(--line);
   padding: 1rem 0;
 }
 
@@ -83,7 +83,7 @@
 
 .baseline .row-card {
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   padding: 0.75rem;
   margin-bottom: 0.75rem;
 }
@@ -105,13 +105,13 @@
 }
 
 .baseline .sticky-actions {
-  border-top: 1px dashed var(--line);
+  border-top: 1px solid var(--line);
   padding-top: 1rem;
 }
 
 .baseline-panel {
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
 }
@@ -136,7 +136,7 @@
   grid-template-columns: auto 1fr;
   gap: 0.5rem;
   padding: 0.4rem 0;
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .baseline .issues li:last-child {
@@ -153,14 +153,4 @@
 
 .baseline .confirm-form button {
   width: 100%;
-  background: var(--solid);
-  border-color: var(--solid);
-  color: var(--on-solid);
-}
-
-.baseline .confirm-form button:disabled {
-  background: var(--line);
-  border-color: var(--line);
-  color: var(--muted);
-  cursor: not-allowed;
 }

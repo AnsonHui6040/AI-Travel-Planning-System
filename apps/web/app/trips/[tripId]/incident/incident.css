@@ -9,7 +9,7 @@
 }
 
 .incident section {
-  border-top: 1px dashed var(--line);
+  border-top: 1px solid var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
@@ -23,7 +23,7 @@
   margin-left: 0.5rem;
   padding: 0 0.4rem;
   border: 1px solid var(--accent);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   color: var(--accent);
   font-size: var(--fs-small);
 }
@@ -109,7 +109,7 @@
 
 .incident-compare th,
 .incident-compare td {
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px solid var(--line);
   padding: 0.35rem 0.3rem;
   text-align: left;
   vertical-align: top;
@@ -139,7 +139,7 @@
 
 .incident-options li {
   padding: 0.5rem 0;
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .incident-options .summary {

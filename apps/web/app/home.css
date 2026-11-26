@@ -6,7 +6,7 @@
 }
 
 .home section {
-  border-top: 1px dashed var(--line);
+  border-top: 1px solid var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
@@ -32,7 +32,7 @@
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
   gap: 0.5rem 1rem;
   padding: 0.5rem 0;
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px solid var(--line);
   overflow-wrap: anywhere;
 }
 

@@ -50,7 +50,7 @@ export function RecordForm({ tripId, date, items, label }: { tripId: string; dat
           ))}
         </select>
       </label>
-      <button type="submit" disabled={pending}>
+      <button className="secondary" type="submit" disabled={pending}>
         {pending ? "記錄中…" : "記錄"}
       </button>
       {state ? (
@@ -65,10 +65,16 @@ export function RecordForm({ tripId, date, items, label }: { tripId: string; dat
 export function ProduceForm({ tripId, date }: { tripId: string; date: string }) {
   const [state, action, pending] = useActionState(produceTimeline, null);
   return (
-    <form action={action} className="timeline-produce">
+    <form
+      action={action}
+      className="timeline-produce"
+      onSubmit={(event) => {
+        if (!window.confirm("結束今天並產生 Actual Timeline？產生後這天不能再記錄。")) event.preventDefault();
+      }}
+    >
       <input type="hidden" name="tripId" value={tripId} />
       <input type="hidden" name="date" value={date} />
-      <button type="submit" disabled={pending}>
+      <button className="primary" type="submit" disabled={pending}>
         {pending ? "產生中…" : "結束今天，產生 Actual Timeline"}
       </button>
       {state ? (

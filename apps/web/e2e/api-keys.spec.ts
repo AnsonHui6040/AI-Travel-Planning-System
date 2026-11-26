@@ -5,6 +5,12 @@ import { saveApiKeyAsAdmin, signInAsNewUser } from "./support/auth";
 const KEY = "sk-test-e2e-not-real-9876";
 
 test("未登入時設定頁要求登入", async ({ page }) => {
+  // 不可逆操作先確認（Astryx）：記錄確認訊息並接受
+  const confirms: string[] = [];
+  page.on("dialog", (d) => {
+    confirms.push(d.message());
+    void d.accept();
+  });
   await page.goto("/settings/api-keys");
   await expect(page.getByRole("heading", { name: "API key" })).toBeVisible();
   await expect(page.getByText("請先登入")).toBeVisible();
@@ -12,6 +18,12 @@ test("未登入時設定頁要求登入", async ({ page }) => {
 });
 
 test("已儲存的 key 只顯示末四碼，完整 key 不出現在頁面；可刪除", async ({ page, context, baseURL }) => {
+  // 不可逆操作先確認（Astryx）：記錄確認訊息並接受
+  const confirms: string[] = [];
+  page.on("dialog", (d) => {
+    confirms.push(d.message());
+    void d.accept();
+  });
   const user = await signInAsNewUser(context, baseURL ?? "");
   await page.goto("/settings/api-keys");
 
@@ -29,12 +41,19 @@ test("已儲存的 key 只顯示末四碼，完整 key 不出現在頁面；可�
   await expect(odptGroup.getByLabel("ODPT")).toHaveValue("");
 
   await odptGroup.getByRole("button", { name: "刪除" }).click();
+  await expect.poll(() => confirms).toEqual(["刪除 ODPT 的 API key？刪除後無法復原。"]);
   await expect(odptGroup.getByText("尚未設定")).toBeVisible();
   await page.reload();
   await expect(odptGroup.getByText("尚未設定")).toBeVisible();
 });
 
 test("格式錯誤的 key 不儲存，錯誤訊息不含輸入內容", async ({ page, context, baseURL }) => {
+  // 不可逆操作先確認（Astryx）：記錄確認訊息並接受
+  const confirms: string[] = [];
+  page.on("dialog", (d) => {
+    confirms.push(d.message());
+    void d.accept();
+  });
   await signInAsNewUser(context, baseURL ?? "");
   await page.goto("/settings/api-keys");
   const odpt = page.getByRole("group", { name: "ODPT" });

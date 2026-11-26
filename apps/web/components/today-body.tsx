@@ -150,15 +150,15 @@ export function TodayBody({ pack, canEdit, offline }: { pack: DayPack; canEdit: 
                         新的開始時間
                         <input value={startValue} onChange={(e) => setStartValue(e.target.value)} inputMode="numeric" placeholder="HH:mm" />
                       </label>
-                      <button type="button" onClick={() => void submit(entry)}>
+                      <button className="primary" type="button" onClick={() => void submit(entry)}>
                         送出修改
                       </button>
-                      <button type="button" onClick={() => setEditing(null)}>
+                      <button className="ghost" type="button" onClick={() => setEditing(null)}>
                         取消
                       </button>
                     </div>
                   ) : (
-                    <button
+                    <button className="secondary"
                       type="button"
                       onClick={() => {
                         setEditing(entry.itemId);

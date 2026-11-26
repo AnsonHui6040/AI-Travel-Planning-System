@@ -23,7 +23,7 @@
 
 .settings .key-row fieldset {
   border: 0;
-  border-top: 1px dashed var(--line);
+  border-top: 1px solid var(--line);
   margin: 0;
   padding: 1rem 0;
   display: grid;
@@ -61,20 +61,6 @@
 .settings .key-actions {
   display: flex;
   gap: 0.5rem;
-}
-
-.settings button {
-  font: inherit;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-pill);
-  background: var(--surface);
-  cursor: pointer;
-}
-
-.settings button[value="save"] {
-  background: var(--solid);
-  border-color: var(--solid);
-  color: var(--on-solid);
 }
 
 .settings select {
@@ -122,7 +108,7 @@
 .settings table.usage th,
 .settings table.usage td {
   padding: 0.4rem 0.3rem;
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px solid var(--line);
   text-align: right;
 }
 
@@ -193,7 +179,7 @@
   display: block;
   width: 100%;
   height: auto;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: var(--surface);
 }
 
@@ -206,7 +192,7 @@
 
 .settings .no-photo {
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   padding: 1.25rem 1rem;
   margin-bottom: 1.5rem;
   background: var(--surface);

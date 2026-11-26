@@ -13,7 +13,7 @@
 }
 
 .proposals section {
-  border-top: 1px dashed var(--line);
+  border-top: 1px solid var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
@@ -31,7 +31,7 @@
 
 .proposal-list li {
   padding: 0.6rem 0;
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px solid var(--line);
   overflow-wrap: anywhere;
 }
 
@@ -45,7 +45,7 @@
   margin-right: 0.5rem;
   padding: 0 0.4rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   font-size: var(--fs-small);
   font-weight: 500;
 }
@@ -93,6 +93,6 @@
 .live-notice {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: var(--surface);
 }
