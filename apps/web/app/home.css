@@ -64,3 +64,41 @@
   gap: 0.5rem 1rem;
   margin-top: 1.5rem;
 }
+
+.trip-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.trip-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.trip-list a {
+  font-weight: 500;
+}
+
+.entry-form {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 24rem;
+}
+
+.entry-form button {
+  justify-self: start;
+  margin-top: 0.5rem;
+}
+
+.entry-form p {
+  margin: 0.25rem 0 0;
+}
+
+.home-login {
+  margin-top: 1.5rem;
+}
