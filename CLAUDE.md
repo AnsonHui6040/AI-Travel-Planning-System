@@ -77,6 +77,7 @@
 - Morning Check（T36）：core 的 `morningCheck` 計算十項（天氣、警報、交通、固定活動、預約、營業、第一段交通、行李、同行者、Backup），沒有資料標示「無資料」不當作通過；只經 `complete_morning_check`（擁有者 `atps_change_writer`，Owner、Companion）寫入：At Risk 以 approved_fact_invalidated 提案自動套用、Standby 提升候選、該日進入 Day Ready、結果存 `morning_checks`。確定性評估場景放 `evals/morning/`。
 - 離開前檢查（T37）：core 的 `departureCheck`（純函式，瀏覽器端以當日包計算，離線可用）；偏差依決策 0004 的 `classifyDelay` 分級，L1 以上建議進入 Incident Mode。E2E 以 Playwright 的 `page.clock` 模擬旅行當天。
 - Incident Mode（T38）：core 的 `planIncident`（純函式）計算分級、Current State Snapshot、重算範圍（只到下一個 Hard Constraint，最遲到達為開始前 15 分鐘）與最多三個替代方案（同區域、鄰近區域、交換今日順序、使用另一日候選、刪減活動），附交通與比較表。伺服器以使用者 session 讀取資料重新計算，只經 `start_incident`（擁有者 `atps_change_writer`）建立即時分支（同一 base version 的待批准提案），不改動行程；批准經 `/proposals` 的 `approve_proposal`。行程鎖定後，trigger `sync_lifecycle_with_schedule` 讓候選排入某日成為已修改、移回候選清單成為已核實。確定性評估場景放 `evals/incident/`。
+- 移回候選清單（T38 修正）：行程鎖定後已排入的項目經提案移回候選清單時，trigger `sync_lifecycle_with_schedule` 設為待核實、未核實（Conflict 維持），須經 `apply_verification` 重新核實才會再被選用。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。
