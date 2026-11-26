@@ -73,6 +73,7 @@ describe("notificationLabel", () => {
     expect(notificationLabel("proposal_applied")).toBe("行程已更新");
     expect(notificationLabel("trip_locked")).toBe("行程已鎖定");
     expect(notificationLabel("incident_started")).toBe("進入 Incident Mode，有替代方案待批准");
+    expect(notificationLabel("timeline_produced")).toBe("已產生一天的 Actual Timeline");
     expect(notificationLabel("something_else")).toBe("行程有新消息");
   });
 });

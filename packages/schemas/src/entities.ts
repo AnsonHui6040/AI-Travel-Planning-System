@@ -481,6 +481,22 @@ export const morningCheckRow = z.strictObject({
   created_at: offsetDateTime,
 });
 
+// T41：旅後記憶提案（MEM-03、MEM-04），擁有者批准後才寫入 memories
+export const memoryProposalRow = z.strictObject({
+  id: uuid,
+  owner_id: uuid,
+  trip_id: uuid,
+  layer: E.memoryLayer,
+  kind: E.memoryKind,
+  item: text(LIMITS.nameZh),
+  value: text(LIMITS.shortNote),
+  unit: nullable(text(20)),
+  reason: text(300),
+  status: E.memoryProposalStatus,
+  decided_at: nullable(offsetDateTime),
+  created_at: offsetDateTime,
+});
+
 export const tableSchemas = {
   profiles: profileRow,
   trips: tripRow,
@@ -495,6 +511,7 @@ export const tableSchemas = {
   actual_timeline_entries: actualTimelineRow,
   notifications: notificationRow,
   memories: memoryRow,
+  memory_proposals: memoryProposalRow,
   api_key_records: apiKeyRecordRow,
   readonly_links: readonlyLinkRow,
   background_jobs: backgroundJobRow,

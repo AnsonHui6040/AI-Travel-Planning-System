@@ -24,7 +24,7 @@ function requireValue(env: Record<string, string>, name: string): string {
   return value;
 }
 
-export async function signInAsNewUser(context: BrowserContext, baseURL: string): Promise<{ email: string; userId: string }> {
+export async function signInAsNewUser(context: BrowserContext, baseURL: string): Promise<{ email: string; userId: string; password: string }> {
   const env = loadEnv();
   const url = requireValue(env, "NEXT_PUBLIC_SUPABASE_URL");
   const anon = requireValue(env, "NEXT_PUBLIC_SUPABASE_ANON_KEY");
@@ -55,7 +55,7 @@ export async function signInAsNewUser(context: BrowserContext, baseURL: string):
 
   const { hostname } = new URL(baseURL);
   await context.addCookies(jar.map((c) => ({ ...c, domain: hostname, path: "/", httpOnly: false, sameSite: "Lax" })));
-  return { email, userId };
+  return { email, userId, password };
 }
 
 function adminClient() {
@@ -349,14 +349,32 @@ export async function simulateReverifyAsAdmin(tripId: string, itemId: string): P
 }
 
 // T32：成員在行程中的資料（行程記憶、通知），用來確認移除後依 SH-07 刪除
-export async function seedMemberDataAsAdmin(tripId: string, userId: string): Promise<void> {
-  const admin = adminClient();
-  const memory = await admin
-    .from("memories")
-    .insert({ owner_id: userId, layer: "trip_context", trip_id: tripId, kind: "preference", item: "步行", value: "少走路", source: "manual" });
-  if (memory.error) throw new Error("建立測試記憶失敗");
-  const notice = await admin.from("notifications").insert({ recipient_id: userId, trip_id: tripId, kind: "proposal_applied" });
+// 記憶以本人 session 寫入（T41：service_role 沒有記憶寫入權）；通知由 admin 建立
+export async function seedMemberDataAsAdmin(tripId: string, user: { userId: string; email: string; password: string }): Promise<void> {
+  await insertOwnMemory(user, { layer: "trip_context", tripId, kind: "preference", item: "步行", value: "少走路" });
+  const notice = await adminClient().from("notifications").insert({ recipient_id: user.userId, trip_id: tripId, kind: "proposal_applied" });
   if (notice.error) throw new Error("建立測試通知失敗");
+}
+
+export async function insertOwnMemory(
+  user: { userId: string; email: string; password: string },
+  memory: { layer: string; kind: string; item: string; value: string; unit?: string | null; tripId?: string | null },
+): Promise<void> {
+  const env = loadEnv();
+  const client = createClient(requireValue(env, "NEXT_PUBLIC_SUPABASE_URL"), requireValue(env, "NEXT_PUBLIC_SUPABASE_ANON_KEY"), { auth: { persistSession: false } });
+  const signedIn = await client.auth.signInWithPassword({ email: user.email, password: user.password });
+  if (signedIn.error) throw new Error("測試使用者登入失敗");
+  const result = await client.from("memories").insert({
+    owner_id: user.userId,
+    layer: memory.layer,
+    trip_id: memory.tripId ?? null,
+    kind: memory.kind,
+    item: memory.item,
+    value: memory.value,
+    unit: memory.unit ?? null,
+    source: "manual",
+  });
+  if (result.error) throw new Error("寫入測試記憶失敗");
 }
 
 export async function countMemberDataAsAdmin(tripId: string, userId: string): Promise<number> {
@@ -420,4 +438,13 @@ export async function setItemFieldsAsAdmin(itemId: string, fields: Record<string
 export async function setTripFieldsAsAdmin(tripId: string, fields: Record<string, unknown>): Promise<void> {
   const result = await adminClient().from("trips").update(fields).eq("id", tripId);
   if (result.error) throw new Error("設定測試行程失敗");
+}
+
+// T41：建立另一位使用者（不登入瀏覽器）
+export async function createUserAsAdmin(): Promise<{ userId: string; email: string; password: string }> {
+  const email = `companion-${randomUUID()}@example.test`;
+  const password = `pw-${randomUUID()}`;
+  const created = await adminClient().auth.admin.createUser({ email, password, email_confirm: true });
+  if (created.error || !created.data.user) throw new Error("建立測試使用者失敗");
+  return { userId: created.data.user.id, email, password };
 }

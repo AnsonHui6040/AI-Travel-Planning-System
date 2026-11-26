@@ -52,7 +52,7 @@ test("邀請、接受、變更角色、移除成員並清除該成員的行程�
   await capture(page, "members");
 
   // SH-07：移除時刪除其在此行程的記憶與通知
-  await seedMemberDataAsAdmin(tripId, guest.userId);
+  await seedMemberDataAsAdmin(tripId, guest);
   expect(await countMemberDataAsAdmin(tripId, guest.userId)).toBe(2);
   page.once("dialog", (dialog) => void dialog.accept());
   await page.getByRole("listitem", { name: "阿明" }).getByRole("button", { name: "移除" }).click();

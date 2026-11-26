@@ -66,6 +66,7 @@ const LABELS: Record<string, string> = {
   day_approved: "有一天的行程已批准",
   trip_locked: "行程已鎖定",
   incident_started: "進入 Incident Mode，有替代方案待批准",
+  timeline_produced: "已產生一天的 Actual Timeline",
 };
 
 export const notificationLabel = (kind: string): string => LABELS[kind] ?? "行程有新消息";

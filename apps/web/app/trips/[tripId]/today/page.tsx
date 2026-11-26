@@ -75,6 +75,10 @@ export default async function TodayPage({ params, searchParams }: { params: Prom
             </p>
           ) : null}
           <p className="today-incident">
+            <Link href={`/trips/${tripId}/memories`}>行程記憶</Link>
+            <span className="muted">同行成員合併後的限制與偏好</span>
+          </p>
+          <p className="today-incident">
             <Link href={`/trips/${tripId}/timeline?date=${view.pack.date}`}>Actual Timeline</Link>
             <span className="muted">記錄實際到達、離開與完成狀態，結束今天時產生 Planned vs Actual</span>
           </p>

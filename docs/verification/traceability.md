@@ -61,17 +61,17 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| MEM-01 | T41 | 待建立 | 未驗收 |
-| MEM-02 | T41 | 待建立 | 未驗收 |
-| MEM-03 | T41 | 待建立 | 未驗收 |
+| MEM-01 | T41 | 三層 `memory_layer`（T06）；`/settings/memories` 依三層顯示，單趟記憶在 `/trips/[tripId]/memories` 新增；E2E `apps/web/e2e/memory.spec.ts` | 已驗收 |
+| MEM-02 | T41 | `memories` 欄位（擁有者、層級、類型、項目、數值、單位、來源、批准時間、最後使用時間）；來源提案編號改指向 `memory_proposals`，`memories_source_matches` 檢查來源與編號一致（`27_memory.test.sql`） | 已驗收 |
+| MEM-03 | T41 | `27_memory.test.sql`：service_role（AI）不可新增、修改、刪除記憶；使用者不可自行標示旅後來源；提案批准前不寫入、否決不寫入。`output-gate.test.ts`：五個角色輸出夾帶記憶一律拒絕 | 已驗收 |
 | MEM-04 | T40 | `packages/core/src/post-trip.test.ts`（報告六項欄位齊全與各項計算）；E2E `apps/web/e2e/post-trip.spec.ts`；旅後提案依此報告產生於 T41 | 已驗收 |
-| MEM-05 | T41 | 待建立 | 未驗收 |
-| MEM-06 | T06、T41 | T06：`supabase/tests/04_entity_permissions.test.sql`（記憶只限本人存取）；payload 排除於 T41 | 部分 |
-| MEM-07 | T41 | 待建立 | 未驗收 |
-| MEM-08 | T41 | 待建立 | 未驗收 |
-| MEM-09 | T41 | 待建立 | 未驗收 |
-| MEM-10 | T41 | 待建立 | 未驗收 |
-| MEM-11 | T11、T41 | T11：`RoleSpec.memoryScope`、core `scopeMemories`（`packages/core/src/extensions.test.ts`）、`SupabaseMemoryReader.read` 依範圍查詢與過濾（`packages/db/src/repositories.test.ts`）；完整版本於 T41 | 部分 |
+| MEM-05 | T41 | 記憶只存於本系統 `memories`；各角色以同一份合併結果組成輸入，與 provider 無關（`research-core.test.ts`） | 已驗收 |
+| MEM-06 | T06、T41 | T06：`04_entity_permissions.test.sql`（記憶只限本人存取）。T41：`27_memory.test.sql` 刪除後 `trip_memories` 不再讀出；`research-core.test.ts` 刪除後不出現在 payload；E2E 修改與刪除 | 已驗收 |
+| MEM-07 | T41 | `27_memory.test.sql`：合併所有成員（含 Viewer）的記憶；電子郵件、電話、姓名不寫入（新增、修改、提案都檢查）；`packages/memory/src/merge.test.ts` 的 `identityViolation` | 已驗收 |
+| MEM-08 | T41 | 決策 0009；`merge.test.ts`（數值取最小、時間取最晚或最早、預算依幣別、飲食限制全部保留、輸出不含擁有者）；`trip_memories` 不回傳擁有者；E2E 衝突標示且不顯示成員 | 已驗收 |
+| MEM-09 | T32、T41 | `27_memory.test.sql`：成員離開後其記憶不再讀出（只讀目前成員，T32 的 trigger 刪除其行程記憶） | 已驗收 |
+| MEM-10 | T41 | `27_memory.test.sql`：單趟 context 只在該行程讀出，不帶入其他行程 | 已驗收 |
+| MEM-11 | T11、T41 | T11：`RoleSpec.memoryScope`、`scopeMemories`、`SupabaseMemoryReader`。T41：`memoryBlockContent` 只輸出範圍內的層級與類型（`merge.test.ts`），Research 以成員偏好資料區塊送出，範圍為空時不送（`research-core.test.ts`） | 已驗收 |
 
 ## 第 6 節 分享
 

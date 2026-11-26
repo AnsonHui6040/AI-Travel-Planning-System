@@ -106,6 +106,17 @@ ol.post-trip-report li span + span {
   margin-left: 0.75rem;
 }
 
+.post-trip-memory {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.post-trip-memory .memory-generate p {
+  margin: 0.25rem 0 0;
+}
+
 .post-trip .error {
   color: #cf222e;
 }

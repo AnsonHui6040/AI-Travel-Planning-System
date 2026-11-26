@@ -627,7 +627,7 @@ Live Operations Mode：即時官方狀態優先於旅前資料；Live Planner �
 |---|---|
 | AI adapter 是否以 Vercel AI SDK 為基礎，或直接使用三家原生 SDK | 已決定：三家官方 SDK（T13，`docs/verification/T13.md`） |
 | 各角色步數與 token 上限的預設值 | 已決定：決策 0006 |
-| 記憶限制衝突取最保守值的具體規則 | T41 開始前，以狀態表確認 |
+| 記憶限制衝突取最保守值的具體規則 | 已決定：決策 0009（固定限制清單） |
 | 交通估算的固定緩衝分鐘數 | 已決定：決策 0008（每段 10 分鐘，每次轉乘再加 5 分鐘） |
 | Apple 登入啟用時間 | 取得 Apple Developer Program 帳號後 |
 | Claude plan 附送的 Console API credit 是否涵蓋 Agent SDK 以外的 API 呼叫 | T12 開始前查證 |

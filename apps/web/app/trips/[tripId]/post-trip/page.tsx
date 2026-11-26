@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { POST_TRIP_STATUS_LABELS, PROVIDER_NAMES, type AiProvider } from "@atps/core";
 import { loadPostTrip } from "../../../../lib/server/post-trip";
 import { PostTripStatusForm } from "./post-trip-form";
+import { GenerateProposalsForm } from "../../../settings/memories/memory-forms";
 import "../../../settings/settings.css";
 import "./post-trip.css";
 
@@ -76,7 +78,13 @@ export default async function PostTripPage({ params }: { params: Promise<{ tripI
 
       <section aria-label="比較報告">
         <h2>Planned vs Actual 比較報告</h2>
-        <p className="muted">依 {view.daysWithTimeline} 天的 Actual Timeline 計算。之後的旅後記憶提案以這份報告為依據，需由你批准才會寫入記憶。</p>
+        <p className="muted">依 {view.daysWithTimeline} 天的 Actual Timeline 計算。旅後記憶提案以這份報告為依據，需由你批准才會寫入記憶。</p>
+        {view.tripStatus === "ended" || view.tripStatus === "archived" ? (
+          <div className="post-trip-memory">
+            <GenerateProposalsForm tripId={tripId} />
+            <Link href="/settings/memories">到「記憶」批准或否決</Link>
+          </div>
+        ) : null}
 
         <h3>停留時間差異</h3>
         {r.stayDifferences.length > 0 ? (
