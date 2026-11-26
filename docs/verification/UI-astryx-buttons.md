@@ -43,3 +43,7 @@
 截圖：`docs/verification/screenshots/UI-{today,timeline,memories,home}-{light,dark}-{390,1280}.png`（已更新為新樣式）。
 
 真機檢視為 TBD。
+
+## 元件樣板頁（2026-11-27）
+
+使用者要求先看樣板、不做邏輯。新增靜態頁 `/styleguide`（不需登入、不讀資料、不送出任何請求、`noindex`），淺色與深色並排：行程分頁、四種按鈕的一般／停用／載入中、導覽連結、確認示意、輸入欄、標示與訊息、清單列、文字、色彩。並排用的 `[data-theme]` 數值由 `tooling/ui-tokens.test.ts` 檢查與系統深淺色一致；`apps/web/e2e/styleguide.spec.ts` 檢查兩個面板的文字對比至少 4.5:1、控制項至少 44px、沒有水平捲動。截圖：`UI-styleguide-390.png`、`UI-styleguide-1280.png`。

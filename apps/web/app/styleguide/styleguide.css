@@ -1,0 +1,282 @@
+/* 元件樣板頁：只排版，顏色一律用 globals.css 的變數 */
+.sg {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.sg h1 {
+  margin: 0 0 0.5rem;
+}
+
+.sg-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 900px) {
+  .sg-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sg-panel {
+  container-type: inline-size;
+  min-width: 0;
+  padding: 1rem;
+  border-radius: var(--radius-card);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.sg-panel h2 {
+  margin: 0 0 0.5rem;
+}
+
+.sg-panel h3 {
+  margin: 1.5rem 0 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.sg-panel a {
+  color: var(--text);
+}
+
+.sg-nav {
+  padding: 0;
+  margin: 0;
+  max-width: none;
+}
+
+.sg-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sg-table th,
+.sg-table td {
+  padding: 0.35rem 0.25rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.sg-table thead th {
+  font-size: var(--fs-small);
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.sg-table tbody th {
+  font-weight: 500;
+}
+
+.sg-table button {
+  white-space: nowrap;
+}
+
+.sg-table tbody th span {
+  display: block;
+  font-size: var(--fs-small);
+  font-weight: 400;
+}
+
+@container (max-width: 640px) {
+  .sg-table thead {
+    display: none;
+  }
+
+  .sg-table tr {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sg-table tbody th {
+    flex-basis: 100%;
+  }
+
+  .sg-table td {
+    padding: 0;
+  }
+}
+
+.sg-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.sg-dialog {
+  padding: 1rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.sg-dialog p {
+  margin: 0 0 0.5rem;
+}
+
+.sg-dialog .sg-row {
+  justify-content: flex-end;
+  margin: 0;
+}
+
+.sg-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.sg-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--fs-small);
+  min-width: 0;
+}
+
+.sg-fields input:not([type="checkbox"]),
+.sg-fields select {
+  max-width: 12rem;
+}
+
+.sg-fields .sg-check {
+  flex-direction: row;
+  align-items: center;
+  min-height: var(--control);
+  font-size: var(--fs-body);
+}
+
+.sg-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-control);
+  font-size: var(--fs-small);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.sg-tag.sg-accent {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.sg-tag.sg-quiet {
+  background: transparent;
+  color: var(--muted);
+}
+
+.sg-accent-text,
+.sg-late {
+  color: var(--accent);
+}
+
+.sg-late {
+  font-size: var(--fs-small);
+}
+
+.sg-ok {
+  font-weight: 500;
+}
+
+.sg-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sg-list > li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.sg-times {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 1rem;
+  margin: 0.25rem 0 0;
+}
+
+.sg-times dt {
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.sg-times dd {
+  margin: 0;
+}
+
+.sg-h1 {
+  font-size: var(--fs-h1);
+  font-weight: 500;
+  margin: 0;
+}
+
+.sg-h2 {
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  margin: 0;
+}
+
+.sg-small {
+  font-size: var(--fs-small);
+}
+
+.sg-colors {
+  margin: 0;
+}
+
+.sg-colors > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  padding: 0.35rem 0;
+}
+
+.sg-colors dt {
+  font-weight: 500;
+  min-width: 6rem;
+}
+
+.sg-colors dd {
+  margin: 0;
+  font-size: var(--fs-small);
+}
+
+.sg-c-text {
+  color: var(--text);
+}
+
+.sg-c-muted {
+  color: var(--muted);
+}
+
+.sg-c-accent {
+  color: var(--accent);
+}
+
+.sg-rule {
+  display: block;
+  width: 5rem;
+  margin-top: 0.4rem;
+  border-top: 1px solid;
+}
+
+.sg-rule.sg-c-line-strong {
+  border-color: var(--line-strong);
+}
+
+.sg-rule.sg-c-line {
+  border-color: var(--line);
+}
