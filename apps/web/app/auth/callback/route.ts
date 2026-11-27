@@ -14,5 +14,14 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(new URL(destination, url.origin));
   }
+
+  // 由伺服器驗證的一次性連結（token_hash）：不需要發出請求的瀏覽器保存 PKCE verifier
+  const tokenHash = url.searchParams.get("token_hash");
+  const type = url.searchParams.get("type");
+  if (!code && tokenHash && (type === "magiclink" || type === "email")) {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+    if (!error) return NextResponse.redirect(new URL(destination, url.origin));
+  }
   return NextResponse.redirect(new URL("/?auth_error=1", url.origin));
 }

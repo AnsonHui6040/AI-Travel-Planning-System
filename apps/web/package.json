@@ -9,7 +9,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
-    "demo:seed": "node scripts/seed-demo.mjs"
+    "demo:seed": "node scripts/seed-demo.mjs",
+    "demo:link": "node scripts/demo-link.mjs"
   },
   "dependencies": {
     "@atps/ai": "workspace:*",
