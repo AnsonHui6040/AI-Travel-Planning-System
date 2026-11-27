@@ -448,3 +448,14 @@ export async function createUserAsAdmin(): Promise<{ userId: string; email: stri
   if (created.error || !created.data.user) throw new Error("建立測試使用者失敗");
   return { userId: created.data.user.id, email, password };
 }
+
+// 決策 0010：讀取行程項目（確認編輯結果與只保存 place_id）
+export async function listItemsAsAdmin(tripId: string): Promise<Array<Record<string, unknown>>> {
+  const result = await adminClient()
+    .from("itinerary_items")
+    .select("id, name_zh, place_id, address, origin, verification_status, lifecycle_status, scheduled_date, scheduled_start, scheduled_end, suggested_stay_minutes, note")
+    .eq("trip_id", tripId)
+    .order("created_at");
+  if (result.error) throw new Error("讀取測試項目失敗");
+  return result.data as Array<Record<string, unknown>>;
+}

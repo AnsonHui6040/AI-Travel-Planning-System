@@ -18,7 +18,8 @@ export default defineConfig({
     { name: "desktop-1280", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } } },
   ],
   webServer: {
-    command: `pnpm build && pnpm start --port ${port}`,
+    // 決策 0010：Places 搜尋以合成回應執行（E2E 不連 Google）
+    command: `pnpm build && E2E_PLACES_FIXTURE=1 pnpm start --port ${port}`,
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

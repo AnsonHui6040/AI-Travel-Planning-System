@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { loadDayDraft } from "../../../../lib/server/day-draft";
 import { itemEditDeps } from "../../../../lib/server/item-edit";
 import { parseEditForm, submitEdit, type EditResult } from "../../../../lib/server/item-edit-core";
@@ -21,5 +22,7 @@ export async function editItem(_previous: EditResult | null, form: FormData): Pr
   if (!parsed.ok) return parsed;
   const result = await submitEdit(await itemEditDeps(), tripId, parsed.request);
   if (result.ok) revalidatePath(`/trips/${tripId}`, "layout");
+  // 刪除後項目已不存在，回到行程
+  if (result.ok && result.mode === "direct" && parsed.request.kind === "delete") redirect(`/trips/${tripId}/days`);
   return result;
 }

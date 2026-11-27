@@ -19,12 +19,18 @@
 
 .field-pair {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.5rem;
 }
 
+.field-pair input,
+.field-pair select {
+  width: 100%;
+  min-width: 0;
+}
+
 .move-row {
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
   align-items: end;
 }
 
@@ -52,8 +58,7 @@
 
 .more-fields summary {
   min-height: var(--control);
-  display: flex;
-  align-items: center;
+  line-height: var(--control);
   cursor: pointer;
 }
 
@@ -106,4 +111,26 @@
 .add-item .screen-head h1,
 .edit-item .screen-head h1 {
   margin: 0.25rem 0 0;
+}
+
+.move-row button {
+  white-space: nowrap;
+}
+
+/* 搜尋結果：名稱一行、地址在下一行，過長以省略號截斷 */
+.place-results .rows > li > a {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.place-results .rows .row-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.place-results .rows > li > a[aria-current="true"] {
+  margin: 0 -0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
 }

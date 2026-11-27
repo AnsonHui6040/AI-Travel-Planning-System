@@ -138,6 +138,23 @@ function Panel({ theme, title }: { theme: "light" | "dark"; title: string }) {
         ))}
       </fieldset>
 
+      <h3>排序與移動（決策 0010）</h3>
+      <div className="sg-row" role="group" aria-label={`${title}排序範例`}>
+        <button className="secondary" type="button">
+          上移
+        </button>
+        <button className="secondary" type="button" disabled>
+          下移
+        </button>
+        <button className="ghost" type="button">
+          移回候選清單
+        </button>
+        <button className="danger" type="button">
+          刪除
+        </button>
+      </div>
+      <p className="muted">編輯畫面的排程按鈕：44px 高；第一項不能上移、最後一項不能下移；刪除先以確認視窗確認。</p>
+
       <h3>確認</h3>
       <div className="sg-dialog" role="group" aria-label={`${title}確認範例`}>
         <p>刪除「每日步行上限」？刪除後 AI 不會再使用，無法復原。</p>

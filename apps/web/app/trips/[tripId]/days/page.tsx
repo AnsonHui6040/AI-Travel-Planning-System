@@ -91,7 +91,7 @@ export default async function DaysPage({ params, searchParams }: { params: Promi
           {view.canEdit ? (
             <div className="screen-actions">
               {view.tripStatus !== "ended" && view.tripStatus !== "archived" ? (
-                <Link className="pill-link" href={`/trips/${tripId}/items/new`}>
+                <Link className="secondary" href={`/trips/${tripId}/items/new`}>
                   新增地點
                 </Link>
               ) : null}

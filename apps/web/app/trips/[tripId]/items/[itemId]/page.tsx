@@ -145,7 +145,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
           </p>
           {view.canEdit && view.tripStatus !== "ended" && view.tripStatus !== "archived" ? (
             <p className="item-edit-link">
-              <Link className="pill-link" href={`/trips/${tripId}/items/${itemId}/edit`}>
+              <Link className="secondary" href={`/trips/${tripId}/items/${itemId}/edit`}>
                 編輯
               </Link>
             </p>
