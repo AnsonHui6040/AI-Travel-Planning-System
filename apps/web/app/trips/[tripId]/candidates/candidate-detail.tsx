@@ -12,11 +12,12 @@ export const TYPE_LABELS: Record<CandidateView["type"], string> = {
   activity: "活動",
 };
 
-export const VERIFICATION_LABELS: Record<CandidateView["verificationStatus"], string> = {
+export const VERIFICATION_LABELS: Record<CandidateView["verificationStatus"] | "user_confirmed", string> = {
   verified: "Verified",
   partially_verified: "Partially Verified",
   unverified: "Unverified",
   conflict: "Conflict",
+  user_confirmed: "使用者確認",
 };
 
 const GRADE_LABELS: Record<string, string> = {

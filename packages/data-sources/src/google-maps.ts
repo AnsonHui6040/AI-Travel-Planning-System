@@ -13,7 +13,8 @@ export const COORDINATE_MAX_AGE_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface GoogleMapsOptions {
-  fetch?: typeof globalThis.fetch;
+  // 伺服器端以 @atps/security 的 allowlistedFetchAsFetch 經白名單連線（決策 0010、S-05）
+  fetch?: (url: string, init: RequestInit) => Promise<Response>;
   timeoutMs?: number;
   now?: () => Date;
 }
@@ -29,6 +30,16 @@ export interface PhotoRef {
   name: string;
   attributions: { displayName: string; uri: string | null }[];
 }
+
+// 決策 0010：搜尋結果。名稱與地址只即時顯示，保存時只取 place_id（D28）
+export interface LivePlaceCandidate {
+  storable: false;
+  placeId: string;
+  name: string;
+  address: string | null;
+}
+export const MAX_SEARCH_QUERY = 100;
+const SEARCH_RESULTS = 5;
 
 // 只即時顯示，不可儲存
 export interface LivePlaceDetails {
@@ -164,6 +175,23 @@ export function createGoogleMapsClient(options: GoogleMapsOptions = {}) {
       if (!match) return { status: "unresolved", reason: "too_far" };
       const placeId = str(match.id);
       return placeId && PLACE_ID.test(placeId) ? { status: "resolved", placeId } : { status: "unresolved", reason: "not_found" };
+    },
+
+    async searchPlaces(key: string, input: { query: string; languageCode: string }): Promise<LivePlaceCandidate[]> {
+      const query = input.query.trim();
+      if (query.length === 0 || query.length > MAX_SEARCH_QUERY) throw new GoogleMapsError("搜尋字須為 1 到 100 字", null);
+      const places = await searchText(key, "places.id,places.displayName,places.formattedAddress", {
+        textQuery: query,
+        languageCode: input.languageCode,
+        pageSize: SEARCH_RESULTS,
+      });
+      return places.flatMap((p) => {
+        if (!isObject(p)) return [];
+        const placeId = str(p.id);
+        const name = isObject(p.displayName) ? str(p.displayName.text) : null;
+        if (!placeId || !PLACE_ID.test(placeId) || !name) return [];
+        return [{ storable: false as const, placeId, name, address: str(p.formattedAddress) }];
+      }).slice(0, SEARCH_RESULTS);
     },
 
     async coordinates(key: string, placeId: string): Promise<LatLng & { fetchedAt: Date }> {

@@ -6,6 +6,15 @@ import { createLogger } from "@atps/security";
 import type { ProposalsDeps } from "./proposals-core";
 import { createSupabaseServerClient, supabaseGuardDeps } from "./supabase";
 
+const FIELD_LABELS: Record<string, string> = {
+  name_zh: "名稱",
+  type: "類型",
+  address: "地址",
+  suggested_stay_minutes: "停留",
+  note: "備註",
+  place_id: "地點",
+};
+
 // T34：提案與 Change Log。全部以使用者本人的 session 讀寫（RLS）；批准、否決經資料庫函式，批准者取自 session
 
 export async function proposalsActionDeps(): Promise<ProposalsDeps> {
@@ -127,6 +136,10 @@ export async function loadProposals(tripId: string): Promise<ProposalsView> {
     return {
       operations: parsed.data.operations.map((op) => {
         if (op.op === "set_at_risk") return `${itemName(op.itemId)}${op.atRisk ? "標示 At Risk" : "取消 At Risk"}`;
+        // 決策 0010：成員的新增、修改、刪除
+        if (op.op === "add_item") return `新增${op.item.name_zh}${op.date ? `（${short(op.date)} ${op.start ?? ""}–${op.end ?? ""}）` : "到候選清單"}`;
+        if (op.op === "update_item") return `修改${itemName(op.itemId)}（${Object.keys(op.fields).map((k) => FIELD_LABELS[k] ?? k).join("、")}）`;
+        if (op.op === "remove_item") return `刪除${itemName(op.itemId)}`;
         if (op.date === null) return `${itemName(op.itemId)}移回候選清單`;
         return `${itemName(op.itemId)}改為 ${short(op.date)} ${op.start ?? ""}–${op.end ?? ""}`;
       }),

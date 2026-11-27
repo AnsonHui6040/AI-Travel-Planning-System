@@ -14,7 +14,10 @@ export type FetchBlockReason =
   | "bad_content_type"
   | "too_large"
   | "timeout"
-  | "network_error";
+  | "network_error"
+  // 決策 0010：帶 key 的請求不跟隨 redirect；不允許的標頭或內容
+  | "redirect_refused"
+  | "bad_request";
 
 export type FetchResult =
   | { ok: true; url: string; status: number; contentType: string; body: string }
@@ -34,7 +37,16 @@ export type FetchTransport = (request: {
   address: string;
   headers: Record<string, string>;
   signal: AbortSignal;
+  method: "GET" | "POST";
+  body: string | undefined;
 }) => Promise<TransportResponse>;
+
+// 決策 0010：官方 API（例如 Places 文字搜尋）需要 POST、JSON 內容與 key 標頭
+export interface AllowlistedRequestInit {
+  method?: "GET" | "POST";
+  headers?: Record<string, string>;
+  body?: string;
+}
 
 export type ResolveHost = (host: string) => Promise<string[]>;
 

@@ -38,6 +38,8 @@ export {
   createGoogleMapsKeyTester,
   directionsUrl,
   type GoogleMapsClient,
+  type LivePlaceCandidate,
+  MAX_SEARCH_QUERY,
   type GoogleMapsOptions,
   type LatLng,
   type LivePlaceDetails,

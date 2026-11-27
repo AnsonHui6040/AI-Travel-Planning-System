@@ -63,6 +63,7 @@ const STATUS_LABELS: Record<VerificationStatus, string> = {
   partially_verified: "Partially Verified",
   unverified: "Unverified",
   conflict: "Conflict",
+  user_confirmed: "使用者確認",
 };
 
 const cell = (s: string): string => s.replaceAll("|", "\\|").replaceAll("\n", " ");

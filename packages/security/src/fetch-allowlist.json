@@ -12,5 +12,8 @@
     "www.tokyometro.jp",
     "www.traffic.nankai.co.jp",
     "www3.jrhokkaido.co.jp"
+  ],
+  "apiHosts": [
+    "places.googleapis.com"
   ]
 }

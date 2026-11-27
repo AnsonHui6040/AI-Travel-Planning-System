@@ -269,3 +269,45 @@ describe("DataSourceAdapter 與導航連結", () => {
     expect(url.searchParams.get("travelmode")).toBe("walking");
   });
 });
+
+// 決策 0010 S：新增地點畫面的搜尋。D28：只回傳即時顯示用的名稱與地址（storable: false），保存時只取 place_id
+describe("搜尋地點（決策 0010）", () => {
+  it("以文字搜尋，key 只在標頭；回傳最多 5 筆 place_id、名稱與地址", async () => {
+    const { options, requests } = fake([
+      searchResult([
+        syntheticPlace({ formattedAddress: "東京都台東區淺草 2-3-1" }),
+        { id: "ChIJsynthetic-place-0002", displayName: { text: "淺草神社" }, formattedAddress: null },
+        { id: "<bad id>", displayName: { text: "格式不正確" } },
+      ]),
+    ]);
+    const results = await createGoogleMapsClient(options).searchPlaces(KEY, { query: "淺草", languageCode: "zh-TW" });
+    expect(results).toEqual([
+      { storable: false, placeId: PLACE, name: "淺草寺", address: "東京都台東區淺草 2-3-1" },
+      { storable: false, placeId: "ChIJsynthetic-place-0002", name: "淺草神社", address: null },
+    ]);
+    expect(requests[0]).toMatchObject({
+      url: "https://places.googleapis.com/v1/places:searchText",
+      method: "POST",
+      body: { textQuery: "淺草", languageCode: "zh-TW", pageSize: 5 },
+    });
+    expect(requests[0]?.headers["x-goog-api-key"]).toBe(KEY);
+    expect(requests[0]?.headers["x-goog-fieldmask"]).toBe("places.id,places.displayName,places.formattedAddress");
+    expect(requests[0]?.url).not.toContain(KEY);
+  });
+
+  it("搜尋字去掉前後空白；空白或超過 100 字時不呼叫", async () => {
+    const { options, requests } = fake([]);
+    const client = createGoogleMapsClient(options);
+    await expect(client.searchPlaces(KEY, { query: "   ", languageCode: "zh-TW" })).rejects.toThrow();
+    await expect(client.searchPlaces(KEY, { query: "x".repeat(101), languageCode: "zh-TW" })).rejects.toThrow();
+    expect(requests).toHaveLength(0);
+  });
+
+  it("沒有結果時為空陣列；403 時丟出不含 key 的錯誤", async () => {
+    const { options } = fake([searchResult([]), { status: 403, body: { error: { message: `bad key ${KEY}` } } }]);
+    const client = createGoogleMapsClient(options);
+    expect(await client.searchPlaces(KEY, { query: "淺草", languageCode: "zh-TW" })).toEqual([]);
+    const error = await client.searchPlaces(KEY, { query: "淺草", languageCode: "zh-TW" }).catch((e: unknown) => e);
+    expect(String(error)).not.toContain(KEY);
+  });
+});

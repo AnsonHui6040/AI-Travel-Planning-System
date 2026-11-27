@@ -14,6 +14,7 @@ const STATUS_LABELS: Record<string, string> = {
   partially_verified: "Partially Verified",
   unverified: "Unverified",
   conflict: "Conflict",
+  user_confirmed: "使用者確認",
 };
 const FIELD_LABELS = { full_name: "全名", phone: "電話", email: "電子郵件" } as const;
 

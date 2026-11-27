@@ -1,9 +1,9 @@
 import allowlistFile from "./fetch-allowlist.json";
 import { isIpLiteral, isPublicAddress } from "./address";
 import { nodeResolve, nodeTransport } from "./node-transport";
-import type { FetchBlockReason, FetchLimits, FetchResult, FetchTransport, ResolveHost, TransportResponse } from "./fetch-types";
+import type { AllowlistedRequestInit, FetchBlockReason, FetchLimits, FetchResult, FetchTransport, ResolveHost, TransportResponse } from "./fetch-types";
 
-export type { FetchBlockReason, FetchLimits, FetchResult, FetchTransport, ResolveHost, TransportResponse } from "./fetch-types";
+export type { AllowlistedRequestInit, FetchBlockReason, FetchLimits, FetchResult, FetchTransport, ResolveHost, TransportResponse } from "./fetch-types";
 
 // T16、S-05：白名單 fetch。只供伺服器端使用（Verification 讀取官方網頁、資料源 adapter）
 
@@ -17,6 +17,9 @@ function validateAllowlist(hosts: readonly string[]): readonly string[] {
 
 // 網域白名單只存於 repo 設定檔，經 PR 修改；執行期間不可變更
 export const FETCH_ALLOWLIST: readonly string[] = validateAllowlist(allowlistFile.hosts);
+// 決策 0010：以使用者本人 key 呼叫的官方 API 主機（例如 Places 文字搜尋）。與讀取官方網頁的白名單分開，
+// Verification 依 AI 輸出讀取網頁時不會連到這些主機；adapter 以 createAllowlistedFetch({ allowlist: FETCH_API_HOSTS }) 使用
+export const FETCH_API_HOSTS: readonly string[] = validateAllowlist(allowlistFile.apiHosts);
 
 export const DEFAULT_FETCH_LIMITS: FetchLimits = Object.freeze({
   maxBytes: 2 * 1024 * 1024,
@@ -40,6 +43,29 @@ const REQUEST_HEADERS = Object.freeze({
 });
 
 const REDIRECTS = new Set([301, 302, 303, 307, 308]);
+
+// 呼叫端不可指定的標頭：連線、長度與壓縮由這裡決定，cookie 一律不送
+const RESERVED_HEADERS = new Set(["host", "cookie", "accept-encoding", "content-length", "connection", "transfer-encoding", "user-agent"]);
+const HEADER_NAME = /^[a-z0-9-]{1,64}$/;
+export const MAX_REQUEST_BODY_BYTES = 16 * 1024;
+
+type Prepared = { method: "GET" | "POST"; headers: Record<string, string>; body: string | undefined; custom: boolean };
+
+function prepare(init: AllowlistedRequestInit | undefined): Prepared | Blocked {
+  const method = init?.method ?? "GET";
+  const extra = init?.headers ?? {};
+  const body = init?.body;
+  for (const [name, value] of Object.entries(extra)) {
+    if (!HEADER_NAME.test(name) || RESERVED_HEADERS.has(name) || /[\r\n]/.test(value)) return block("bad_request", `不允許的標頭：${name}`);
+  }
+  if (body !== undefined) {
+    if (method === "GET") return block("bad_request", "GET 不可帶內容");
+    if (new TextEncoder().encode(body).byteLength > MAX_REQUEST_BODY_BYTES) return block("bad_request", "內容過大");
+  }
+  const headers: Record<string, string> = { ...REQUEST_HEADERS, ...extra };
+  if (body !== undefined) headers["content-length"] = String(new TextEncoder().encode(body).byteLength);
+  return { method, headers, body, custom: Object.keys(extra).length > 0 || body !== undefined };
+}
 
 type Blocked = Extract<FetchResult, { ok: false }>;
 const block = (reason: FetchBlockReason, detail: string, status?: number): Blocked =>
@@ -120,13 +146,17 @@ function withDeadline<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   });
 }
 
-export function createAllowlistedFetch(options: AllowlistedFetchOptions = {}): (url: string | URL) => Promise<FetchResult> {
+export type AllowlistedFetch = (url: string | URL, init?: AllowlistedRequestInit) => Promise<FetchResult>;
+
+export function createAllowlistedFetch(options: AllowlistedFetchOptions = {}): AllowlistedFetch {
   const allowlist = new Set(options.allowlist ? validateAllowlist(options.allowlist) : FETCH_ALLOWLIST);
   const limits: FetchLimits = { ...DEFAULT_FETCH_LIMITS, ...options.limits };
   const resolve = options.resolve ?? nodeResolve;
   const transport = options.transport ?? nodeTransport;
 
-  return async (input) => {
+  return async (input, init) => {
+    const request = prepare(init);
+    if ("ok" in request) return request;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), limits.timeoutMs);
     let current: TransportResponse | undefined;
@@ -139,11 +169,15 @@ export function createAllowlistedFetch(options: AllowlistedFetchOptions = {}): (
         const address = await withDeadline(resolvePublic(url.hostname.toLowerCase(), resolve), controller.signal);
         if (typeof address !== "string") return address;
 
-        current = await withDeadline(transport({ url, address, headers: { ...REQUEST_HEADERS }, signal: controller.signal }), controller.signal);
+        current = await withDeadline(
+          transport({ url, address, headers: { ...request.headers }, signal: controller.signal, method: request.method, body: request.body }),
+          controller.signal,
+        );
         const response = current;
 
         if (REDIRECTS.has(response.status)) {
           response.cancel();
+          if (request.custom) return block("redirect_refused", "帶標頭或內容的請求不跟隨 redirect");
           const location = response.headers.location;
           if (!location) return block("http_status", "redirect 沒有目的地", response.status);
           if (hop >= limits.maxRedirects) return block("too_many_redirects", `redirect 超過 ${limits.maxRedirects} 次`);
@@ -179,5 +213,25 @@ export function createAllowlistedFetch(options: AllowlistedFetchOptions = {}): (
     } finally {
       clearTimeout(timer);
     }
+  };
+}
+
+// 決策 0010：轉為 fetch 介面，讓官方 API 的 adapter（例如 Google Maps）經白名單連線。
+// 2xx 回傳內容；其他狀態碼回傳同一狀態碼（不含內容）；被擋下時丟出錯誤
+export function allowlistedFetchAsFetch(fetcher: AllowlistedFetch = createAllowlistedFetch()): (url: string, init?: RequestInit) => Promise<Response> {
+  return async (url, init) => {
+    const headers: Record<string, string> = {};
+    new Headers(init?.headers).forEach((value, key) => {
+      headers[key] = value;
+    });
+    const method = (init?.method ?? "GET").toUpperCase();
+    if (method !== "GET" && method !== "POST") throw new Error("只支援 GET 與 POST");
+    if (init?.body !== undefined && init.body !== null && typeof init.body !== "string") throw new Error("內容須為文字");
+    const result = await fetcher(url, { method, headers, ...(typeof init?.body === "string" ? { body: init.body } : {}) });
+    if (result.ok) return new Response(result.body, { status: result.status, headers: { "content-type": result.contentType } });
+    if (result.reason === "http_status" && result.status !== undefined && result.status >= 200 && result.status <= 599) {
+      return new Response(null, { status: result.status });
+    }
+    throw new Error(`白名單 fetch 拒絕：${result.reason}`);
   };
 }

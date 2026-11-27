@@ -6,8 +6,13 @@ export { isPublicAddress } from "./address";
 export {
   DEFAULT_FETCH_LIMITS,
   FETCH_ALLOWLIST,
+  FETCH_API_HOSTS,
+  MAX_REQUEST_BODY_BYTES,
+  allowlistedFetchAsFetch,
   createAllowlistedFetch,
+  type AllowlistedFetch,
   type AllowlistedFetchOptions,
+  type AllowlistedRequestInit,
   type FetchBlockReason,
   type FetchLimits,
   type FetchResult,

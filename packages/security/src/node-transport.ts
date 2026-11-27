@@ -21,10 +21,10 @@ export function pinnedLookup(address: string) {
   };
 }
 
-export const nodeTransport: FetchTransport = ({ url, address, headers, signal }) =>
+export const nodeTransport: FetchTransport = ({ url, address, headers, signal, method, body }) =>
   new Promise((resolve, reject) => {
     const options: RequestOptions = {
-      method: "GET",
+      method,
       protocol: "https:",
       host: url.hostname,
       servername: url.hostname,
@@ -54,5 +54,5 @@ export const nodeTransport: FetchTransport = ({ url, address, headers, signal })
       });
     });
     req.on("error", reject);
-    req.end();
+    req.end(body);
   });
