@@ -10,9 +10,8 @@ export async function approveProposal(_previous: ProposalActionResult | null, fo
   const result = await approveProposalAction(await proposalsActionDeps(), form.get("proposalId"));
   const tripId = form.get("tripId");
   if (typeof tripId === "string") {
-    revalidatePath(`/trips/${tripId}/proposals`);
-    // T38：Incident Mode 的即時分支在批准後更新狀態
-    revalidatePath(`/trips/${tripId}/incident`, "layout");
+    // 行程內所有畫面（含 T38 Incident Mode 的即時分支與分頁的待批准數）
+    revalidatePath(`/trips/${tripId}`, "layout");
   }
   return result;
 }
@@ -21,8 +20,7 @@ export async function rejectProposal(_previous: ProposalActionResult | null, for
   const result = await rejectProposalAction(await proposalsActionDeps(), form.get("proposalId"));
   const tripId = form.get("tripId");
   if (typeof tripId === "string") {
-    revalidatePath(`/trips/${tripId}/proposals`);
-    revalidatePath(`/trips/${tripId}/incident`, "layout");
+    revalidatePath(`/trips/${tripId}`, "layout");
   }
   return result;
 }

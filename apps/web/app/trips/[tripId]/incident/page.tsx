@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { loadIncidentEntry } from "../../../../lib/server/incident";
 import { IncidentForm } from "./incident-form";
-import "../../../settings/settings.css";
+import { IncidentSteps } from "./incident-steps";
 import "./incident.css";
 
-// T38：Incident Mode 入口。分級、Snapshot 與替代方案由伺服器計算；批准前不改動行程
+// T38：出狀況（Incident Mode）第 1 步。分級、Snapshot 與替代方案由伺服器計算；批准前不改動行程
 
-export const metadata: Metadata = { title: "Incident Mode" };
+export const metadata: Metadata = { title: "出狀況" };
 export const dynamic = "force-dynamic";
 
 const formatTime = (iso: string, timeZone: string) =>
@@ -19,30 +19,38 @@ export default async function IncidentEntryPage({ params, searchParams }: { para
   const view = await loadIncidentEntry(tripId, date);
   if (view.state !== "ok") {
     return (
-      <main className="settings incident">
-        <h1>Incident Mode</h1>
+      <main className="screen incident">
+        <h1>出狀況</h1>
         <p>{view.state === "signed_out" ? "請先登入。" : "找不到這個行程，或你不是成員。"}</p>
       </main>
     );
   }
+  const backHref = `/trips/${tripId}/today?date=${view.date}`;
+  const open = view.canEdit && (view.tripStatus === "locked" || view.tripStatus === "in_progress");
   return (
-    <main className="settings incident">
-      <h1>Incident Mode</h1>
-      <p className="trip-line">
-        {view.tripName}，{view.date}
-      </p>
-      {view.canEdit && (view.tripStatus === "locked" || view.tripStatus === "in_progress") ? (
-        <>
-          <p className="muted">只重新安排到下一個 Hard Constraint 為止。替代方案依同區域、鄰近區域、交換今日順序、使用另一日候選、刪減活動的次序產生，批准其中一個之前行程不會改動。</p>
-          <IncidentForm tripId={tripId} date={view.date} items={view.items} />
-        </>
+    <main className="screen incident">
+      <header className="screen-head">
+        <Link className="back-link" href={backHref} aria-label="返回現在">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+          現在
+        </Link>
+        <h1>出狀況</h1>
+        <p className="trip-line">
+          Incident Mode，{view.tripName}，{view.date.slice(5).replace("-", "/")}
+        </p>
+      </header>
+      <IncidentSteps current={1} />
+      {open ? (
+        <IncidentForm tripId={tripId} date={view.date} items={view.items} backHref={backHref} />
       ) : (
         <p className="muted">{view.canEdit ? "行程鎖定後才能使用 Incident Mode。" : "只有 Owner 與 Companion 可以進入 Incident Mode。"}</p>
       )}
       {view.recent.length > 0 ? (
-        <section aria-labelledby="recent-heading">
-          <h2 id="recent-heading">最近的 Incident</h2>
-          <ul className="incident-recent">
+        <details className="incident-recent">
+          <summary>最近的 Incident（{view.recent.length}）</summary>
+          <ul>
             {view.recent.map((r) => (
               <li key={r.id}>
                 <Link href={`/trips/${tripId}/incident/${r.id}`}>
@@ -51,11 +59,8 @@ export default async function IncidentEntryPage({ params, searchParams }: { para
               </li>
             ))}
           </ul>
-        </section>
+        </details>
       ) : null}
-      <p>
-        <Link href={`/trips/${tripId}/today?date=${view.date}`}>回到當日行程</Link>
-      </p>
     </main>
   );
 }

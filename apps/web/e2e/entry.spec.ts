@@ -38,6 +38,9 @@ test("未登入導向登入；magic link 登入、建立行程、登出", async 
   await expect(page.getByRole("heading", { name: "我的行程" })).toBeVisible();
   await expect(page.getByText("還沒有行程。")).toBeVisible();
 
+  // 新行程另開畫面
+  await page.getByRole("link", { name: "新行程" }).click();
+  await expect(page).toHaveURL(/\/trips\/new$/);
   const form = page.getByRole("form", { name: "建立行程" });
   await form.getByLabel("行程名稱").fill("京都週末");
   await form.getByLabel("目的地（可留空）").fill("京都");
@@ -67,15 +70,20 @@ test("示範資料腳本：建立的行程可在各頁面檢視", async ({ page,
   const out = execFileSync("node", [path.resolve(import.meta.dirname, "../scripts/seed-demo.mjs"), user.email], { encoding: "utf8" });
   expect(out).toMatch(/已建立示範行程：\/trips\/[0-9a-f-]{36}\/today/);
 
+  // 首頁：旅行中的行程在最上，卡片顯示下一站
   await page.goto("/");
-  await page.getByRole("link", { name: "東京三日（示範）" }).click();
-  await expect(page.getByRole("heading", { name: "當日行程" })).toBeVisible();
+  const card = page.getByRole("list").filter({ hasText: "東京三日（示範）" }).getByRole("listitem").first();
+  await expect(card).toContainText("東京三日（示範）");
+  await card.getByRole("link").click();
+  await expect(page.getByRole("heading", { name: "東京三日（示範）", level: 1 })).toBeVisible();
   await expect(page.locator("main")).toContainText("淺草寺");
   const nav = page.getByRole("navigation", { name: "行程" });
-  await nav.getByRole("link", { name: "候選" }).click();
-  await expect(page.locator("main")).toContainText("藏前咖啡廳");
-  await nav.getByRole("link", { name: "提案" }).click();
+  await nav.getByRole("link", { name: /提案/ }).click();
   await expect(page.locator("main")).toContainText("晴空塔延後半小時");
-  await nav.getByRole("link", { name: "每日" }).click();
+  await nav.getByRole("link", { name: "行程" }).click();
+  await page.getByRole("navigation", { name: "日期" }).getByRole("link").nth(1).click();
   await expect(page.locator("main")).toContainText("東京國立博物館");
+  await nav.getByRole("link", { name: "更多" }).click();
+  await page.getByRole("link", { name: /^候選/ }).click();
+  await expect(page.locator("main")).toContainText("藏前咖啡廳");
 });

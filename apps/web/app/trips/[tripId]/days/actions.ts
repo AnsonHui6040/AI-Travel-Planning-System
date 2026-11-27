@@ -9,6 +9,6 @@ import { dayApprovalDeps } from "../../../../lib/server/day-approval";
 export async function approveDay(_previous: DayApprovalResult | null, form: FormData): Promise<DayApprovalResult> {
   const tripId = form.get("tripId");
   const result = await approveDayAction(await dayApprovalDeps(), tripId, form.get("date"), form.get("baseVersion"));
-  if (result.ok && typeof tripId === "string") revalidatePath(`/trips/${tripId}/days`);
+  if (result.ok && typeof tripId === "string") revalidatePath(`/trips/${tripId}`, "layout");
   return result;
 }

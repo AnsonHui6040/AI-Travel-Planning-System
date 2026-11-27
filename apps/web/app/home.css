@@ -65,23 +65,65 @@
   margin-top: 1.5rem;
 }
 
-.trip-list {
+.home-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.home-head h1 {
+  margin: 0;
+}
+
+/* 行程卡片：目前行程在最上 */
+.trip-cards {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  gap: 0.5rem;
 }
 
-.trip-list li {
+.trip-cards a {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.trip-cards li.current a {
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+
+.trip-card-head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 1rem;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--line);
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
-.trip-list a {
+.trip-card-name {
+  font-size: var(--fs-h2);
   font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.trip-cards .muted {
+  font-size: var(--fs-small);
+}
+
+.trip-card-next {
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.new-trip h1 {
+  margin: 0.25rem 0 0.5rem;
 }
 
 .entry-form {

@@ -26,9 +26,10 @@ async function measure(page: Page) {
     };
     const bg = getComputedStyle(document.body).backgroundColor;
     const texts = [...document.querySelectorAll("main p, main span, main h1, main h2, main h3, main a, main label, main dt, main dd")]
-      .filter((el) => (el as HTMLElement).innerText?.trim())
+      // 實心底的主要動作（文字對填色的對比由 tooling/ui-tokens.test.ts 檢查）
+      .filter((el) => (el as HTMLElement).innerText?.trim() && !el.closest(".primary"))
       .map((el) => ratio(getComputedStyle(el).color, bg));
-    const buttons = [...document.querySelectorAll("main button, .trip-nav a")].map((el) => el.getBoundingClientRect().height).filter((h) => h > 0);
+    const buttons = [...document.querySelectorAll("main button, main a.primary, main a.secondary, .tabbar a")].map((el) => el.getBoundingClientRect().height).filter((h) => h > 0);
     return {
       bg,
       minText: Math.min(...texts),
@@ -62,15 +63,15 @@ for (const scheme of ["light", "dark"] as const) {
       expect(m.scrollOk, `${name} 沒有水平捲動`).toBe(true);
       if (name !== "home") {
         const nav = page.getByRole("navigation", { name: "行程" });
-        await expect(nav.getByRole("link")).toHaveText(["今天", "每日", "候選", "提案", "記憶", "旅後"]);
+        await expect(nav.getByRole("link")).toHaveText(["現在", "行程", "提案", "更多"]);
       }
       await capture(page, `${name}-${scheme}`);
     }
     await page.goto(`/trips/${tripId}/today?date=${DATE}`);
-    await expect(page.getByRole("navigation", { name: "行程" }).getByRole("link", { name: "今天" })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("navigation", { name: "行程" }).getByRole("link", { name: "現在" })).toHaveAttribute("aria-current", "page");
     // Astryx：每個畫面只有一個主要按鈕；控制項 10px 圓角、沒有外框
-    await expect(page.locator("main button.primary")).toHaveCount(1);
-    const shape = await page.locator("main button").first().evaluate((el) => {
+    await expect(page.locator("main .primary")).toHaveCount(1);
+    const shape = await page.locator("main .primary").first().evaluate((el) => {
       const s = getComputedStyle(el);
       return { radius: s.borderTopLeftRadius, border: s.borderTopWidth };
     });

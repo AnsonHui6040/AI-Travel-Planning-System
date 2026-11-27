@@ -9,6 +9,6 @@ import { morningCheckDeps } from "../../../../lib/server/morning-check";
 export async function runMorningCheck(_previous: MorningCheckActionResult | null, form: FormData): Promise<MorningCheckActionResult> {
   const tripId = form.get("tripId");
   const result = await runMorningCheckAction(await morningCheckDeps(), tripId, form.get("date"));
-  if (result.ok && typeof tripId === "string") revalidatePath(`/trips/${tripId}/today`);
+  if (result.ok && typeof tripId === "string") revalidatePath(`/trips/${tripId}`, "layout");
   return result;
 }

@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { ServiceWorkerRegistration } from "../components/service-worker";
 import "./globals.css";
+import "./shell.css";
 
 export const metadata: Metadata = {
   title: "旅行規劃",

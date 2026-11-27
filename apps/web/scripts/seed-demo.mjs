@@ -1,13 +1,18 @@
 // 本機示範資料：為指定電子郵件的使用者建立一個「東京三日（示範）」行程，方便在瀏覽器檢視各頁面。
 // 只寫入本機 Supabase（網址不是 localhost 或 127.0.0.1 時拒絕執行）。使用者須先以該電子郵件登入一次。
-// 用法：pnpm --filter @atps/web demo:seed 你的電子郵件
+// 用法：pnpm --filter @atps/web demo:seed 你的電子郵件 [--phase=trip|planning|post]
+// - trip（預設）：旅行中，第一天是今天
+// - planning：規劃中，基線已確認、有候選、每日尚未批准（「現在」顯示步驟）
+// - post：已結束，三天都在過去、尚未標記旅後狀態
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
 const email = (process.argv[2] ?? "").trim().toLowerCase();
-if (!email.includes("@")) {
-  console.error("用法：pnpm --filter @atps/web demo:seed 你的電子郵件");
+const phaseArg = process.argv.find((a) => a.startsWith("--phase="));
+const phase = phaseArg ? phaseArg.slice("--phase=".length) : "trip";
+if (!email.includes("@") || !["trip", "planning", "post"].includes(phase)) {
+  console.error("用法：pnpm --filter @atps/web demo:seed 你的電子郵件 [--phase=trip|planning|post]");
   process.exit(1);
 }
 
@@ -57,11 +62,14 @@ if (!userId) {
   process.exit(1);
 }
 
-const days = [tokyoDate(0), tokyoDate(1), tokyoDate(2)];
+// 規劃中為 30 天後出發；旅後為三天前到昨天
+const offset = phase === "planning" ? 30 : phase === "post" ? -3 : 0;
+const days = [tokyoDate(offset), tokyoDate(offset + 1), tokyoDate(offset + 2)];
+const TRIP_STATUS = { trip: "in_progress", planning: "planning", post: "ended" };
 const trip = must(
   await admin
     .from("trips")
-    .insert({ name: "東京三日（示範）", destination: "東京", owner_id: userId, start_date: days[0], end_date: days[2], timezone: "Asia/Tokyo", status: "in_progress", current_version: 1 })
+    .insert({ name: "東京三日（示範）", destination: "東京", owner_id: userId, start_date: days[0], end_date: days[2], timezone: "Asia/Tokyo", status: TRIP_STATUS[phase], current_version: 1 })
     .select("id")
     .single(),
   "建立行程",
@@ -121,15 +129,11 @@ const items = must(
   await admin
     .from("itinerary_items")
     .insert(
-      scheduled.map(([name, type, day, start, end]) => ({
-        ...base,
-        name_zh: name,
-        type,
-        lifecycle_status: "locked",
-        scheduled_date: days[day],
-        scheduled_start: start,
-        scheduled_end: end,
-      })),
+      scheduled.map(([name, type, day, start, end]) =>
+        phase === "planning"
+          ? { ...base, name_zh: name, type, lifecycle_status: "verified", availability: [{ start: "08:00", end: "20:00" }] }
+          : { ...base, name_zh: name, type, lifecycle_status: "locked", scheduled_date: days[day], scheduled_start: start, scheduled_end: end },
+      ),
     )
     .select("id, name_zh"),
   "建立行程項目",
@@ -142,23 +146,28 @@ must(
   ]),
   "建立候選",
 );
-must(await admin.from("days").insert(days.map((date) => ({ trip_id: tripId, date, status: "approved" }))), "建立每日");
+if (phase !== "planning") {
+  must(await admin.from("days").insert(days.map((date) => ({ trip_id: tripId, date, status: phase === "post" ? "completed" : "approved" }))), "建立每日");
+}
 
-const tower = items.find((i) => i.name_zh === "晴空塔");
-must(
-  await admin.from("proposals").insert({
-    trip_id: tripId,
-    proposer_member_id: userId,
-    base_version: 1,
-    change: {
-      changeKind: "minor_non_incident",
-      versionKind: "minor",
-      summary: "晴空塔延後半小時，避開排隊",
-      operations: [{ op: "schedule_item", itemId: tower.id, date: days[0], start: "11:30", end: "13:00" }],
-    },
-    impact_scope: { dates: [days[0]] },
-  }),
-  "建立提案",
-);
+// 旅行中：一個待批准的提案
+if (phase === "trip") {
+  const tower = items.find((i) => i.name_zh === "晴空塔");
+  must(
+    await admin.from("proposals").insert({
+      trip_id: tripId,
+      proposer_member_id: userId,
+      base_version: 1,
+      change: {
+        changeKind: "minor_non_incident",
+        versionKind: "minor",
+        summary: "晴空塔延後半小時，避開排隊",
+        operations: [{ op: "schedule_item", itemId: tower.id, date: days[0], start: "11:30", end: "13:00" }],
+      },
+      impact_scope: { dates: [days[0]] },
+    }),
+    "建立提案",
+  );
+}
 
 console.log(`已建立示範行程：/trips/${tripId}/today`);

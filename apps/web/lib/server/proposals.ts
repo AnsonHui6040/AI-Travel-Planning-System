@@ -44,6 +44,11 @@ export interface ProposalView {
   proposer: string;
   baseVersion: number;
   createdAt: string;
+  // 提案詳情的影響範圍：影響的日期與每個變更（以項目名稱描述）
+  dates: string[];
+  operations: string[];
+  reason: string | null;
+  versionKind: "major" | "minor" | null;
 }
 
 export interface ChangeLogView {
@@ -80,7 +85,7 @@ export async function loadProposals(tripId: string): Promise<ProposalsView> {
 
   const { data: proposals } = await session
     .from("proposals")
-    .select("id, change, base_version, status, proposer_member_id, proposer_role, proposer_provider, proposer_model, created_at")
+    .select("id, change, impact_scope, base_version, status, proposer_member_id, proposer_role, proposer_provider, proposer_model, created_at")
     .eq("trip_id", tripId)
     .order("created_at", { ascending: false })
     .limit(100);
@@ -107,6 +112,32 @@ export async function loadProposals(tripId: string): Promise<ProposalsView> {
     const parsed = changePayload.safeParse(change);
     return parsed.success ? parsed.data.summary : "（內容格式不正確）";
   };
+  const recent = (proposals ?? []).slice(0, 30);
+  const itemIds = new Set<string>();
+  for (const p of recent) {
+    const parsed = changePayload.safeParse(p.change);
+    if (parsed.success) for (const op of parsed.data.operations) itemIds.add(op.itemId);
+  }
+  const { data: itemRows } = itemIds.size > 0 ? await session.from("itinerary_items").select("id, name_zh").eq("trip_id", tripId).in("id", [...itemIds]) : { data: [] };
+  const itemName = (id: string) => String((itemRows ?? []).find((r) => r.id === id)?.name_zh ?? "項目");
+  const short = (date: string) => date.slice(5).replace("-", "/");
+  const detailOf = (change: unknown) => {
+    const parsed = changePayload.safeParse(change);
+    if (!parsed.success) return { operations: [], reason: null, versionKind: null };
+    return {
+      operations: parsed.data.operations.map((op) => {
+        if (op.op === "set_at_risk") return `${itemName(op.itemId)}${op.atRisk ? "標示 At Risk" : "取消 At Risk"}`;
+        if (op.date === null) return `${itemName(op.itemId)}移回候選清單`;
+        return `${itemName(op.itemId)}改為 ${short(op.date)} ${op.start ?? ""}–${op.end ?? ""}`;
+      }),
+      reason: parsed.data.reason ?? null,
+      versionKind: parsed.data.versionKind,
+    };
+  };
+  const datesOf = (scope: unknown) => {
+    const dates = (scope as { dates?: unknown } | null)?.dates;
+    return Array.isArray(dates) ? dates.filter((d): d is string => typeof d === "string") : [];
+  };
 
   return {
     state: "ok",
@@ -114,14 +145,16 @@ export async function loadProposals(tripId: string): Promise<ProposalsView> {
     tripName: String(trip.name),
     currentVersion: Number(trip.current_version),
     canDecide: member?.role === "owner" || member?.role === "companion",
-    proposals: (proposals ?? []).slice(0, 30).map((p) => ({
-        id: String(p.id),
-        status: p.status as ProposalView["status"],
-        summary: summaryOf(p.change),
-        proposer: proposerOf(p as Record<string, unknown>),
-        baseVersion: Number(p.base_version),
-        createdAt: String(p.created_at),
-      })),
+    proposals: recent.map((p) => ({
+      id: String(p.id),
+      status: p.status as ProposalView["status"],
+      summary: summaryOf(p.change),
+      proposer: proposerOf(p as Record<string, unknown>),
+      baseVersion: Number(p.base_version),
+      createdAt: String(p.created_at),
+      dates: datesOf(p.impact_scope),
+      ...detailOf(p.change),
+    })),
     changeLog: (versions ?? []).map((v) => ({
       version: `v${String(v.major)}.${String(v.minor)}`,
       summary: String(v.summary),

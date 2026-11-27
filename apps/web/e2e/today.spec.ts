@@ -18,9 +18,10 @@ test("離線時從 IndexedDB 閱讀當日行程與最遲離開時間；離線修
   await scheduleItemAsAdmin(tripId, senso, "2026-12-10", "09:00", "10:00");
   await scheduleItemAsAdmin(tripId, kami, "2026-12-10", "11:00", "12:00");
 
-  // 線上開啟：存入 IndexedDB、service worker 快取離線頁面
+  // 線上開啟「現在」：存入 IndexedDB、service worker 快取離線頁面
   await page.goto(`/trips/${tripId}/today`);
-  await expect(page.getByRole("listitem", { name: "淺草寺" })).toContainText("最遲 10:30 離開前往雷門");
+  await expect(page.getByRole("list", { name: "今天" })).toContainText("09:00淺草寺");
+  await expect(page.getByRole("list", { name: "今天" })).toContainText("11:00雷門");
   await expect(page.locator("[data-offline-ready]")).toHaveAttribute("data-offline-ready", "yes");
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;

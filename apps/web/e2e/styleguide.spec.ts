@@ -22,8 +22,8 @@ test("元件樣板頁：四種按鈕、確認、輸入欄、分頁與標示；�
       await expect(panel.locator(`table button.${variant}`)).toHaveCount(3);
     }
     await expect(panel.locator("table button:disabled")).toHaveCount(8);
-    await expect(panel.getByRole("navigation")).toBeVisible();
-    await expect(panel.getByRole("group")).toContainText("無法復原");
+    await expect(panel.getByRole("navigation", { name: /行程分頁/ }).getByRole("link")).toHaveCount(4);
+    await expect(panel.getByRole("group", { name: /確認範例/ })).toContainText("無法復原");
   }
 
   const result = await page.evaluate(() => {
@@ -55,7 +55,7 @@ test("元件樣板頁：四種按鈕、確認、輸入欄、分頁與標示；�
           }
           return ratio(getComputedStyle(el).color, under);
         });
-      const controls = [...panel.querySelectorAll("button, input:not([type=checkbox]), select, .trip-nav a")].map((el) => el.getBoundingClientRect().height);
+      const controls = [...panel.querySelectorAll("button, input:not([type=checkbox]):not([type=radio]), select, .tabbar a, .chips a, .rows a, .choices label")].map((el) => el.getBoundingClientRect().height);
       return { theme: panel.dataset.theme, bg, minText: Math.min(...texts), minControl: Math.min(...controls) };
     });
   });

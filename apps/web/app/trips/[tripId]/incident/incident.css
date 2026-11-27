@@ -1,4 +1,4 @@
-/* T38：Incident Mode */
+/* T38：出狀況（Incident Mode）。第 1 步選擇與細節、第 2 步替代方案卡片、第 3 步確認；完整比較另開 */
 .settings.incident {
   max-width: 56rem;
 }
@@ -8,7 +8,7 @@
   color: var(--muted);
 }
 
-.incident section {
+.incident-compare-page section {
   border-top: 1px solid var(--line);
   margin-top: 1.25rem;
   padding-top: 0.75rem;
@@ -28,13 +28,53 @@
   font-size: var(--fs-small);
 }
 
-.incident-form {
+.incident-steps {
+  flex: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: grid;
-  gap: 0.6rem;
-  max-width: 28rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.25rem;
 }
 
-.incident-form label {
+.incident-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.incident-steps li[data-state="current"],
+.incident-steps li[data-state="done"] {
+  color: var(--text);
+}
+
+.incident-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  font-variant-numeric: tabular-nums;
+}
+
+.incident-steps li[data-state="current"] .incident-step-number {
+  background: var(--solid);
+  border-color: var(--solid);
+  color: var(--on-solid);
+}
+
+.incident-details {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.incident-details label {
   display: grid;
   gap: 0.2rem;
 }
@@ -47,14 +87,111 @@
   display: none;
 }
 
-.incident-form:has(option[value="long_queue"]:checked) .f-item,
-.incident-form:has(option[value="attraction_closed"]:checked) .f-item,
-.incident-form:has(option[value="rail_disruption"]:checked) .f-item,
-.incident-form:has(option[value="slot_cancelled"]:checked) .f-item,
-.incident-form:has(option[value="delay"]:checked) .f-delay,
-.incident-form:has(option[value="heavy_rain"]:checked) .f-rain,
-.incident-form:has(option[value="flight_shift"]:checked) .f-flight {
+.incident-form:has(input[value="long_queue"]:checked) .f-item,
+.incident-form:has(input[value="attraction_closed"]:checked) .f-item,
+.incident-form:has(input[value="rail_disruption"]:checked) .f-item,
+.incident-form:has(input[value="slot_cancelled"]:checked) .f-item,
+.incident-form:has(input[value="delay"]:checked) .f-delay,
+.incident-form:has(input[value="heavy_rain"]:checked) .f-rain,
+.incident-form:has(input[value="flight_shift"]:checked) .f-flight {
   display: grid;
+}
+
+.incident-recent {
+  flex: none;
+}
+
+.incident-recent summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--control);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.incident-recent ul {
+  margin: 0 0 0.5rem;
+  padding-left: 1.2rem;
+}
+
+/* 第 2 步：替代方案卡片 */
+.alt-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.alt-cards a {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.alt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.alt-tier {
+  font-weight: 600;
+}
+
+.alt-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.alt-line {
+  color: var(--muted);
+  font-size: var(--fs-small);
+  overflow-wrap: anywhere;
+}
+
+/* 第 3 步：確認 */
+.incident-confirm h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.incident-confirm .summary {
+  margin: 0 0 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.incident-confirm p {
+  margin: 0.25rem 0 0;
+}
+
+.incident-confirm h2 {
+  margin-bottom: 0.25rem;
+}
+
+.incident-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.incident-facts dt {
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.incident-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .incident-location {
@@ -67,6 +204,26 @@
 
 .incident-form .error {
   color: var(--accent);
+}
+
+.incident-confirm .incident-transport {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.incident-confirm .incident-transport div {
+  display: grid;
+  gap: 0;
+}
+
+.incident-confirm .incident-transport dt {
+  min-width: 0;
+  font-size: var(--fs-small);
+}
+
+.incident-confirm .incident-transport p {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: var(--fs-small);
 }
 
 .incident-snapshot,
@@ -151,10 +308,6 @@
 .incident-options .meta {
   margin: 0.2rem 0;
   color: var(--muted);
-}
-
-.incident-recent {
-  padding-left: 1.2rem;
 }
 
 @media (max-width: 480px) {

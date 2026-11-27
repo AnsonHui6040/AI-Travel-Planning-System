@@ -23,7 +23,7 @@ const BUTTONS: ReadonlyArray<{ variant: ButtonVariant; name: string; label: stri
   { variant: "danger", name: "危險", label: "刪除", loading: "刪除中…", use: "刪除、否決、移除；會寫入的先確認" },
 ];
 
-const TABS = ["今天", "每日", "候選", "提案", "記憶", "旅後"];
+const TABS = ["現在", "行程", "提案", "更多"];
 
 function Panel({ theme, title }: { theme: "light" | "dark"; title: string }) {
   const id = (s: string) => `${theme}-${s}`;
@@ -32,10 +32,17 @@ function Panel({ theme, title }: { theme: "light" | "dark"; title: string }) {
       <h2>{title}</h2>
 
       <h3>行程分頁</h3>
-      <nav aria-label={`${title}行程分頁`} className="trip-nav sg-nav">
+      <p className="muted">固定四個分頁：手機在底部，1024px 以上為左側欄。「提案」顯示待批准數</p>
+      <nav aria-label={`${title}行程分頁`} className="tabbar sg-tabbar">
         {TABS.map((t, i) => (
           <a key={t} href="#top" aria-current={i === 0 ? "page" : undefined}>
-            {t}
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.5" />
+            </svg>
+            <span className="tab-label">
+              {t}
+              {t === "提案" ? <span className="badge">2</span> : null}
+            </span>
           </a>
         ))}
       </nav>
@@ -77,11 +84,59 @@ function Panel({ theme, title }: { theme: "light" | "dark"; title: string }) {
         </tbody>
       </table>
       <p className="sg-row">
-        <a className="pill-link" href="#top">
-          Incident Mode
+        <a className="primary" href="#top">
+          開始導航
         </a>
-        <span className="muted">導覽用連結，外觀與次要按鈕相同</span>
+        <a className="secondary" href="#top">
+          出狀況
+        </a>
+        <span className="muted">導覽用連結，外觀與按鈕相同；主要動作放在畫面下方</span>
       </p>
+
+      <h3>篩選與日期切換</h3>
+      <nav aria-label={`${title}篩選範例`} className="chips">
+        {["全部", "未核實", "已核實", "Backup"].map((c, i) => (
+          <a key={c} href="#top" aria-current={i === 1 ? "page" : undefined}>
+            {c}
+          </a>
+        ))}
+      </nav>
+
+      <h3>每項一行的清單</h3>
+      <ul className="rows">
+        <li>
+          <a href="#top">
+            <span className="row-time">09:00</span>
+            <span className="row-name">淺草寺</span>
+            <span className="row-meta">Verified</span>
+          </a>
+        </li>
+        <li>
+          <a href="#top">
+            <span className="row-time">11:00</span>
+            <span className="row-name">晴空塔</span>
+            <span className="row-meta risk">At Risk</span>
+          </a>
+        </li>
+        <li>
+          <div className="row">
+            <span className="row-time">19:00</span>
+            <span className="row-name">晚餐（已付款）</span>
+            <span className="row-meta">固定活動</span>
+          </div>
+        </li>
+      </ul>
+
+      <h3>單選選項</h3>
+      <fieldset className="choices">
+        <legend>發生什麼事？</legend>
+        {["延誤", "景點休館", "大雨"].map((c, i) => (
+          <label key={c}>
+            <input type="radio" name={id("what")} defaultChecked={i === 2} />
+            {c}
+          </label>
+        ))}
+      </fieldset>
 
       <h3>確認</h3>
       <div className="sg-dialog" role="group" aria-label={`${title}確認範例`}>

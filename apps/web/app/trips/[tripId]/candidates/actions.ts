@@ -9,7 +9,7 @@ import { researchStartDeps } from "../../../../lib/server/research";
 export async function startResearch(_previous: ResearchStartResult | null, form: FormData): Promise<ResearchStartResult> {
   const tripId = form.get("tripId");
   const result = await startResearchAction(await researchStartDeps(), tripId);
-  if (result.ok && typeof tripId === "string") revalidatePath(`/trips/${tripId}/candidates`);
+  if (result.ok && typeof tripId === "string") revalidatePath(`/trips/${tripId}`, "layout");
   // 回應不含 job 以外的資料
   return { ok: result.ok, message: result.message };
 }

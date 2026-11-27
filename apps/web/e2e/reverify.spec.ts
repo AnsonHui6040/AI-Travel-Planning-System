@@ -48,7 +48,8 @@ test("Owner 開啟排程後，問題項目標示 At Risk，開啟 App 時顯示�
   // 未開啟排程時不建立 job
   expect(await simulateReverifyAsAdmin(tripId, itemId)).toBe(false);
 
-  await page.goto(`/trips/${tripId}/days`);
+  // 開關在「更多」
+  await page.goto(`/trips/${tripId}/more`);
   const section = page.getByRole("region", { name: "旅前自動再核實" });
   await expect(section.getByRole("heading")).toHaveText("旅前自動再核實：未開啟");
   await section.getByRole("button", { name: "開啟旅前自動再核實" }).click();
@@ -75,7 +76,7 @@ test("Owner 開啟排程後，問題項目標示 At Risk，開啟 App 時顯示�
   await expect(risk.getByRole("listitem")).toContainText("純喫茶");
 
   // 關閉後不再執行
-  await page.goto(`/trips/${tripId}/days`);
+  await page.goto(`/trips/${tripId}/more`);
   await page.getByRole("button", { name: "關閉旅前自動再核實" }).click();
   await expect(page.getByRole("region", { name: "旅前自動再核實" }).getByRole("heading")).toHaveText("旅前自動再核實：未開啟");
 });
@@ -89,8 +90,8 @@ test("Companion 看不到排程開關", async ({ page, context, browser, baseURL
   await saveBaselineAsAdmin(tripId, baseline);
   await markBaselineConfirmedAsAdmin(tripId);
   await confirmTripAsAdmin(tripId);
-  await page.goto(`/trips/${tripId}/days`);
-  await expect(page.getByRole("heading", { name: "每日時段草案", level: 1 })).toBeVisible();
+  await page.goto(`/trips/${tripId}/more`);
+  await expect(page.getByRole("heading", { name: "更多", level: 1 })).toBeVisible();
   await expect(page.getByRole("region", { name: "旅前自動再核實" })).toHaveCount(0);
 });
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { drainQueue, enqueue, isPackDay, leaveCountdown, type DayPack, type QueuedChange } from "@atps/offline";
-import { useCallback, useEffect, useState } from "react";
-import { loadQueue, saveQueue } from "../lib/client/offline-store";
+import { isPackDay, leaveCountdown, type DayPack } from "@atps/offline";
+import { useEffect, useState } from "react";
 import { DeparturePanel } from "./departure-panel";
+import { shiftedChange, useOfflineQueue } from "./use-offline-queue";
 
 // T35：當日行程（線上與離線共用）。最遲離開倒數每分鐘更新；修改先排入佇列，有網路時送出為待批准提案（SH-05）
 
@@ -13,9 +13,6 @@ const STATUS_LABELS: Record<string, string> = {
   unverified: "Unverified",
   conflict: "Conflict",
 };
-
-const toMin = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
-const toHhmm = (m: number) => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 
 function countdownText(minutes: number | null): string {
   if (minutes === null) return "";
@@ -31,8 +28,7 @@ function savedAt(iso: string, timeZone: string): string {
 
 export function TodayBody({ pack, canEdit, offline }: { pack: DayPack; canEdit: boolean; offline: boolean }) {
   const [now, setNow] = useState(() => new Date());
-  const [queue, setQueue] = useState<QueuedChange[]>([]);
-  const [message, setMessage] = useState<string | null>(null);
+  const { queue, message, setMessage, add } = useOfflineQueue(pack.tripId);
   const [editing, setEditing] = useState<string | null>(null);
   const [startValue, setStartValue] = useState("");
 
@@ -41,67 +37,14 @@ export function TodayBody({ pack, canEdit, offline }: { pack: DayPack; canEdit: 
     return () => clearInterval(timer);
   }, []);
 
-  const sync = useCallback(async () => {
-    const current = await loadQueue(pack.tripId);
-    if (current.length === 0 || !navigator.onLine) {
-      setQueue(current);
-      return;
-    }
-    const result = await drainQueue(current, async (change) => {
-      try {
-        const response = await fetch(`/api/trips/${change.tripId}/offline-proposals`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ itemId: change.itemId, date: change.date, start: change.start, end: change.end, baseVersion: change.baseVersion }),
-        });
-        if (response.status === 201) return "sent";
-        if (response.status >= 400 && response.status < 500 && response.status !== 429) return "rejected";
-        return "failed";
-      } catch {
-        return "failed";
-      }
-    });
-    await saveQueue(pack.tripId, result.remaining);
-    setQueue(result.remaining);
-    if (result.sent > 0) setMessage(`已同步 ${result.sent} 項修改為提案，等成員批准後才會套用`);
-    else if (result.rejected > 0) setMessage(`${result.rejected} 項修改無法送出（行程已變更或沒有權限），已移除`);
-  }, [pack.tripId]);
-
-  useEffect(() => {
-    void sync();
-    const onOnline = () => void sync();
-    window.addEventListener("online", onOnline);
-    return () => window.removeEventListener("online", onOnline);
-  }, [sync]);
-
   const submit = async (entry: DayPack["entries"][number]) => {
-    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(startValue)) {
-      setMessage("時間格式須為 HH:mm");
+    const change = shiftedChange({ tripId: pack.tripId, itemId: entry.itemId, itemName: entry.name, date: pack.date, start: entry.start, end: entry.end, baseVersion: pack.baseVersion }, startValue);
+    if (typeof change === "string") {
+      setMessage(change);
       return;
     }
-    const duration = toMin(entry.end) - toMin(entry.start);
-    const end = toMin(startValue) + duration;
-    if (end >= 24 * 60) {
-      setMessage("結束時間不可超過當天");
-      return;
-    }
-    const change: QueuedChange = {
-      id: crypto.randomUUID(),
-      tripId: pack.tripId,
-      itemId: entry.itemId,
-      itemName: entry.name,
-      date: pack.date,
-      start: startValue,
-      end: toHhmm(end),
-      baseVersion: pack.baseVersion,
-      queuedAt: new Date().toISOString(),
-    };
-    const next = enqueue(await loadQueue(pack.tripId), change);
-    await saveQueue(pack.tripId, next);
-    setQueue(next);
     setEditing(null);
-    setMessage(navigator.onLine ? "正在送出修改" : "已排入佇列，恢復網路後送出為提案");
-    if (navigator.onLine) await sync();
+    await add(change);
   };
 
   return (
