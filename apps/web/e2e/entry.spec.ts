@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import { signInAsNewUser } from "./support/auth";
+import { createUserAsAdmin, signInAsNewUser } from "./support/auth";
 
 // 進入 App：未登入的首頁導向登入；Email magic link 登入（本機信件由 Supabase 的測試信箱 Mailpit 收取）；
 // 建立行程後進入 Trip Baseline；行程出現在首頁清單；登出
@@ -86,4 +86,20 @@ test("示範資料腳本：建立的行程可在各頁面檢視", async ({ page,
   await nav.getByRole("link", { name: "更多" }).click();
   await page.getByRole("link", { name: /^候選/ }).click();
   await expect(page.locator("main")).toContainText("藏前咖啡廳");
+});
+
+test("本機一鍵登入連結：在任何瀏覽器開啟即登入，連結只可用一次", async ({ page, browser }) => {
+  const user = await createUserAsAdmin();
+  const out = execFileSync("node", [path.resolve(import.meta.dirname, "../scripts/demo-link.mjs"), user.email], { encoding: "utf8" });
+  const link = /http:\/\/\S+/.exec(out)?.[0] ?? "";
+  expect(link).toContain("/auth/callback?token_hash=");
+
+  await page.goto(link);
+  await expect(page.getByRole("heading", { name: "我的行程" })).toBeVisible();
+
+  const other = await browser.newContext();
+  const again = await other.newPage();
+  await again.goto(link);
+  await expect(again).toHaveURL(/auth_error=1/);
+  await other.close();
 });
