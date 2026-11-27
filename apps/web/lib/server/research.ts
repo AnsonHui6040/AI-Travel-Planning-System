@@ -90,6 +90,8 @@ export interface CandidateView {
 // T28：交通動線比較（全部為估算）
 export interface SegmentView {
   id: string;
+  fromId: string;
+  toId: string;
   from: string;
   to: string;
   estimates: { mode: string; total_minutes: number; buffer_minutes: number; price: { amount: number; currency: string } | null; transfers: number; source_urls: string[] }[];
@@ -196,6 +198,8 @@ export async function loadCandidateList(tripId: string): Promise<CandidateListVi
     return [
       {
         id: String(r.id),
+        fromId: String(r.from_item_id),
+        toId: String(r.to_item_id),
         from,
         to,
         estimates: estimates.data,

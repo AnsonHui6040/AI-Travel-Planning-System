@@ -11,7 +11,7 @@ const FIELDS = ["tripId", "date", "itemId", "completion", "arrived", "departed"]
 export async function recordEntry(_previous: TimelineActionResult | null, form: FormData): Promise<TimelineActionResult> {
   const fields = Object.fromEntries(FIELDS.map((k) => [k, form.get(k) ?? ""]));
   const result = await recordEntryAction(await timelineDeps(), fields);
-  if (result.ok && typeof fields.tripId === "string") revalidatePath(`/trips/${fields.tripId}/timeline`);
+  if (result.ok && typeof fields.tripId === "string") revalidatePath(`/trips/${fields.tripId}`, "layout");
   return result;
 }
 
@@ -19,8 +19,7 @@ export async function produceTimeline(_previous: TimelineActionResult | null, fo
   const tripId = form.get("tripId");
   const result = await produceTimelineAction(await timelineDeps(), tripId, form.get("date"));
   if (result.ok && typeof tripId === "string") {
-    revalidatePath(`/trips/${tripId}/timeline`);
-    revalidatePath(`/trips/${tripId}/today`);
+    revalidatePath(`/trips/${tripId}`, "layout");
   }
   return result;
 }

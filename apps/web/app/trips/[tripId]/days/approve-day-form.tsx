@@ -27,7 +27,7 @@ export function ApproveDayForm({
       <input type="hidden" name="date" value={date} />
       <input type="hidden" name="baseVersion" value={String(baseVersion)} />
       {mode === "ready" ? (
-        <button className="secondary" type="submit" disabled={pending}>
+        <button className="primary" type="submit" disabled={pending}>
           {pending ? "批准中…" : `批准${label}`}
         </button>
       ) : null}

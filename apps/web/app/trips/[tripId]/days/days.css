@@ -1,131 +1,104 @@
-/* T29：每日時段草案與行程 Card */
-.settings.days {
-  max-width: 48rem;
-}
+/* 行程分頁：日期切換、每項一行（T29、T30）；項目詳情另開畫面 */
 
 .days .trip-line {
-  margin: 0 0 0.5rem;
   color: var(--muted);
 }
 
-.days .muted {
-  color: var(--muted);
-  font-size: var(--fs-body);
-  margin: 0.5rem 0;
-}
-
-.days section {
-  border-top: 1px solid var(--line);
-  margin-top: 1.25rem;
-  padding-top: 0.75rem;
-}
-
-.days h2 {
-  font-size: var(--fs-h2);
-  margin: 0 0 0.5rem;
+.day-head {
+  flex: none;
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
   gap: 0.5rem;
 }
 
-.day-status {
-  font-size: var(--fs-small);
-  font-weight: 500;
-  color: var(--muted);
+.day-head h2 {
+  margin: 0;
+}
+
+.day-notes {
+  flex: none;
+}
+
+.day-notes p,
+.day-notes ul {
+  margin: 0.25rem 0;
 }
 
 .day-issues {
-  margin: 0.5rem 0;
   padding-left: 1.25rem;
-  font-size: var(--fs-body);
+  color: var(--accent);
 }
 
-.approve-day {
-  margin-top: 0.75rem;
+.day-returned summary {
+  min-height: var(--control);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--muted);
 }
 
 .approve-day p {
   margin: 0.4rem 0 0;
-  font-size: var(--fs-body);
 }
 
 .approve-day .error {
   color: var(--accent);
 }
 
-.days .fixed-row {
-  margin: 0.5rem 0;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--line);
-  font-weight: 600;
+/* 項目詳情 */
+.item-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.day-card {
+.item-detail h1 {
+  margin: 0;
+  font-size: var(--fs-h1);
+}
+
+.item-facts {
   display: grid;
-  grid-template-columns: 7rem minmax(0, 1fr);
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--line);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.item-facts dt {
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.item-facts dd {
+  margin: 0;
   overflow-wrap: anywhere;
 }
 
-.day-photo img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: var(--radius-control);
+.item-photo {
+  margin: 0;
+}
+
+.item-photo img {
   display: block;
+  max-width: 100%;
+  max-height: 28vh;
+  border-radius: var(--radius-card);
+  object-fit: cover;
 }
 
-.day-photo figure {
-  margin: 0;
-}
-
-.day-photo figcaption {
-  font-size: var(--fs-small);
+.item-photo figcaption {
   color: var(--muted);
+  font-size: var(--fs-small);
 }
 
-.photo-fallback {
+.item-links {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  aspect-ratio: 4 / 3;
-  padding: 0.5rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  font-size: var(--fs-small);
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
 }
 
-.day-body h3 {
-  font-size: var(--fs-body);
-  margin: 0 0 0.4rem;
-}
-
-.day-body dl {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.25rem 1rem;
-  margin: 0;
-}
-
-.day-body dt {
-  font-size: var(--fs-small);
-  color: var(--muted);
-}
-
-.day-body dd {
-  margin: 0;
-  font-size: var(--fs-body);
-}
-
-@media (max-width: 600px) {
-  .day-card {
-    grid-template-columns: 5.5rem minmax(0, 1fr);
-  }
-
-  .day-body dl {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.item-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control);
 }

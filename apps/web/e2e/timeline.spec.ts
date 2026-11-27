@@ -31,8 +31,9 @@ test("記錄實際時間與完成狀態，產生 Planned vs Actual：未完成�
   await setTripFieldsAsAdmin(tripId, { start_date: DATE, end_date: DATE, status: "in_progress" });
   await setDayStatusAsAdmin(tripId, DATE, "day_ready");
 
-  await page.goto(`/trips/${tripId}/today?date=${DATE}`);
-  await page.getByRole("link", { name: "Actual Timeline" }).click();
+  // Actual Timeline 在「更多」
+  await page.goto(`/trips/${tripId}/more`);
+  await page.getByRole("link", { name: /Actual Timeline/ }).click();
   await expect(page.getByRole("heading", { name: "Actual Timeline" })).toBeVisible();
   await expect(page.getByText("尚未產生")).toBeVisible();
 

@@ -10,6 +10,15 @@ async function capture(page: Page, name: string, task = "T24") {
   await page.screenshot({ path: `../../docs/verification/screenshots/${task}-${name}-${page.viewportSize()?.width ?? 0}.png`, fullPage: true });
 }
 
+// 清單每項一行，點進去才看詳情（docs/verification/ux-logic-2026-11-27.md）
+async function openCandidate(page: Page, tripId: string, name: string) {
+  await page.goto(`/trips/${tripId}/candidates`);
+  await page.getByRole("list", { name: "候選" }).getByRole("link", { name: new RegExp(name) }).click();
+  const article = page.getByRole("article", { name, exact: true });
+  await article.waitFor();
+  return article;
+}
+
 const source = (url: string) => ({ url, fetched_at: "2026-11-23T10:00:00+09:00", grade: "facility_official" });
 const candidate = (over: Record<string, unknown>) => ({
   name_zh: "淺草寺",
@@ -49,11 +58,11 @@ test("Candidate List 依研究方向顯示；script、事件屬性與 javascript
     void d.dismiss();
   });
   await page.goto(`/trips/${tripId}/candidates`);
-  await expect(page.getByRole("heading", { name: "Candidate List", level: 1 })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Research A：主要景點/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Research B：餐飲/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "候選", level: 1 })).toBeVisible();
+  await expect(page.getByRole("list", { name: "候選" }).getByRole("listitem")).toHaveText([/景點淺草寺Unverified/, /餐飲測試咖啡Unverified/]);
 
-  const senso = page.getByRole("article", { name: "淺草寺" });
+  const senso = await openCandidate(page, tripId, "淺草寺");
+  await expect(senso).toContainText("Research A：主要景點");
   await expect(senso.getByText("Unverified")).toBeVisible();
   await expect(senso.getByText("已對應")).toBeVisible();
   await expect(senso.locator("dl.scores dt")).toHaveCount(8);
@@ -61,7 +70,8 @@ test("Candidate List 依研究方向顯示；script、事件屬性與 javascript
   await expect(official).toHaveAttribute("href", "https://www.senso-ji.jp/");
   await expect(official).toHaveAttribute("rel", "noopener noreferrer");
 
-  const cafe = page.getByRole("article", { name: "測試咖啡" });
+  const cafe = await openCandidate(page, tripId, "測試咖啡");
+  await expect(cafe).toContainText("Research B：餐飲");
   await expect(cafe.getByText("未對應")).toBeVisible();
   await expect(cafe.getByText("週三公休")).toBeVisible();
   // 標籤以文字顯示，沒有產生元素；不安全的連結只留文字
@@ -70,7 +80,7 @@ test("Candidate List 依研究方向顯示；script、事件屬性與 javascript
   await expect(cafe.getByRole("link", { name: "按我" })).toHaveCount(0);
   await expect(cafe.getByRole("link", { name: "舊站" })).toHaveCount(0);
   await expect(cafe.getByText("按我")).toBeVisible();
-  for (const link of await page.locator("main a").all()) {
+  for (const link of await cafe.locator("a").all()) {
     expect(await link.getAttribute("href")).toMatch(/^https:\/\//);
     expect(await link.getAttribute("rel")).toBe("noopener noreferrer");
   }
@@ -104,12 +114,11 @@ test("E4：交叉核查後顯示採用的官方營業時間；無法判定的事
     verifiedBy: gemini,
   });
 
-  await page.goto(`/trips/${tripId}/candidates`);
-  const senso = page.getByRole("article", { name: "淺草寺" });
+  const senso = await openCandidate(page, tripId, "淺草寺");
   await expect(senso.getByText("Verified", { exact: true })).toBeVisible();
   await expect(senso.getByText("營業時間：09:00–17:00（設施官方）")).toBeVisible();
   await expect(senso.getByText(/Gemini（gemini-model）核實/)).toBeVisible();
-  const cafe = page.getByRole("article", { name: "測試咖啡" });
+  const cafe = await openCandidate(page, tripId, "測試咖啡");
   await expect(cafe.getByText("Conflict", { exact: true })).toBeVisible();
   await expect(cafe.getByText("營業時間：來源不一致，無法判定")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -126,10 +135,9 @@ test("T26：每個候選顯示八個篩選維度的評分與 Primary 或 Backup"
     雷門: { role: "backup", scores: [3, 2, 5, 5, 5, 3, 4, 1] },
   });
 
-  await page.goto(`/trips/${tripId}/candidates`);
-  const senso = page.getByRole("article", { name: "淺草寺" });
-  const kaminarimon = page.getByRole("article", { name: "雷門" });
+  const senso = await openCandidate(page, tripId, "淺草寺");
   await expect(senso.locator("dl.facts")).toContainText("Primary");
+  const kaminarimon = await openCandidate(page, tripId, "雷門");
   await expect(kaminarimon.locator("dl.facts")).toContainText("Backup");
   const scores = kaminarimon.locator("dl.scores > div");
   await expect(scores).toHaveCount(8);
@@ -158,10 +166,12 @@ test("T27：候選顯示分區與由出發地前往的轉乘次數；主要區�
     ["新宿御苑"],
   );
 
-  await page.goto(`/trips/${tripId}/candidates`);
-  await expect(page.getByRole("article", { name: "乙地" }).locator("dl.facts")).toContainText("新宿與直達沿線（估算：轉乘 0 次，約 25 分鐘）");
-  await expect(page.getByRole("article", { name: "甲地" }).locator("dl.facts")).toContainText("甲區（估算：轉乘 2 次，約 35 分鐘）");
-  await expect(page.getByRole("article", { name: "新宿御苑" }).locator("dl.facts")).toContainText("Backup");
+  await expect((await openCandidate(page, tripId, "乙地")).locator("dl.facts")).toContainText("新宿與直達沿線（估算：轉乘 0 次，約 25 分鐘）");
+  await expect((await openCandidate(page, tripId, "甲地")).locator("dl.facts")).toContainText("甲區（估算：轉乘 2 次，約 35 分鐘）");
+  await expect((await openCandidate(page, tripId, "新宿御苑")).locator("dl.facts")).toContainText("Backup");
+  // 篩選 Backup 只列出新宿御苑
+  await page.goto(`/trips/${tripId}/candidates?filter=backup`);
+  await expect(page.getByRole("list", { name: "候選" }).getByRole("listitem")).toHaveText([/新宿御苑/]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await capture(page, "zoning", "T27");
 });
@@ -194,7 +204,8 @@ test("T28：每段顯示四種方案、含緩衝的估算時間與來源，並�
     maps_url: mapsUrl,
   });
 
-  await page.goto(`/trips/${tripId}/candidates`);
+  // 交通動線比較在起點或終點候選的詳情
+  await openCandidate(page, tripId, "淺草寺");
   const segment = page.getByRole("article", { name: "淺草寺到上野公園" });
   await expect(segment.getByText("四種方案（估算，含固定緩衝）")).toBeVisible();
   const rows = segment.locator("tbody tr");
@@ -231,7 +242,7 @@ test("沒有 Research 的 API key 時不能開始研究；基線未確認與 Vie
 
   const viewerPage = await viewerContext.newPage();
   await viewerPage.goto(`/trips/${tripId}/candidates`);
-  await expect(viewerPage.getByRole("heading", { name: "Candidate List", level: 1 })).toBeVisible();
+  await expect(viewerPage.getByRole("heading", { name: "候選", level: 1 })).toBeVisible();
   await expect(viewerPage.getByRole("button", { name: "開始研究" })).toHaveCount(0);
   await viewerContext.close();
 });

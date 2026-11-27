@@ -9,6 +9,6 @@ import { postTripDeps } from "../../../../lib/server/post-trip";
 export async function savePostTripStatus(_previous: PostTripActionResult | null, form: FormData): Promise<PostTripActionResult> {
   const fields = { tripId: form.get("tripId"), itemId: form.get("itemId"), status: form.get("status") };
   const result = await setPostTripStatusAction(await postTripDeps(), fields);
-  if (result.ok && typeof fields.tripId === "string") revalidatePath(`/trips/${fields.tripId}/post-trip`);
+  if (result.ok && typeof fields.tripId === "string") revalidatePath(`/trips/${fields.tripId}`, "layout");
   return result;
 }

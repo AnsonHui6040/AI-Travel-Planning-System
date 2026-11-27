@@ -1,0 +1,255 @@
+/* 「現在」分頁：旅行中（下一站、今天、檢查與 Backup）、規劃中（步驟）、旅後（一次一個項目）。
+   手機為單欄；1024px 以上旅行中為三欄 */
+
+/* ---- 旅行中 ---- */
+
+.now-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas: "side" "next" "day" "actions";
+  gap: 0.75rem;
+}
+
+.now-grid > .screen-actions {
+  grid-area: actions;
+  padding-top: 0;
+}
+
+.now-side {
+  grid-area: side;
+  display: grid;
+  gap: 0.25rem;
+  align-content: start;
+}
+
+.now-next {
+  grid-area: next;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.now-day {
+  grid-area: day;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.now-morning {
+  display: flex;
+  align-items: center;
+  min-height: var(--control);
+  padding: 0 1rem;
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.now-side [data-offline-ready] {
+  margin: 0;
+  font-size: var(--fs-small);
+}
+
+.now-backups {
+  display: none;
+}
+
+.now-backups h2 {
+  font-size: var(--fs-h3);
+}
+
+.now-backups ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.now-next h2 {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.now-next p {
+  margin: 0.15rem 0 0;
+}
+
+.now-stop {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  font-size: var(--fs-h2);
+  font-weight: 500;
+}
+
+.now-start {
+  font-variant-numeric: tabular-nums;
+}
+
+.now-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.now-leave {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  font-size: var(--fs-h1);
+  font-weight: 500;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.now-countdown {
+  font-size: var(--fs-body);
+  font-weight: 500;
+}
+
+.now-countdown.late {
+  color: var(--accent);
+}
+
+.now-next .departure {
+  margin-top: 0.4rem;
+}
+
+.now-rows > li > a,
+.now-rows > li > .row {
+  grid-template-columns: 1.5rem auto minmax(0, 1fr) auto;
+  min-height: var(--control);
+}
+
+.now-rows > li[data-state="done"] .row-name,
+.now-rows > li[data-state="done"] .row-time {
+  color: var(--muted);
+}
+
+.now-rows > li[data-state="current"] .row-name {
+  font-weight: 700;
+}
+
+.now-mark svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.now-mark .filled {
+  fill: currentColor;
+}
+
+@media (min-width: 1024px) {
+  .now-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 0.9fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "next day side" "actions day side";
+    gap: 1rem 1.5rem;
+  }
+
+  .now-grid > .screen-actions {
+    align-self: start;
+    margin-top: 0;
+  }
+
+  .now-next {
+    align-self: start;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .now-backups {
+    display: block;
+    margin-top: 0.75rem;
+  }
+
+  .now-planning .screen-actions,
+  .now-post .screen-actions {
+    justify-content: flex-start;
+  }
+
+  .now-planning .screen-actions > *,
+  .now-post .screen-actions > :not(.primary) {
+    flex: 0 0 14rem;
+  }
+}
+
+/* ---- 規劃中：步驟列 ---- */
+
+.steps {
+  flex: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.25rem;
+}
+
+.steps li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.steps li[data-state="done"],
+.steps li[data-state="current"] {
+  color: var(--text);
+}
+
+.step-mark {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 2px solid var(--line-strong);
+  border-radius: 50%;
+}
+
+.steps li[data-state="done"] .step-mark,
+.steps li[data-state="current"] .step-mark {
+  border-color: var(--solid);
+  background: var(--solid);
+}
+
+.steps li[data-state="current"] .step-mark {
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--solid);
+}
+
+.step-card {
+  flex: 0 1 auto;
+  padding: 1rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.step-card p {
+  margin: 0.25rem 0 0;
+}
+
+.step-card .choices {
+  margin-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .now-planning .steps,
+  .now-planning .step-card,
+  .now-post .step-card,
+  .now-planning .screen-actions,
+  .now-post .screen-actions {
+    max-width: 44rem;
+    width: 100%;
+  }
+
+}

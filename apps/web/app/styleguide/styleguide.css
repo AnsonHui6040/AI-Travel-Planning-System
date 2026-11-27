@@ -44,14 +44,30 @@
   font-size: var(--fs-small);
 }
 
-.sg-panel a {
-  color: var(--text);
+/* 分頁樣板：不固定在畫面上 */
+.sg-panel .sg-tabbar {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
 }
 
-.sg-nav {
-  padding: 0;
-  margin: 0;
-  max-width: none;
+.sg-panel .sg-tabbar a {
+  color: var(--muted);
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0.4rem 0;
+  border-radius: 0;
+  font-size: var(--fs-small);
+}
+
+.sg-panel .sg-tabbar a[aria-current="page"] {
+  background: transparent;
+  color: var(--text);
 }
 
 .sg-table {

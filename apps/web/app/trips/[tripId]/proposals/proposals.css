@@ -1,53 +1,41 @@
-/* T34：提案與 Change Log */
-.settings.proposals {
-  max-width: 48rem;
-}
-
-.proposals .trip-line {
-  margin: 0 0 0.5rem;
+/* T34：提案清單（每項一行）、提案詳情與 Change Log */
+.proposals .trip-line,
+.proposals .muted,
+.proposals .meta {
   color: var(--muted);
 }
 
-.proposals .muted {
-  color: var(--muted);
+.proposals .muted,
+.proposals .meta {
+  margin: 0.25rem 0;
 }
 
-.proposals section {
-  border-top: 1px solid var(--line);
-  margin-top: 1.25rem;
-  padding-top: 0.75rem;
-}
-
-.proposals h2 {
-  font-size: var(--fs-h2);
-  margin: 0 0 0.5rem;
-}
-
-.proposal-list {
-  list-style: none;
+.proposals .list-title {
   margin: 0;
-  padding: 0;
+  font-size: var(--fs-h1);
+  font-weight: 500;
 }
 
-.proposal-list li {
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--line);
-  overflow-wrap: anywhere;
+@media (max-width: 1023px) {
+  .proposals .split[data-detail="open"] .list-title {
+    display: none;
+  }
 }
 
-.proposal-list .summary {
-  margin: 0;
-  font-weight: 600;
+.proposal-rows > li > a {
+  grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
 .proposal-status {
-  display: inline-block;
-  margin-right: 0.5rem;
-  padding: 0 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.45rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   font-size: var(--fs-small);
   font-weight: 500;
+  line-height: 1.6;
+  white-space: nowrap;
 }
 
 .proposal-status.pending {
@@ -55,17 +43,50 @@
   color: var(--accent);
 }
 
-.proposal-list .version {
-  display: inline-block;
-  margin-right: 0.5rem;
+.log-rows .row {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+}
+
+.log-rows .version {
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
 
-.proposal-list .meta {
+.log-text {
+  display: grid;
+  min-width: 0;
+}
+
+.log-text .row-name {
+  white-space: normal;
+}
+
+.log-text .row-meta {
+  white-space: normal;
+}
+
+.proposal-detail h1 {
+  margin: 0;
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.impact {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.impact p,
+.impact ul {
   margin: 0.25rem 0 0;
-  color: var(--muted);
-  font-size: var(--fs-body);
+}
+
+.impact ul {
+  padding-left: 1.25rem;
 }
 
 .proposal-decision {
@@ -73,17 +94,27 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 0.5rem;
 }
 
 .proposal-decision form {
   margin: 0;
 }
 
+.screen-actions .proposal-decision {
+  flex: 1 1 auto;
+}
+
+.screen-actions .proposal-decision form {
+  flex: 1 1 0;
+}
+
+.screen-actions .proposal-decision button {
+  width: 100%;
+}
+
 .proposal-decision p {
   flex-basis: 100%;
   margin: 0;
-  font-size: var(--fs-body);
 }
 
 .proposal-decision .error {
@@ -91,8 +122,14 @@
 }
 
 .live-notice {
+  margin: 0;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   background: var(--surface);
+}
+
+/* 主要動作在右邊（拇指較易按到） */
+.screen-actions .proposal-decision {
+  flex-direction: row-reverse;
 }

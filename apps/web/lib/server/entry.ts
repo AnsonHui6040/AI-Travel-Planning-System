@@ -48,6 +48,11 @@ export interface TripSummary {
   destination: string | null;
   status: string;
   dates: string | null;
+  // 首頁排序用：原始狀態、日期與時區
+  rawStatus: string;
+  startDate: string | null;
+  endDate: string | null;
+  timezone: string;
 }
 
 // 首頁：本人是成員的行程（RLS）
@@ -57,7 +62,7 @@ export async function loadTrips(): Promise<TripSummary[] | null> {
   if (!auth.user) return null;
   const { data } = await session
     .from("trips")
-    .select("id, name, destination, status, start_date, end_date")
+    .select("id, name, destination, status, start_date, end_date, timezone")
     .order("created_at", { ascending: false })
     .limit(50);
   return (data ?? []).map((t) => ({
@@ -66,5 +71,9 @@ export async function loadTrips(): Promise<TripSummary[] | null> {
     destination: (t.destination as string | null) ?? null,
     status: STATUS[String(t.status)] ?? String(t.status),
     dates: t.start_date ? `${String(t.start_date)}–${String(t.end_date ?? t.start_date)}` : null,
+    rawStatus: String(t.status),
+    startDate: (t.start_date as string | null) ?? null,
+    endDate: (t.end_date as string | null) ?? null,
+    timezone: String(t.timezone),
   }));
 }

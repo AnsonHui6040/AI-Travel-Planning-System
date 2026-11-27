@@ -24,10 +24,14 @@ test("兩個瀏覽器同時批准：先到先得，另一個提案失效，雙�
   await createProposalAsAdmin(tripId, companion.userId, itemId, "淺草寺改到 10:00", "10:00", "11:00");
   await createProposalAsAdmin(tripId, owner.userId, itemId, "淺草寺改到 15:00", "15:00", "16:00");
 
+  // 清單每項一行，點進去看影響範圍再批准
   await page.goto(`/trips/${tripId}/proposals`);
   await companionPage.goto(`/trips/${tripId}/proposals`);
-  const mine = page.getByRole("listitem", { name: "淺草寺改到 10:00" });
-  const theirs = companionPage.getByRole("listitem", { name: "淺草寺改到 15:00" });
+  await page.getByRole("link", { name: /淺草寺改到 10:00/ }).click();
+  await companionPage.getByRole("link", { name: /淺草寺改到 15:00/ }).click();
+  const mine = page.getByRole("article", { name: "淺草寺改到 10:00" });
+  const theirs = companionPage.getByRole("article", { name: "淺草寺改到 15:00" });
+  await expect(mine.getByRole("region", { name: "影響範圍" })).toContainText("淺草寺改為 12/10 10:00–11:00");
   await expect(mine).toContainText("阿明 提出");
   await expect(theirs).toContainText("小安 提出");
   await capture(page, "pending");
@@ -48,13 +52,14 @@ test("兩個瀏覽器同時批准：先到先得，另一個提案失效，雙�
   await expect(page.locator(".live-notice")).toHaveText("其他成員剛處理了提案，畫面已更新。");
   await expect(companionPage.locator(".live-notice")).toHaveText("其他成員剛處理了提案，畫面已更新。");
 
-  await page.reload();
+  await page.goto(`/trips/${tripId}/proposals`);
   await expect(page.getByRole("region", { name: "提案" }).getByText("待批准 0 個。", { exact: false })).toBeVisible();
   const statuses = [
     await page.getByRole("listitem", { name: "淺草寺改到 10:00" }).locator(".proposal-status").textContent(),
     await page.getByRole("listitem", { name: "淺草寺改到 15:00" }).locator(".proposal-status").textContent(),
   ].sort();
   expect(statuses).toEqual(["已套用", "已失效"].sort());
+  await page.getByRole("navigation", { name: "分類" }).getByRole("link", { name: "Change Log" }).click();
   const log = page.getByRole("region", { name: "Change Log" }).getByRole("listitem", { name: "v1.0" });
 
   await expect(log).toContainText(winner === "小安" ? "淺草寺改到 10:00" : "淺草寺改到 15:00");
@@ -75,6 +80,8 @@ test("Viewer 看得到提案與 Change Log，但不能批准或否決", async ({
   await createProposalAsAdmin(tripId, owner.userId, itemId, "大阪城改到 10:00", "10:00", "11:00");
   await page.goto(`/trips/${tripId}/proposals`);
   await expect(page.getByRole("listitem", { name: "大阪城改到 10:00" })).toBeVisible();
+  await page.getByRole("link", { name: /大阪城改到 10:00/ }).click();
+  await expect(page.getByText("只有 Owner 與 Companion 可以批准或否決。")).toBeVisible();
   await expect(page.getByRole("button", { name: "批准" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "否決" })).toHaveCount(0);
 });

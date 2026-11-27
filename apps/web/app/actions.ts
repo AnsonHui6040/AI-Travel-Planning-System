@@ -15,6 +15,6 @@ export async function markAllRead(_previous: InboxActionResult | null): Promise<
 export async function setReverify(_previous: InboxActionResult | null, form: FormData): Promise<InboxActionResult> {
   const tripId = form.get("tripId");
   const result = await setReverifyAction(await inboxActionDeps(), tripId, form.get("value"));
-  if (result.ok && typeof tripId === "string") revalidatePath(`/trips/${tripId}/days`);
+  if (result.ok && typeof tripId === "string") revalidatePath(`/trips/${tripId}`, "layout");
   return result;
 }
