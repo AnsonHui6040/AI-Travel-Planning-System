@@ -37,7 +37,7 @@ export default async function ExpensesPage({ params }: { params: Promise<{ tripI
           {budget.state === "no_rate" ? <p className="figure-note risk">預算為 {budget.currency}，請輸入 {budget.currency} 的匯率</p> : null}
           {budget.state === "within" || budget.state === "over" ? (
             <>
-              <p className={budget.state === "over" ? "figure risk" : "figure"}>
+              <p className={budget.state === "over" ? "figure secondary-figure risk" : "figure secondary-figure"}>
                 {budget.state === "over" ? `超出 ${formatMoney(-budget.remaining, c)}` : `剩餘 ${formatMoney(budget.remaining, c)}`}
               </p>
               <p className="figure-note">

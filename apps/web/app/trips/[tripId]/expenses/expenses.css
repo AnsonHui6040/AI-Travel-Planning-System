@@ -34,6 +34,7 @@
 
 .expense-columns {
   display: grid;
+  align-content: start;
   gap: 0.75rem;
 }
 
@@ -102,8 +103,9 @@
   grid-column: 1 / -1;
 }
 
-.expense-form input,
-.expense-form select {
+.expense-form .field input,
+.expense-form .field select,
+.share-row input[inputmode] {
   width: 100%;
   color: var(--text);
 }
@@ -179,7 +181,8 @@
   border-bottom: 1px solid var(--line);
 }
 
-.inline-form {
+.inline-form,
+.expenses .screen-actions form.inline-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
   align-items: end;
@@ -198,4 +201,32 @@
 .inline-form select {
   width: 100%;
   color: var(--text);
+}
+
+.inline-form [role="status"] {
+  grid-column: 1 / -1;
+}
+
+.expense-summary .figure.secondary-figure {
+  font-size: var(--fs-h2);
+}
+
+.expenses .figure.risk {
+  color: var(--accent);
+}
+
+.inline-form.two {
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 0.75rem;
+}
+
+.transfer-row > span:first-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.transfer-row .row-meta {
+  color: var(--muted);
+  font-size: var(--fs-small);
 }

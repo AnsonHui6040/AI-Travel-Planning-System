@@ -55,7 +55,7 @@ export default async function SettlePage({ params }: { params: Promise<{ tripId:
                     {nameOf(s.fromUser)}付給{nameOf(s.toUser)}
                   </span>
                   <span className="expense-amount">{formatMoney(s.amount, s.currency)}</span>
-                  <span className="row-meta">，{shortDate(s.paidOn)}</span>
+                  <span className="row-meta">{shortDate(s.paidOn)} 付款</span>
                 </span>
                 {view.canEdit ? <UndoSettlementButton tripId={tripId} settlementId={s.id} /> : null}
               </li>

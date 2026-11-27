@@ -270,7 +270,7 @@ export function UndoSettlementButton({ tripId, settlementId }: { tripId: string;
 export function CurrencyForm({ tripId, currency, currencies }: { tripId: string; currency: string; currencies: string[] }) {
   const [state, action, pending] = useActionState(setCurrency, null);
   return (
-    <form action={action} className="inline-form" aria-label="主幣別">
+    <form action={action} className="inline-form two" aria-label="主幣別">
       <input type="hidden" name="tripId" value={tripId} />
       <label>
         主幣別
@@ -282,7 +282,6 @@ export function CurrencyForm({ tripId, currency, currencies }: { tripId: string;
           ))}
         </select>
       </label>
-      <span />
       <button className="secondary" type="submit" disabled={pending}>
         儲存主幣別
       </button>
