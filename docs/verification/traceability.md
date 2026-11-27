@@ -90,11 +90,11 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| F-01 | T06、T11 | T06：行程項目的預估費用、實際費用、付款人欄位（schema 與 migration）；T11：`ExpenseLedger` 介面與 feature flag `expense_ledger`（`docs/verification/T11.md`） | 已驗收 |
+| F-01 | T06、T11、X | T06：行程項目的預估費用、實際費用、付款人欄位（schema 與 migration）；T11：`ExpenseLedger` 介面與 feature flag `expense_ledger`（`docs/verification/T11.md`）；X（決策 0010）：記帳、匯率、預算比較、分帳結算（`packages/core/src/expenses.test.ts`、`supabase/tests/28_expenses.test.sql`、`apps/web/lib/server/expenses-core.test.ts`、E2E `apps/web/e2e/expenses.spec.ts`，`docs/verification/X-expenses.md`）；真機 X-R1、X-R2 TBD | 部分 |
 | F-02 | T11 | `Exporter` 介面（`packages/core/src/ports.ts`）與 feature flag `calendar_export` | 已驗收 |
 | F-03 | T11 | `Notifier`（站內）、`LocationEvent`、`LocationSource` 介面與 feature flag `push_notifications`、`location_reminders` | 已驗收 |
 | F-04 | T11 | `Importer` 介面，`ImportedBooking.constraintClass` 固定為 `hard_constraint`；feature flag `booking_import` | 已驗收 |
-| F-05 | T11 | `supabase/tests/07_feature_flags.test.sql`（預設關閉、只讀）；`isFeatureEnabled` 與 `SupabaseFeatureFlagReader` 測試 | 已驗收 |
+| F-05 | T11、X | `supabase/tests/07_feature_flags.test.sql`（預設關閉、只讀；X 的 migration 開啟 `expense_ledger`，其他仍關閉）；`isFeatureEnabled` 與 `SupabaseFeatureFlagReader` 測試 | 已驗收 |
 
 ## 第 9.3 節 AI 評估場景
 

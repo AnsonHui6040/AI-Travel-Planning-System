@@ -1,0 +1,232 @@
+/* 決策 0010 X：記帳畫面。顏色、字級、圓角只用 globals.css 的變數；共用的版面在 shell.css */
+
+.expenses .figure {
+  margin: 0;
+  font-size: var(--fs-h1);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.expenses .figure-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.expenses .figure-note.risk {
+  color: var(--accent);
+}
+
+.expense-summary {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.expense-summary h2,
+.expense-columns h2 {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.expense-columns {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .expense-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+.compact-rows > li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2rem;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+.compact-rows .risk {
+  color: var(--accent);
+}
+
+.expense-links {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.expense-links a {
+  padding: 0 0.5rem;
+  font-size: var(--fs-small);
+  text-align: center;
+}
+
+.expense-rows .expense-row-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.expense-amount {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 表單：兩欄一列，手機上不用捲動 */
+.expense-form .fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 0.75rem;
+}
+
+.expense-form label.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.expense-form label.field.wide {
+  grid-column: 1 / -1;
+}
+
+.expense-form .field input,
+.expense-form .field select,
+.share-row input[inputmode] {
+  width: 100%;
+  color: var(--text);
+}
+
+.split-mode {
+  display: flex;
+  gap: 1rem;
+  min-height: var(--control);
+  align-items: center;
+}
+
+.split-mode label,
+.share-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: var(--control);
+}
+
+.share-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.share-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8rem;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.share-row .share-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.expenses fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.expenses .split-label {
+  padding: 0;
+  font-weight: 500;
+}
+
+.detail-facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.35rem 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.detail-facts dt {
+  color: var(--muted);
+}
+
+.detail-facts dd {
+  margin: 0;
+}
+
+.transfer-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 48px;
+  border-bottom: 1px solid var(--line);
+}
+
+.inline-form,
+.expenses .screen-actions form.inline-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.inline-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.inline-form input,
+.inline-form select {
+  width: 100%;
+  color: var(--text);
+}
+
+.inline-form [role="status"] {
+  grid-column: 1 / -1;
+}
+
+.expense-summary .figure.secondary-figure {
+  font-size: var(--fs-h2);
+}
+
+.expenses .figure.risk {
+  color: var(--accent);
+}
+
+.inline-form.two {
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 0.75rem;
+}
+
+.transfer-row > span:first-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.transfer-row .row-meta {
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
