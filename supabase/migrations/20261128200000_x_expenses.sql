@@ -264,3 +264,6 @@ alter function public.save_expense(uuid, uuid, jsonb) owner to atps_expense_writ
 revoke create on schema public from atps_expense_writer;
 revoke all on function public.save_expense(uuid, uuid, jsonb) from public, anon, authenticated, service_role;
 grant execute on function public.save_expense(uuid, uuid, jsonb) to authenticated;
+
+-- F-05：功能開關只經 migration 修改。記帳已完成，開啟 expense_ledger（畫面與 loadExpenses 依此判斷）
+update public.feature_flags set enabled = true, updated_at = now() where key = 'expense_ledger';

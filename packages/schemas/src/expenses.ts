@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { LIMITS, currencyCode, isoDate, offsetDateTime, text, uuid } from "./common";
 
-// 決策 0010 X：記帳與分帳的資料表。鍵名與 migration 20261128020000_x_expenses.sql 的欄位一致
+// 決策 0010 X：記帳與分帳的資料表。鍵名與 migration 20261128200000_x_expenses.sql 的欄位一致
 // （tooling/schema-migration-consistency.test.ts）。金額上限與 money 相同；匯率為 1 單位外幣 = rate 單位主幣別。
 
 export const expenseCategory = z.enum(["food", "transport", "lodging", "tickets", "shopping", "other"]);

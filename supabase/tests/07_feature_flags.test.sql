@@ -8,10 +8,11 @@ insert into auth.users (id, email, aud, role) values
 select has_table('public', 'feature_flags', 'feature_flags 存在');
 select col_default_is('public', 'feature_flags', 'enabled', 'false', '新功能預設關閉');
 
+-- 決策 0010 X：記帳已完成，由 migration 20261128200000_x_expenses.sql 開啟 expense_ledger；其他仍關閉
 select is(
-  (select count(*)::int from public.feature_flags where enabled),
-  0,
-  '第 7.1 節預留功能全部關閉'
+  (select array_agg(key order by key) from public.feature_flags where enabled),
+  array['expense_ledger'],
+  '第 7.1 節預留功能只開啟記帳'
 );
 select is(
   (select count(*)::int from public.feature_flags

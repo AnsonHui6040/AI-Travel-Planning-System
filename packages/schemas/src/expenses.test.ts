@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { expenseCategory, expenseRateRow, expenseRow, expenseShareRow, expenseSettlementRow, tableSchemas } from "./index";
 
-// 決策 0010 X：記帳資料表的 row schema（與 migration 20261128020000_x_expenses.sql 的 check constraint 相同）
+// 決策 0010 X：記帳資料表的 row schema（與 migration 20261128200000_x_expenses.sql 的 check constraint 相同）
 const id = "00000000-0000-4000-8000-000000000001";
 const at = "2026-12-01T10:00:00+00:00";
 const row = {

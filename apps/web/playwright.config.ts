@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const port = 3100;
+// 平行的 worktree 可用 E2E_PORT 改用其他連接埠，避免共用同一個已啟動的伺服器
+const port = Number(process.env.E2E_PORT ?? 3100);
 
 export default defineConfig({
   testDir: "./e2e",

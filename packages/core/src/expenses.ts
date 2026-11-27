@@ -167,14 +167,10 @@ function apportion(totalMinor: number, shares: readonly Share[], currency: strin
   if (weightSum === 0) return weights.map(() => 0);
   const exact = weights.map((w) => (totalMinor * w) / weightSum);
   const floors = exact.map((x) => Math.floor(x + 1e-9));
-  let left = totalMinor - floors.reduce((a, b) => a + b, 0);
-  const order = exact.map((x, i) => ({ i, frac: x - floors[i]! })).sort((a, b) => b.frac - a.frac || a.i - b.i);
-  for (const { i } of order) {
-    if (left <= 0) break;
-    floors[i]! += 1;
-    left -= 1;
-  }
-  return floors;
+  const left = totalMinor - floors.reduce((a, b) => a + b, 0);
+  const order = exact.map((x, i) => ({ i, frac: x - (floors[i] ?? 0) })).sort((a, b) => b.frac - a.frac || a.i - b.i);
+  const extra = new Set(order.slice(0, Math.max(0, left)).map((o) => o.i));
+  return floors.map((f, i) => f + (extra.has(i) ? 1 : 0));
 }
 
 export function expenseBalances(input: {

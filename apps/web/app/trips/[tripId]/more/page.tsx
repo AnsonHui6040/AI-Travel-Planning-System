@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { expenseLedgerEnabled } from "../../../../lib/server/expenses";
 import { loadTripHeader } from "../../../../lib/server/trip-nav";
 import { ReverifyToggle } from "../../../inbox-forms";
 import "./more.css";
@@ -21,6 +22,7 @@ export default async function MorePage({ params }: { params: Promise<{ tripId: s
     );
   }
   const base = `/trips/${tripId}`;
+  const ledger = await expenseLedgerEnabled();
   const groups: Array<{ title: string; links: Array<{ href: string; label: string; note: string }> }> = [
     {
       title: "行程資料",
@@ -31,6 +33,7 @@ export default async function MorePage({ params }: { params: Promise<{ tripId: s
         { href: `${base}/timeline`, label: "Actual Timeline", note: "記錄實際到達與離開" },
         { href: `${base}/incident`, label: "Incident 紀錄", note: "出狀況時的替代方案" },
         { href: `${base}/post-trip`, label: "旅後回顧", note: "旅後狀態與比較報告" },
+        ...(ledger ? [{ href: `${base}/expenses`, label: "記帳", note: "花費、預算與分帳結算" }] : []),
       ],
     },
     {
