@@ -32,13 +32,15 @@
 
 ## 指令結果
 
+rebase 到含記帳（PR 57）的 main 之後再全部執行一次：
+
 | 指令 | 結果 |
 |---|---|
-| `pnpm test` | 1661＋4 passed |
+| `pnpm test` | 1726＋4 passed |
 | `pnpm typecheck` | 通過 |
 | `pnpm lint`（含 depcruise） | 通過，沒有依賴方向違規 |
-| `supabase test db`（只有本分支的 migration） | 28 個檔案、590 個測試 PASS |
-| `pnpm test:e2e`（production build，390 與 1280） | 148 passed |
+| `supabase db reset` 後 `supabase test db` | 29 個檔案、623 個測試 PASS |
+| `pnpm test:e2e`（production build，390 與 1280） | 152 passed |
 
 ## 設計說明
 
