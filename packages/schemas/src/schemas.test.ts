@@ -73,6 +73,9 @@ const validItem = {
   actual_cost_amount: null,
   actual_cost_currency: null,
   payer_id: null,
+  origin: "ai",
+  added_by: null,
+  note: "member-note-not-for-ai",
   created_at: "2026-11-23T10:00:00+09:00",
 };
 
@@ -167,6 +170,10 @@ describe("行程項目", () => {
     ["constraint_class", "hard_constraint", true],
     ["verification_status", "conflict", true],
     ["verification_status", "unknown", false],
+    ["verification_status", "user_confirmed", true],
+    ["origin", "user", true],
+    ["origin", "import", false],
+    ["note", "x".repeat(501), false],
   ])("%s = %j 時，通過為 %s", (field, value, expected) => {
     expect(ok(itineraryItemRow, { ...validItem, [field]: value })).toBe(expected);
   });

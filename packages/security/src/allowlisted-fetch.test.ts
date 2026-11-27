@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FETCH_ALLOWLIST, createAllowlistedFetch, nodeTransport, pinnedLookup, type FetchLimits, type FetchTransport, type TransportResponse } from "./index";
+import { FETCH_ALLOWLIST, FETCH_API_HOSTS, allowlistedFetchAsFetch, createAllowlistedFetch, nodeTransport, pinnedLookup, type FetchLimits, type FetchTransport, type TransportResponse } from "./index";
 
 // T16：白名單 fetch 與 SSRF 測試集（S-05）
 const HOST = "www.example-rail.jp";
@@ -11,10 +11,10 @@ type Reply = Partial<Omit<TransportResponse, "body">> & { chunks?: string[]; nev
 function setup(options: { dns?: Record<string, string[]>; replies?: Record<string, Reply>; limits?: Partial<FetchLimits> } = {}) {
   const dns = options.dns ?? { [HOST]: [PUBLIC_IP], [OTHER]: ["203.0.114.10"] };
   const replies = options.replies ?? {};
-  const calls: { url: string; address: string; headers: Record<string, string> }[] = [];
+  const calls: { url: string; address: string; headers: Record<string, string>; method: string; body: string | undefined }[] = [];
   let cancelled = 0;
   const transport: FetchTransport = (req) => {
-    calls.push({ url: req.url.href, address: req.address, headers: req.headers });
+    calls.push({ url: req.url.href, address: req.address, headers: req.headers, method: req.method, body: req.body });
     const reply = replies[req.url.href] ?? { chunks: ["<p>ok</p>"] };
     if (reply.never) return new Promise(() => {});
     const encoder = new TextEncoder();
@@ -234,11 +234,83 @@ describe("Node 連線層", () => {
       address: "127.0.0.1",
       headers: {},
       signal: AbortSignal.timeout(2000),
+      method: "GET",
+      body: undefined,
     }).then(
       () => null,
       (e: unknown) => e as NodeJS.ErrnoException,
     );
     expect(error?.code).not.toBe("ENOTFOUND");
     expect(error?.code).toMatch(/ECONNREFUSED|EPROTO|ECONNRESET|ERR_SSL/);
+  });
+});
+
+// 決策 0010 S：Places 文字搜尋需要 POST、JSON 內容與 key 標頭。只在該次請求帶出，不跟隨 redirect
+describe("白名單 fetch：帶內容與標頭的請求", () => {
+  it("POST 送出內容與指定標頭，仍連線到驗證過的位址", async () => {
+    const { fetch, calls } = setup({ replies: { [`https://${HOST}/search`]: { headers: { "content-type": "application/json; charset=UTF-8" }, chunks: ['{"places":[]}'] } } });
+    const result = await fetch(`https://${HOST}/search`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-goog-api-key": "fake", "x-goog-fieldmask": "places.id" },
+      body: '{"textQuery":"ramen"}',
+    });
+    expect(result).toMatchObject({ ok: true, contentType: "application/json", body: '{"places":[]}' });
+    expect(calls[0]).toMatchObject({ method: "POST", body: '{"textQuery":"ramen"}', address: PUBLIC_IP });
+    expect(calls[0]?.headers["x-goog-api-key"]).toBe("fake");
+    expect(calls[0]?.headers["accept-encoding"]).toBe("identity");
+  });
+
+  it("沒有指定時為 GET、不帶內容", async () => {
+    const { fetch, calls } = setup();
+    await fetch(`https://${HOST}/`);
+    expect(calls[0]).toMatchObject({ method: "GET", body: undefined });
+  });
+
+  it("帶標頭或內容的請求不跟隨 redirect，避免把 key 送到其他位置", async () => {
+    const { fetch, calls } = setup({ replies: { [`https://${HOST}/a`]: { status: 302, headers: { location: `https://${OTHER}/steal` }, chunks: [] } } });
+    const result = await fetch(`https://${HOST}/a`, { method: "POST", headers: { "x-goog-api-key": "k" }, body: "{}" });
+    expect(result).toMatchObject({ ok: false, reason: "redirect_refused" });
+    expect(calls).toHaveLength(1);
+  });
+
+  it.each(["host", "cookie", "accept-encoding", "content-length", "Bad Header"])("不接受標頭 %s", async (name) => {
+    const { fetch, calls } = setup();
+    expect(await fetch(`https://${HOST}/`, { headers: { [name]: "x" } })).toMatchObject({ ok: false, reason: "bad_request" });
+    expect(calls).toHaveLength(0);
+  });
+
+  it("內容超過 16 KB 時不送出", async () => {
+    const { fetch, calls } = setup();
+    expect(await fetch(`https://${HOST}/`, { method: "POST", body: "x".repeat(16 * 1024 + 1) })).toMatchObject({ ok: false, reason: "bad_request" });
+    expect(calls).toHaveLength(0);
+  });
+
+  it("GET 不可帶內容", async () => {
+    const { fetch } = setup();
+    expect(await fetch(`https://${HOST}/`, { body: "{}" })).toMatchObject({ ok: false, reason: "bad_request" });
+  });
+});
+
+describe("白名單 fetch 轉為 fetch 介面（供 adapter 使用）", () => {
+  it("成功時回傳 Response；非 2xx 回傳同一狀態碼；被擋下時丟出錯誤", async () => {
+    const { fetch } = setup({
+      replies: {
+        [`https://${HOST}/ok`]: { headers: { "content-type": "application/json" }, chunks: ['{"a":1}'] },
+        [`https://${HOST}/denied`]: { status: 403, chunks: [] },
+      },
+    });
+    const asFetch = allowlistedFetchAsFetch(fetch);
+    const ok = await asFetch(`https://${HOST}/ok`, { method: "POST", headers: { "x-goog-api-key": "k" }, body: "{}" });
+    expect(ok.status).toBe(200);
+    expect(await ok.json()).toEqual({ a: 1 });
+    expect((await asFetch(`https://${HOST}/denied`)).status).toBe(403);
+    await expect(asFetch("https://not-allowed.example.com/")).rejects.toThrow();
+  });
+});
+
+describe("官方 API 主機（決策 0010）", () => {
+  it("Places 文字搜尋的主機另列，不在讀取網頁的白名單", () => {
+    expect(FETCH_API_HOSTS).toEqual(["places.googleapis.com"]);
+    expect(FETCH_ALLOWLIST).not.toContain("places.googleapis.com");
   });
 });

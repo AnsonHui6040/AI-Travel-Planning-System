@@ -1,0 +1,136 @@
+/* 決策 0010：新增地點與編輯項目。一個畫面一件事，390×844 與 1280×800 不用捲動；只有搜尋結果可捲動 */
+
+.item-form label,
+.schedule-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.item-form input,
+.item-form select,
+.item-form textarea,
+.schedule-controls input,
+.schedule-controls select {
+  color: var(--text);
+}
+
+.field-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.field-pair input,
+.field-pair select {
+  width: 100%;
+  min-width: 0;
+}
+
+.move-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.schedule-controls {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.schedule-controls fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.more-fields summary {
+  min-height: var(--control);
+  line-height: var(--control);
+  cursor: pointer;
+}
+
+.more-fields[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.place-search {
+  flex: none;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.place-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.place-results {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 10.5rem;
+  overflow-y: auto;
+}
+
+.place-results .attribution,
+.selected-place {
+  margin: 0.25rem 0 0;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.edit-status p,
+.edit-warnings {
+  margin: 0;
+}
+
+.edit-warnings {
+  padding-left: 1.25rem;
+  color: var(--accent);
+}
+
+.add-item .screen-head p,
+.edit-item .screen-head p {
+  margin: 0.25rem 0 0;
+}
+
+.add-item .screen-head h1,
+.edit-item .screen-head h1 {
+  margin: 0.25rem 0 0;
+}
+
+.move-row button {
+  white-space: nowrap;
+}
+
+/* 搜尋結果：名稱一行、地址在下一行，過長以省略號截斷 */
+.place-results .rows > li > a {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.place-results .rows .row-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.place-results .rows > li > a[aria-current="true"] {
+  margin: 0 -0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}

@@ -39,11 +39,11 @@
 
 | 規則 | 負責 Task | 對應測試或項目 | 狀態 |
 |---|---|---|---|
-| S-01 | T09、T18 | T09：`packages/schemas/src/change.test.ts`（提案 schema）、`supabase/tests/05_apply_change.test.sql`（只有 `atps_change_writer` 可寫入正式行程表）；T18：`packages/core/src/output-gate.test.ts`（AI 提案只能是需要批准的種類、只能操作已知項目）、回歸測試集 `packages/ai/src/injection/`（21 筆，沒有批准或正式行程寫入）；T30：每日批准只經 `atps_change_writer` 擁有的 `approve_day`（`supabase/tests/19_feasibility_lock.test.sql`） | 已驗收 |
+| S-01 | T09、T18 | T09：`packages/schemas/src/change.test.ts`（提案 schema）、`supabase/tests/05_apply_change.test.sql`（只有 `atps_change_writer` 可寫入正式行程表）；T18：`packages/core/src/output-gate.test.ts`（AI 提案只能是需要批准的種類、只能操作已知項目）、回歸測試集 `packages/ai/src/injection/`（21 筆，沒有批准或正式行程寫入）；T30：每日批准只經 `atps_change_writer` 擁有的 `approve_day`（`supabase/tests/19_feasibility_lock.test.sql`）；決策 0010：AI 提案只能含排程與 At Risk（`aiChangePayload`，`change.test.ts`、回歸案例 N4），`commit_proposal` 拒絕 AI 提出的新增、修改、刪除（`supabase/tests/28_item_editing.test.sql`） | 已驗收 |
 | S-02 | T06、T14 | T06：`packages/schemas/src/schemas.test.ts`（拒絕未知欄位、格式與上下限）；T14：五個角色的 strict 輸出 schema（`packages/schemas/src/roles.test.ts`）、不符即丟棄並記錄、回傳原因與欄位（`packages/core/src/role-runner.test.ts`）；畫面顯示與重試隨各 job 畫面 | 部分 |
 | S-03 | T18、T24 | T18：`packages/security/src/untrusted.test.ts`（資料區塊、偽造標記中和）；回歸測試集 `packages/ai/src/injection/`（七類各 3 筆）；網頁與搜尋結果只產生候選並附來源（`researchCandidate` 的 sources 必填）。T24：Research A–D 的輸入只含行程與基線的資料區塊，不讀其他方向的結論（`packages/core/src/research.test.ts`）；Research 的資料範圍只有基線 | 已驗收 |
 | S-04 | T14 | `packages/ai/src/roles.test.ts`（五個角色的工具）、`packages/core/src/role-runner.test.ts`（只把內建搜尋交給 AI）、T13 adapter 拒絕清單以外的工具 | 已驗收 |
-| S-05 | T16 | `packages/security/src/allowlisted-fetch.test.ts`（SSRF 測試集：IP 直連、DNS 解析至私有位址、redirect 至白名單外、https 與連接埠限制、大小、時間與內容類型上限、白名單設定檔格式、連線固定到已驗證位址）；`address.test.ts`（私有與保留位址）；T20：日本 pack 的 12 個官方主機加入設定檔，`packages/data-sources/src/region-allowlist.test.ts` 確認地區白名單與設定檔一致；連線真實網站於旅前 TBD | 已驗收 |
+| S-05 | T16 | `packages/security/src/allowlisted-fetch.test.ts`（SSRF 測試集：IP 直連、DNS 解析至私有位址、redirect 至白名單外、https 與連接埠限制、大小、時間與內容類型上限、白名單設定檔格式、連線固定到已驗證位址）；`address.test.ts`（私有與保留位址）；T20：日本 pack 的 12 個官方主機加入設定檔，`packages/data-sources/src/region-allowlist.test.ts` 確認地區白名單與設定檔一致；連線真實網站於旅前 TBD；決策 0010：Places 文字搜尋的主機另列於設定檔的 `apiHosts`（不在讀取網頁的白名單），帶 key 的請求不跟隨 redirect、不接受保留標頭（`allowlisted-fetch.test.ts`），網址於 2026-11-28 以瀏覽器確認 | 已驗收 |
 | S-06 | T14 | `packages/core/src/role-runner.test.ts`（步數與 token 超過即停止並記錄）；`supabase/tests/09_ai_settings.test.sql`；E2E 設定頁顯示每個角色的用量 | 已驗收 |
 | S-07 | T17 | `supabase/tests/10_sensitive_fields.test.sql`（Vault 加密、沒有明文欄位、AI 用函式只回傳開啟「提供給 AI」的欄位且只授權 service_role）；`packages/security/src/payload.test.ts`（allowlist builder）；`packages/ai/src/outbound-payload.test.ts`（三家 outbound payload 快照：開關關閉時不含欄位值） | 已驗收 |
 | S-08 | T01、T24 | T01：ESLint 禁止 `dangerouslySetInnerHTML`；`apps/web/lib/security-headers.test.ts`（CSP、nonce、HSTS）；`apps/web/e2e/security-headers.spec.ts`（實際回應標頭、腳本 nonce、無 CSP 違規）。T24：AI 與網頁內容共用的 `SafeMarkdown`、`SafeLink`（`apps/web/components/safe-markdown.test.tsx`、`packages/core/src/safe-markdown.test.ts`）：HTML 只當文字、連結只允許 https 並加 `rel="noopener noreferrer"`；E2E `apps/web/e2e/candidates.spec.ts` 確認注入的腳本不執行。T34：`connect-src` 只另外允許 Supabase 網址的 http(s) 與 ws(s)（Realtime），非 http(s) 網址不加入（`security-headers.test.ts`） | 已驗收 |
@@ -111,6 +111,21 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 | E7 | 待建立 | 無 | TBD | 未驗收 |
 | E8 | `evals/incident/E8.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-26-E8-incident.md` PASS） | 不適用 | 已驗收 |
 | E9 | `evals/zoning/E9.json` | PASS（`docs/verification/evals/2026-11-24-E9.md`） | TBD | 部分 |
+
+## 決策 0010 基本旅遊功能
+
+| 項目 | 負責 Task | 對應測試或項目 | 狀態 |
+|---|---|---|---|
+| E 手動新增（使用者新增、使用者確認） | E＋S | `supabase/tests/28_item_editing.test.sql`；`packages/core/src/states.test.ts`（可排入草案）；E2E `apps/web/e2e/item-edit.spec.ts` | 已驗收 |
+| E AI 核實不改寫使用者確認 | E＋S | pgTAP：check constraint `itinerary_items_user_confirmed`（23514）；鎖定後移回候選清單維持使用者確認 | 已驗收 |
+| E 修改、刪除、排序、移動、移回候選清單 | E＋S | `packages/core/src/item-edit.test.ts`；`apps/web/lib/server/item-edit-core.test.ts`；pgTAP；E2E（刪除先確認、44px 按鈕） | 已驗收 |
+| E 鎖定前直接寫入（Owner、Companion） | E＋S | pgTAP：Viewer、非成員、直接寫入資料表、已批准日期、已鎖定行程都被拒 | 已驗收 |
+| E 鎖定後成為提案（add、update、remove、schedule） | E＋S | `packages/core/src/versions.test.ts`、`item-edit.test.ts`；pgTAP 批准新增、修改、刪除提案；E2E 鎖定後送出提案 | 已驗收 |
+| E 每次修改後以 checkDay 提示、不阻擋 | E＋S | `item-edit-core.test.ts`（直接寫入後回傳提醒）；`apps/web/lib/server/day-draft.ts` 手動排程以 `checkDay` 檢查 | 已驗收 |
+| S 搜尋加入（Vault key、白名單 fetch） | E＋S | `packages/data-sources/src/google-maps.contract.test.ts`（searchPlaces）；`apps/web/lib/server/places-core.test.ts`；E2E（合成回應） | 已驗收 |
+| S 只保存 place_id（D28） | E＋S | E2E：保存後名稱為輸入的搜尋字、地址為空、place_id 為選定的地點 | 已驗收 |
+| S 沒有 Maps key 只手動新增 | E＋S | `places-core.test.ts`；E2E 顯示到設定輸入 key 的提示 | 已驗收 |
+| 真實 Places 回應 | E＋S | 以使用者本人 key 在設定頁實測 | TBD |
 
 ## 沒有負責 Task 的規則
 

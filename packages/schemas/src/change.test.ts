@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CHANGE_KINDS, changePayload, restoreResult, scheduleSnapshot } from "./index";
+import { CHANGE_KINDS, MEMBER_ONLY_OPERATIONS, aiChangePayload, changePayload, restoreResult, roleOutputs, scheduleSnapshot, userItemFields } from "./index";
 
 const itemId = "30000000-0000-4000-8000-000000000001";
 
@@ -65,5 +65,47 @@ describe("版本快照與復原結果（T10A）", () => {
     const result = { outcome: "restored", major: 2, minor: 0, version_id: "50000000-0000-4000-8000-000000000001" };
     expect(restoreResult.parse(result)).toEqual(result);
     expect(() => restoreResult.parse({ outcome: "restored", major: 2 })).toThrow();
+  });
+});
+
+// 決策 0010：成員的新增、修改、刪除提案；AI 的提案不可含這三種操作
+describe("成員編輯的提案操作（決策 0010）", () => {
+  const item = { name_zh: "藏前咖啡", type: "restaurant", address: null, suggested_stay_minutes: 60, note: null, place_id: null };
+
+  it("接受新增、修改、刪除", () => {
+    const parsed = changePayload.parse({
+      ...valid,
+      operations: [
+        { op: "add_item", itemId, item, date: "2026-12-01", start: "10:00", end: "11:00" },
+        { op: "update_item", itemId, fields: { note: "要排隊" } },
+        { op: "remove_item", itemId },
+      ],
+    });
+    expect(parsed.operations.map((o) => o.op)).toEqual(["add_item", "update_item", "remove_item"]);
+  });
+
+  it("新增到候選清單時日期與時間都是空值；只填日期不接受", () => {
+    expect(() => changePayload.parse({ ...valid, operations: [{ op: "add_item", itemId, item, date: null, start: null, end: null }] })).not.toThrow();
+    expect(() => changePayload.parse({ ...valid, operations: [{ op: "add_item", itemId, item, date: "2026-12-01", start: null, end: null }] })).toThrow();
+    expect(() => changePayload.parse({ ...valid, operations: [{ op: "add_item", itemId, item, date: "2026-12-01", start: "11:00", end: "10:00" }] })).toThrow();
+  });
+
+  it("修改至少一個欄位；不接受未知欄位（例如核實狀態）", () => {
+    expect(() => changePayload.parse({ ...valid, operations: [{ op: "update_item", itemId, fields: {} }] })).toThrow();
+    expect(() =>
+      changePayload.parse({ ...valid, operations: [{ op: "update_item", itemId, fields: { verification_status: "verified" } }] }),
+    ).toThrow();
+  });
+
+  it("place_id 只接受 Google 的格式", () => {
+    expect(userItemFields.safeParse({ ...item, place_id: "ChIJ51cu8IcbXWARiRtXIothAS4" }).success).toBe(true);
+    expect(userItemFields.safeParse({ ...item, place_id: "<script>" }).success).toBe(false);
+  });
+
+  it("AI 的提案只能含排程與 At Risk", () => {
+    expect(aiChangePayload.safeParse(valid).success).toBe(true);
+    expect(aiChangePayload.safeParse({ ...valid, operations: [{ op: "remove_item", itemId }] }).success).toBe(false);
+    expect(roleOutputs.master_planner.safeParse({ proposals: [{ ...valid, operations: [{ op: "add_item", itemId, item, date: null, start: null, end: null }] }] }).success).toBe(false);
+    expect(MEMBER_ONLY_OPERATIONS).toEqual(["add_item", "update_item", "remove_item"]);
   });
 });

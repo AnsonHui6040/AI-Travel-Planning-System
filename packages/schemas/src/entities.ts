@@ -85,6 +85,8 @@ export const tripRow = z.strictObject({
   created_at: offsetDateTime,
   // T31：旅前自動再核實排程（只有 Owner 可開關）
   reverify_enabled: z.boolean(),
+  // 決策 0010：成員已手動排過每日行程；之後草案日只顯示資料庫中的排程，不再自動排入
+  manual_schedule: z.boolean(),
 });
 
 export const tripMemberRow = z.strictObject({
@@ -207,6 +209,10 @@ export const itineraryItemRow = z.strictObject({
   actual_cost_currency: nullable(currencyCode),
   payer_id: nullable(uuid),
   created_at: offsetDateTime,
+  // 決策 0010：來源（AI 研究或成員新增）、新增的成員與備註
+  origin: E.itemOrigin,
+  added_by: nullable(uuid),
+  note: nullable(text(LIMITS.itemNote)),
 });
 
 export const dayRow = z.strictObject({

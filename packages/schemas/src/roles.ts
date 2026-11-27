@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { changePayload } from "./change";
+import { aiChangePayload } from "./change";
 import { LIMITS, isoDate, text, uuid } from "./common";
 import { aiMobilityEstimate, availabilitySlot, factClaim, sourceRef } from "./entities";
 import * as E from "./enums";
@@ -51,8 +51,8 @@ export const roleOutputs = {
   research: z.strictObject({ candidates: z.array(researchCandidate).max(30) }),
   verification: z.strictObject({ results: z.array(verificationResult).max(50) }),
   transport: z.strictObject({ segments: z.array(transportSegment).max(30) }),
-  master_planner: z.strictObject({ proposals: z.array(changePayload).min(1).max(5) }),
-  live_planner: z.strictObject({ proposals: z.array(changePayload).min(1).max(3) }),
+  master_planner: z.strictObject({ proposals: z.array(aiChangePayload).min(1).max(5) }),
+  live_planner: z.strictObject({ proposals: z.array(aiChangePayload).min(1).max(3) }),
 } as const;
 
 // T27：地理分區的輸出（以 Transport 的模型設定執行）。每個項目標示由出發地前往的轉乘次數與分鐘數（E9）

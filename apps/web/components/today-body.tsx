@@ -12,6 +12,7 @@ const STATUS_LABELS: Record<string, string> = {
   partially_verified: "Partially Verified",
   unverified: "Unverified",
   conflict: "Conflict",
+  user_confirmed: "使用者確認",
 };
 
 function countdownText(minutes: number | null): string {

@@ -48,6 +48,8 @@ describe("核實狀態（D07）", () => {
     ["partially_verified", true],
     ["unverified", false],
     ["conflict", false],
+    // 決策 0010：成員自行新增的項目（使用者確認）可以排入
+    ["user_confirmed", true],
   ] as const)("%s 進入行程草案：%s", (status, allowed) => {
     expect(canEnterDraft(status)).toBe(allowed);
   });

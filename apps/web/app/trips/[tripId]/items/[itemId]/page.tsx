@@ -19,6 +19,7 @@ const STATUS_LABELS: Record<string, string> = {
   partially_verified: "Partially Verified",
   unverified: "Unverified",
   conflict: "Conflict",
+  user_confirmed: "使用者確認",
 };
 const MODE_LABELS: Record<string, string> = { walk: "步行", rail: "鐵路與地鐵", bus: "公車", taxi: "計程車與叫車", drive: "自駕" };
 
@@ -73,6 +74,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
           <h1>{item.nameZh}</h1>
           <p className="tags">
             <span className="tag">{STATUS_LABELS[item.verificationStatus] ?? item.verificationStatus}</span>
+            {item.origin === "user" ? <span className="tag">使用者新增</span> : null}
             {item.atRisk ? <span className="tag risk">At Risk</span> : null}
             {day && entry ? <span className="tag">{DAY_STATUS_LABELS[day.status]}</span> : packEntry ? null : <span className="tag">尚未排入</span>}
           </p>
@@ -89,6 +91,12 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
               <dt>停留</dt>
               <dd>{item.stayMinutes} 分鐘</dd>
             </div>
+            {item.note ? (
+              <div>
+                <dt>備註</dt>
+                <dd>{item.note}</dd>
+              </div>
+            ) : null}
             {entry || packEntry ? (
               <div>
                 <dt>下一站</dt>
@@ -135,6 +143,13 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
             ) : null}
             <Link href={`/trips/${tripId}/items/${itemId}/photos`}>照片</Link>
           </p>
+          {view.canEdit && view.tripStatus !== "ended" && view.tripStatus !== "archived" ? (
+            <p className="item-edit-link">
+              <Link className="secondary" href={`/trips/${tripId}/items/${itemId}/edit`}>
+                編輯
+              </Link>
+            </p>
+          ) : null}
         </article>
       </div>
     </main>

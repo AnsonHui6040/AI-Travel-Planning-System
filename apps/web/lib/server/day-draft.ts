@@ -2,8 +2,10 @@ import "server-only";
 import {
   DEFAULT_TRAVEL_MINUTES,
   categorizeForSchedule,
+  checkDay,
   dayApprovalEntries,
   isDayBlocked,
+  manualDayDraft,
   planFeasibleDays,
   type DayDraft,
   type DraftEntry,
@@ -20,6 +22,7 @@ import { createSupabaseServerClient } from "./supabase";
 // T29、T30：每日時段草案與可行性驗證的畫面資料。以使用者 session（RLS）讀取。
 // 已批准的日期顯示資料庫中的時段；其餘日期由 core 的 planFeasibleDays 計算（不寫入），
 // 未通過可行性驗證的項目回到地理分區、留在 Candidate List。
+// 決策 0010：成員手動排過（trips.manual_schedule）之後，草案日改為資料庫中的排程，以 checkDay 檢查並只提示。
 
 export interface CardItem {
   id: string;
@@ -28,6 +31,16 @@ export interface CardItem {
   verificationStatus: FeasibilityItem["verification_status"];
   atRisk: boolean;
   photo: PhotoView;
+  // 決策 0010：編輯畫面用
+  type: FeasibilityItem["type"];
+  address: string | null;
+  note: string | null;
+  placeId: string | null;
+  origin: "ai" | "user";
+  lifecycle: string;
+  candidateRole: "primary" | "backup";
+  // 資料庫中的排程日期（自動草案的項目為 null）
+  scheduledDate: string | null;
 }
 
 export interface TravelInfo {
@@ -60,6 +73,8 @@ export type DayDraftView =
       reverifyEnabled: boolean;
       canApprove: boolean;
       baseVersion: number;
+      // 決策 0010：成員已手動排程
+      manualSchedule: boolean;
       days: DayView[];
       items: Record<string, CardItem>;
       travel: Record<string, TravelInfo>;
@@ -98,12 +113,32 @@ function storedDay(date: string, baseline: TripBaselineData, items: FeasibilityI
   return { date, zone_ids: [], entries: [...fixed, ...placed].sort((a, b) => a.start.localeCompare(b.start)), backups: [], unplaced: [] };
 }
 
+// 決策 0010：手動排程的草案日。只有資料庫中排入該日、尚未批准的項目；以 checkDay 檢查（規劃中只提示）
+function manualPlan(
+  dates: readonly string[],
+  baseline: TripBaselineData,
+  items: FeasibilityItem[],
+  rows: ReadonlyArray<Record<string, unknown>>,
+  segment: (from: string, to: string) => SegmentInfo | null,
+): { days: DayDraft[]; issues: FeasibilityIssue[]; returned: ReturnedItem[] } {
+  const days = dates.map((date) =>
+    manualDayDraft(
+      date,
+      baseline.fixed_activities,
+      rows
+        .filter((r) => r.scheduled_date === date && r.scheduled_start && r.scheduled_end)
+        .map((r) => ({ itemId: String(r.id), start: hhmm(r.scheduled_start), end: hhmm(r.scheduled_end) })),
+    ),
+  );
+  return { days, issues: days.flatMap((d) => checkDay(d, { baseline, items, segment })), returned: [] };
+}
+
 export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
   const session = await createSupabaseServerClient();
   const { data: auth } = await session.auth.getUser();
   if (!auth.user) return { state: "signed_out" };
   if (!uuid.safeParse(tripId).success) return { state: "not_found" };
-  const { data: trip } = await session.from("trips").select("name, status, current_version, reverify_enabled, timezone").eq("id", tripId).maybeSingle();
+  const { data: trip } = await session.from("trips").select("name, status, current_version, reverify_enabled, timezone, manual_schedule").eq("id", tripId).maybeSingle();
   if (!trip) return { state: "not_found" };
   const tripName = String(trip.name);
 
@@ -117,7 +152,7 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
   const { data: rows, error } = await session
     .from("itinerary_items")
     .select(
-      "id, name_zh, name_local, address, type, suggested_stay_minutes, priority, candidate_role, verification_status, zone_id, score_time_slot_dependency, at_risk, availability, reservation_requirement, weather_dependency, lifecycle_status, scheduled_date, scheduled_start, scheduled_end, movable_from, movable_to",
+      "id, name_zh, name_local, address, type, suggested_stay_minutes, priority, candidate_role, verification_status, zone_id, score_time_slot_dependency, at_risk, availability, reservation_requirement, weather_dependency, lifecycle_status, scheduled_date, scheduled_start, scheduled_end, movable_from, movable_to, origin, note, place_id",
     )
     .eq("trip_id", tripId)
     .in("lifecycle_status", [...OPEN_STATES, ...SCHEDULED_STATES])
@@ -174,11 +209,15 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
     allDates.push(d.toISOString().slice(0, 10));
   }
   const draftDates = allDates.filter((d) => (statusOf.get(d) ?? "draft") === "draft");
-  const openItems = items.filter((i) => OPEN_STATES.has(String(rowList.find((r) => String(r.id) === i.id)?.lifecycle_status)));
+  const openRows = rowList.filter((r) => OPEN_STATES.has(String(r.lifecycle_status)));
+  const openItems = items.filter((i) => openRows.some((r) => String(r.id) === i.id));
+  const manualSchedule = trip.manual_schedule === true;
   const plan =
-    draftDates.length > 0
-      ? planFeasibleDays({ baseline: baseline.data, items: openItems, segment: segmentOf, dates: draftDates })
-      : { days: [], issues: [], returned: [] };
+    draftDates.length === 0
+      ? { days: [], issues: [], returned: [] }
+      : manualSchedule
+        ? manualPlan(draftDates, baseline.data, openItems, openRows, segmentOf)
+        : planFeasibleDays({ baseline: baseline.data, items: openItems, segment: segmentOf, dates: draftDates });
 
   const days: DayView[] = allDates.map((date) => {
     const status = statusOf.get(date) ?? "draft";
@@ -212,6 +251,14 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
       stayMinutes: Number(r.suggested_stay_minutes),
       verificationStatus: r.verification_status as FeasibilityItem["verification_status"],
       atRisk: r.at_risk === true,
+      type: r.type as FeasibilityItem["type"],
+      address: (r.address as string | null) ?? null,
+      note: (r.note as string | null) ?? null,
+      placeId: (r.place_id as string | null) ?? null,
+      origin: r.origin === "user" ? "user" : "ai",
+      lifecycle: String(r.lifecycle_status),
+      candidateRole: r.candidate_role === "backup" ? "backup" : "primary",
+      scheduledDate: (r.scheduled_date as string | null) ?? null,
       photo: photoDisplay(
         { name_zh: String(r.name_zh), name_local: (r.name_local as string | null) ?? null, address: (r.address as string | null) ?? null },
         photos,
@@ -239,6 +286,7 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
     reverifyEnabled: trip.reverify_enabled === true,
     canApprove: (role === "owner" || role === "companion") && trip.status === "planning",
     baseVersion: Number(trip.current_version),
+    manualSchedule,
     days,
     items: cards,
     travel,

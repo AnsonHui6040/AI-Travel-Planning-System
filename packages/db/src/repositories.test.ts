@@ -85,6 +85,9 @@ const item = {
   actual_cost_amount: null,
   actual_cost_currency: null,
   payer_id: null,
+  origin: "ai",
+  added_by: null,
+  note: null,
   created_at: "2026-11-23T10:00:00+00:00",
 };
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FEASIBILITY_LABELS, isDayBlocked } from "@atps/core";
 import { loadDayDraft } from "../../../../lib/server/day-draft";
 import { ApproveDayForm } from "./approve-day-form";
@@ -87,8 +88,14 @@ export default async function DaysPage({ params, searchParams }: { params: Promi
               </details>
             ) : null}
           </div>
-          {view.canEdit && placed ? (
+          {view.canEdit ? (
             <div className="screen-actions">
+              {view.tripStatus !== "ended" && view.tripStatus !== "archived" ? (
+                <Link className="secondary" href={`/trips/${tripId}/items/new`}>
+                  新增地點
+                </Link>
+              ) : null}
+              {placed ? (
               <ApproveDayForm
                 tripId={tripId}
                 date={day.date}
@@ -96,6 +103,7 @@ export default async function DaysPage({ params, searchParams }: { params: Promi
                 label={weekday(day.date)}
                 mode={!view.canApprove || day.status !== "draft" ? "hidden" : isDayBlocked(day.issues, day.date) ? "blocked" : "ready"}
               />
+              ) : null}
             </div>
           ) : null}
         </section>
