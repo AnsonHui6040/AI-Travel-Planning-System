@@ -9,6 +9,8 @@ export const LIMITS = {
   area: 80,
   longText: 300,
   shortNote: 200,
+  // 決策 0010：成員自行輸入的項目備註
+  itemNote: 500,
   stayMinutes: { min: 5, max: 600 },
   priority: { min: 1, max: 5 },
   score: { min: 0, max: 5 },

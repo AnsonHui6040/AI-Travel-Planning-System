@@ -7,7 +7,10 @@ export const constraintClass = z.enum(["hard_constraint", "strong_preference", "
 export const level3 = z.enum(["low", "medium", "high"]);
 export const reservationRequirement = z.enum(["none", "recommended", "required"]);
 export const candidateRole = z.enum(["primary", "backup"]);
-export const verificationStatus = z.enum(["verified", "partially_verified", "unverified", "conflict"]);
+// 決策 0010：user_confirmed 為成員自行新增的項目（使用者確認），不經 AI 核實，AI 也不能改寫
+export const verificationStatus = z.enum(["verified", "partially_verified", "unverified", "conflict", "user_confirmed"]);
+// 決策 0010：項目來源。ai 為 AI 研究，user 為成員自行新增
+export const itemOrigin = z.enum(["ai", "user"]);
 export const sourceGrade = z.enum([
   "facility_official",
   "official_transport_tourism",

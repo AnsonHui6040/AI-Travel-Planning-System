@@ -47,9 +47,9 @@ export const canTransitionLifecycle = (from: LifecycleStatus, to: LifecycleStatu
 export const canTransitionTrip = (from: TripStatus, to: TripStatus) => TRIP_TRANSITIONS[from].includes(to);
 export const canTransitionDay = (from: DayStatus, to: DayStatus) => DAY_TRANSITIONS[from].includes(to);
 
-// D07：Unverified 與 Conflict 不得進入行程草案
+// D07：Unverified 與 Conflict 不得進入行程草案。決策 0010：成員自行新增的項目（使用者確認）可以排入
 export const canEnterDraft = (status: VerificationStatus) =>
-  status === "verified" || status === "partially_verified";
+  status === "verified" || status === "partially_verified" || status === "user_confirmed";
 
 export const needsPartialBadge = (status: VerificationStatus) => status === "partially_verified";
 

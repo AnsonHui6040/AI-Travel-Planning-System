@@ -83,3 +83,35 @@ describe("第 2.7 節 Major 與 Minor 判定", () => {
     expect(() => classifyVersionKind([{ op: "set_at_risk", itemId: "z", atRisk: true }], items)).toThrow();
   });
 });
+
+// 決策 0010：成員的新增、修改、刪除提案
+describe("成員編輯提案的 Major 與 Minor", () => {
+  const items = [
+    { id: "a", scheduled_date: "2026-12-01" },
+    { id: "b", scheduled_date: null },
+  ];
+  const fields = { name_zh: "藏前咖啡", type: "restaurant" as const, address: null, suggested_stay_minutes: 60, note: null, place_id: null };
+
+  it("新增到某一天為 Minor；新增的項目不必已在行程中", () => {
+    expect(classifyVersionKind([{ op: "add_item", itemId: "n", item: fields, date: "2026-12-01", start: "10:00", end: "11:00" }], items)).toBe("minor");
+    expect(classifyVersionKind([{ op: "add_item", itemId: "n", item: fields, date: null, start: null, end: null }], items)).toBe("minor");
+  });
+
+  it("修改或刪除單一項目為 Minor；同時影響兩天為 Major", () => {
+    expect(classifyVersionKind([{ op: "update_item", itemId: "a", fields: { note: "排隊" } }], items)).toBe("minor");
+    expect(classifyVersionKind([{ op: "remove_item", itemId: "a" }], items)).toBe("minor");
+    expect(
+      classifyVersionKind(
+        [
+          { op: "remove_item", itemId: "a" },
+          { op: "add_item", itemId: "n", item: fields, date: "2026-12-02", start: "10:00", end: "11:00" },
+        ],
+        items,
+      ),
+    ).toBe("major");
+  });
+
+  it("修改或刪除不在行程中的項目時拒絕", () => {
+    expect(() => classifyVersionKind([{ op: "remove_item", itemId: "x" }], items)).toThrow();
+  });
+});

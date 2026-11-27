@@ -16,6 +16,7 @@ export const fullTrip: Row<"trips"> = {
   owner_id: MEMBER_A,
   created_at: "2026-11-01T10:00:00+08:00",
   reverify_enabled: false,
+  manual_schedule: false,
 };
 
 export const fullItem: Row<"itinerary_items"> = {
@@ -75,5 +76,8 @@ export const fullItem: Row<"itinerary_items"> = {
   actual_cost_amount: null,
   actual_cost_currency: null,
   payer_id: null,
+  origin: "ai",
+  added_by: null,
+  note: "member-note-not-for-ai",
   created_at: "2026-11-01T10:00:00+08:00",
 };

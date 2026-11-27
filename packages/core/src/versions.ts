@@ -26,6 +26,11 @@ export function classifyVersionKind(
   if (structural.length > 0) return "major";
   const dates = new Set<string>();
   for (const op of operations) {
+    // 決策 0010：新增的項目還不在行程中，只看排入的日期
+    if (op.op === "add_item") {
+      if (op.date !== null) dates.add(op.date);
+      continue;
+    }
     const item = items.find((i) => i.id === op.itemId);
     if (!item) throw new Error("變更的項目不在此行程中");
     if (item.scheduled_date !== null) dates.add(item.scheduled_date);
