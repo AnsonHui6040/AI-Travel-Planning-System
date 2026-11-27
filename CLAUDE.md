@@ -83,6 +83,7 @@
 - 記憶（T41，決策 0009）：使用者以本人 session 手動新增、修改、刪除（來源只能是 manual）；旅後提案由 `@atps/memory` 的 `postTripMemoryProposals` 依比較報告產生，經 `create_post_trip_memory_proposals`、`decide_memory_proposal`（擁有者 `atps_memory_writer`）由本人批准後寫入。service_role 沒有 `memories` 的寫入權（AI 不可寫入記憶；E2E 以本人 session 建立測試記憶）。trigger `check_memory_write` 拒絕身分與聯絡資料。共同行程以 `trip_memories`（不回傳擁有者）或 service client 讀目前成員的記憶，經 `mergeMemories` 取最保守值，再以 `memoryBlockContent` 依角色 `memoryScope` 放入 member_preference 資料區塊。
 - 介面（ORYZO 工作版）：顏色、字級、圓角只用 `apps/web/app/globals.css` 的 token；頁面 CSS 不寫死顏色、不寫 `prefers-color-scheme`（`tooling/ui-tokens.test.ts` 檢查）。按鈕與輸入欄至少 44px；點綴色只用於 At Risk、衝突、晚到與錯誤；行程內導覽在 `components/trip-nav.tsx`。按鈕依 Meta Astryx：每個按鈕必須有 `primary`、`secondary`、`ghost`、`danger` 之一（`className` 放在第一個屬性），每個畫面一個 primary，會寫入的危險操作以 `window.confirm` 確認（`tooling/ui-buttons.test.ts`）；E2E 點到這些按鈕時要接受 dialog。元件樣板在 `/styleguide`（靜態），新增元件時一併加上。
 - 進入 App：`/login` 以 Email magic link 登入（本機信件在 Mailpit http://localhost:54324）；首頁列出行程並可建立行程（id 由伺服器產生，RETURNING 受 RLS 限制）。本機示範資料：`pnpm --filter @atps/web demo:seed 電子郵件`（只可寫入本機）。
+- Session 更新：`proxy.ts` 每次頁面請求以 `auth.getUser()` 更新過期的 token 並寫回 cookie；Server Component 的 Supabase client 不寫 cookie（寫入失敗略過）。
 - workflow 測試（`pnpm test:workflow`）會打包 repo 內所有 workflow；`tooling/workflow-test-loader.mjs` 讓測試 worker 載入工作區套件的 TypeScript 原始碼。
 - React 19 在 Server Action 完成後會重設 `<form>`：受控的輸入欄位（尤其核取方塊）不要放在送出用的 form 內。
 - 函式擁有者沒有 `auth` schema 權限；security definer 函式取目前使用者用 `private.session_user_id()`（T09）。

@@ -20,7 +20,12 @@ export async function createSupabaseServerClient() {
       cookies: {
         getAll: () => cookieStore.getAll(),
         setAll: (items) => {
-          for (const { name, value, options } of items) cookieStore.set(name, value, options);
+          // Server Component 不能寫 cookie（session 已由 proxy 更新）；Server Action 與 Route Handler 照常寫入
+          try {
+            for (const { name, value, options } of items) cookieStore.set(name, value, options);
+          } catch {
+            // 忽略
+          }
         },
       },
     },
