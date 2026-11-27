@@ -14,6 +14,7 @@ import {
   uuid,
 } from "./common";
 import * as E from "./enums";
+import { expenseRateRow, expenseRow, expenseSettingsRow, expenseSettlementRow, expenseShareRow } from "./expenses";
 import { memberSensitiveFieldRow } from "./sensitive";
 
 // 第 2.4 節與第 2.11 節的實體。鍵名與資料庫欄位一致（snake_case），
@@ -524,6 +525,12 @@ export const tableSchemas = {
   ai_role_settings: aiRoleSettingRow,
   ai_usage: aiUsageRow,
   member_sensitive_fields: memberSensitiveFieldRow,
+  // 決策 0010 X：記帳與分帳
+  expense_settings: expenseSettingsRow,
+  expense_rates: expenseRateRow,
+  expenses: expenseRow,
+  expense_shares: expenseShareRow,
+  expense_settlements: expenseSettlementRow,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;
