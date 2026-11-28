@@ -79,9 +79,6 @@ export function ImportFlow({
             貼上確認信、其他 App 匯出的行程或自己的清單
             <textarea value={text} maxLength={50_000} spellCheck={false} onChange={(e) => setText(e.target.value)} />
           </label>
-          <p className="muted import-hint">
-            以你的 AI 設定與 key 整理成預訂與地點，你確認後才會加入。全名、電話、電子郵件會先移除，不送給 AI。
-          </p>
           {notice ? (
             <div role="status" className={notice.kind === "empty" ? "import-notice" : "import-notice error"}>
               <p>{notice.message}</p>
@@ -348,7 +345,6 @@ export function ImportFlow({
                   <input maxLength={500} autoComplete="off" value={place.note} onChange={(e) => updatePlace(place.key, { note: e.target.value })} />
                 </label>
               </div>
-              <p className="muted import-hint">來源為「使用者新增」，狀態為「使用者確認」。</p>
               <div className="screen-actions import-detail-actions">
                 <button key="done-place" className="secondary" type="button" onClick={close}>
                   完成

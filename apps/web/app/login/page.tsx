@@ -19,7 +19,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <main className="home">
       <h1>登入</h1>
-      <p className="muted">輸入電子郵件，我們會寄一封登入連結給你；在同一個瀏覽器開啟連結即可登入。</p>
       {auth_error ? <p className="error">登入連結無效或已過期，請重新寄送。</p> : null}
       <LoginForm next={target} />
     </main>

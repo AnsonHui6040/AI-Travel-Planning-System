@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-height: var(--control);
+  min-height: var(--hit);
   color: var(--muted);
   font-size: var(--fs-small);
   font-weight: 500;
@@ -113,6 +113,16 @@
 
 /* ---- 連結外觀的按鈕（導覽用連結，外觀與 Astryx 按鈕相同） ---- */
 
+a.primary::after,
+a.secondary::after,
+a.ghost::after,
+.back-link::after,
+.chips a::after {
+  content: "";
+  position: absolute;
+  inset: calc((var(--control) - var(--hit)) / 2) 0;
+}
+
 a.primary,
 a.secondary,
 a.ghost {
@@ -126,6 +136,7 @@ a.ghost {
   font-size: var(--fs-body);
   font-weight: 500;
   text-decoration: none;
+  position: relative;
 }
 
 a.primary {
@@ -236,6 +247,7 @@ a.ghost {
   align-items: center;
   gap: 0.25rem;
   min-height: var(--control);
+  position: relative;
   color: var(--text);
   font-weight: 500;
   text-decoration: none;
@@ -260,6 +272,8 @@ a.ghost {
   gap: 0.4rem;
   overflow-x: auto;
   scrollbar-width: none;
+  /* 晶片的觸控範圍（::after）在捲動區內，不會產生垂直捲動 */
+  padding-block: calc((var(--hit) - var(--control)) / 2);
 }
 
 .chips a {
@@ -267,6 +281,7 @@ a.ghost {
   align-items: center;
   flex: none;
   min-height: var(--control);
+  position: relative;
   padding: 0 0.9rem;
   border-radius: var(--radius-control);
   background: color-mix(in srgb, var(--text) 10%, transparent);
@@ -298,7 +313,7 @@ a.ghost {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
-  min-height: 48px;
+  min-height: var(--hit);
   padding: 0.25rem 0;
   color: var(--text);
   text-decoration: none;
@@ -426,7 +441,7 @@ a.ghost {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
+  min-height: var(--hit);
   padding: 0 0.5rem;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-control);
@@ -491,7 +506,7 @@ a.ghost {
   grid-template-columns: minmax(0, 1fr) 7.5rem auto;
   align-items: center;
   gap: 0.5rem;
-  min-height: 48px;
+  min-height: var(--hit);
 }
 
 .checklist-check {

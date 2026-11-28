@@ -23,7 +23,6 @@ export default async function NewTripPage() {
         所有行程
       </Link>
       <h1>新行程</h1>
-      <p className="muted">建立後先填寫 Trip Baseline（日期、航班、住宿、固定活動）。</p>
       <CreateTripForm />
     </main>
   );

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EDIT_HINTS, viewEditMode } from "../../../../../lib/edit-mode";
+import { viewEditMode } from "../../../../../lib/edit-mode";
 import Link from "next/link";
 import { loadDayDraft } from "../../../../../lib/server/day-draft";
 import { searchPlaces } from "../../../../../lib/server/places";
@@ -54,13 +54,8 @@ export default async function NewItemPage({ params, searchParams }: { params: Pr
           行程
         </Link>
         <h1>新增地點</h1>
-        {EDIT_HINTS[mode] ? <p className="muted">{EDIT_HINTS[mode]}</p> : null}
       </header>
-      {search.state === "no_key" ? (
-        <p className="muted">
-          在<Link href="/settings/api-keys">設定</Link>輸入 Google Maps key 後可以搜尋地點；現在可以直接手動新增。
-        </p>
-      ) : (
+      {search.state === "no_key" ? null : (
         <form method="get" role="search" className="place-search">
           <label className="sr-only" htmlFor="place-q">
             搜尋地點

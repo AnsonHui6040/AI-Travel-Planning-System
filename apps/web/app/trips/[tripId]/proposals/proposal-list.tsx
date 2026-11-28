@@ -29,7 +29,7 @@ export function ProposalList({ tripId, proposals, currentId }: { tripId: string;
   const pending = proposals.filter((p) => p.status === "pending").length;
   return (
     <>
-      <p className="muted">待批准 {pending} 個。先批准的提案先套用；行程更新後，其他基於舊版本的提案會失效。</p>
+      <p className="muted">待批准 {pending} 個。</p>
       <ScrollKeeper scrollKey={`proposals:${tripId}`}>
         {proposals.length === 0 ? <p className="muted">還沒有提案。</p> : null}
         <ul aria-label="提案清單" className="rows proposal-rows">

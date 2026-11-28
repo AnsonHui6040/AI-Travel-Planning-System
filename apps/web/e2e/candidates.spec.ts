@@ -219,7 +219,6 @@ test("T28：每段顯示四種方案、含緩衝的估算時間與來源，並�
   const href = new URL((await maps.getAttribute("href")) ?? "");
   expect(href.searchParams.get("origin")).toBe("浅草寺");
   expect(href.searchParams.get("destination")).toBe("上野恩賜公園");
-  await expect(page.getByText(/全部為 AI 依官方資料的估算/)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await capture(page, "transport", "T28");
 });

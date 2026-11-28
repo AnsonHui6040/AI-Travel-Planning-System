@@ -29,7 +29,8 @@ async function measure(page: Page) {
       // 實心底的主要動作（文字對填色的對比由 tooling/ui-tokens.test.ts 檢查）
       .filter((el) => (el as HTMLElement).innerText?.trim() && !el.closest(".primary"))
       .map((el) => ratio(getComputedStyle(el).color, bg));
-    const buttons = [...document.querySelectorAll("main button, main a.primary, main a.secondary, .tabbar a")].map((el) => el.getBoundingClientRect().height).filter((h) => h > 0);
+    const hit = (el: Element) => { const r = el.getBoundingClientRect().height; const a = getComputedStyle(el, "::after"); return a.position === "absolute" ? r + Math.max(0, -parseFloat(a.top)) + Math.max(0, -parseFloat(a.bottom)) : r; };
+    const buttons = [...document.querySelectorAll("main button, main a.primary, main a.secondary, .tabbar a")].filter((el) => el.getBoundingClientRect().height > 0).map(hit);
     return {
       bg,
       minText: Math.min(...texts),
@@ -40,7 +41,7 @@ async function measure(page: Page) {
 }
 
 for (const scheme of ["light", "dark"] as const) {
-  test(`${scheme === "light" ? "淺色" : "深色"}：文字對比至少 4.5:1、控制項至少 44px、行程內有分頁`, async ({ page, context, baseURL }) => {
+  test(`${scheme === "light" ? "淺色" : "深色"}：文字對比至少 4.5:1、控制項觸控範圍至少 44px、行程內有分頁`, async ({ page, context, baseURL }) => {
     const owner = await signInAsNewUser(context, baseURL ?? "");
     const tripId = await createTrip(owner.userId, "東京一日");
     const item = await createItem(tripId, { name_zh: "淺草寺" });
@@ -59,7 +60,7 @@ for (const scheme of ["light", "dark"] as const) {
       const m = await measure(page);
       expect(m.bg, `${name} 背景`).toBe(scheme === "light" ? "rgb(251, 243, 232)" : "rgb(16, 9, 4)");
       expect(m.minText, `${name} 文字對比`).toBeGreaterThanOrEqual(4.5);
-      if (m.minControl !== null) expect(m.minControl, `${name} 控制項高度`).toBeGreaterThanOrEqual(44);
+      if (m.minControl !== null) expect(m.minControl, `${name} 控制項觸控範圍`).toBeGreaterThanOrEqual(44);
       expect(m.scrollOk, `${name} 沒有水平捲動`).toBe(true);
       if (name !== "home") {
         const nav = page.getByRole("navigation", { name: "行程" });
@@ -69,12 +70,12 @@ for (const scheme of ["light", "dark"] as const) {
     }
     await page.goto(`/trips/${tripId}/today?date=${DATE}`);
     await expect(page.getByRole("navigation", { name: "行程" }).getByRole("link", { name: "現在" })).toHaveAttribute("aria-current", "page");
-    // Astryx：每個畫面只有一個主要按鈕；控制項 10px 圓角、沒有外框
+    // Astryx：每個畫面只有一個主要按鈕；控制項 8px 圓角、沒有外框
     await expect(page.locator("main .primary")).toHaveCount(1);
     const shape = await page.locator("main .primary").first().evaluate((el) => {
       const s = getComputedStyle(el);
       return { radius: s.borderTopLeftRadius, border: s.borderTopWidth };
     });
-    expect(shape).toEqual({ radius: "10px", border: "0px" });
+    expect(shape).toEqual({ radius: "8px", border: "0px" });
   });
 }

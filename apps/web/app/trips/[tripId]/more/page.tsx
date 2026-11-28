@@ -84,7 +84,6 @@ export default async function MorePage({ params }: { params: Promise<{ tripId: s
         {canReverify ? (
           <section aria-label="旅前自動再核實" className="more-reverify">
             <h2>旅前自動再核實：{view.reverifyEnabled ? "已開啟" : "未開啟"}</h2>
-            <p className="muted">出發前 7 天與前 1 天以你的 API key 重新核實已排入的項目；資料可能已變動的項目標示 At Risk，並通知所有成員。</p>
             <ReverifyToggle tripId={tripId} enabled={view.reverifyEnabled} />
           </section>
         ) : null}

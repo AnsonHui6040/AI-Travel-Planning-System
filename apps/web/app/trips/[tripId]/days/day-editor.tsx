@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useActionState, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import { legGapMinutes, shiftDay, reorderDesired, type EditMode, type Leg } from "@atps/core";
 import { ScrollKeeper } from "../../../../components/scroll-keeper";
-import { EDIT_HINTS } from "../../../../lib/edit-mode";
 import { ITEM_TYPE_LABELS, TRAVEL_MODE_LABELS, USER_TRAVEL_MODES } from "../../../../lib/item-labels";
 import type { EditResult } from "../../../../lib/server/item-edit-core";
 import type { TripEditResult } from "../../../../lib/server/trip-edit-core";
@@ -332,9 +331,8 @@ export function DayEditor({
           </button>
         ) : null}
       </div>
-      {editing && EDIT_HINTS[mode] ? <p className="muted edit-hint">{EDIT_HINTS[mode]}</p> : null}
       {editing && fixed.length > 0 ? (
-        <p className="muted edit-hint">固定活動（不移動）：{fixed.map((f) => `${f.start} ${f.name}`).join("、")}</p>
+        <p className="muted edit-hint">固定活動：{fixed.map((f) => `${f.start} ${f.name}`).join("、")}</p>
       ) : null}
       {!editing && rows.length === 0 && fixed.length === 0 ? <p className="muted">這天還沒有可排入的項目。</p> : null}
       <ScrollKeeper scrollKey={`days:${tripId}:${date}${editing ? ":edit" : ""}`}>

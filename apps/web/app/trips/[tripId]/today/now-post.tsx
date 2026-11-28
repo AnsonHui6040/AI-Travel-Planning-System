@@ -50,7 +50,6 @@ export async function NowPost({ tripId }: { tripId: string }) {
           <p>
             {next.date ? `${next.date.slice(5).replace("-", "/")} ${next.start ?? ""}`.trim() : "計畫外"}，{next.visited ? "去過" : "沒有去"}
           </p>
-          <p className="muted">{next.visited ? "去過的項目可標為完成、想再去或不推薦。" : "沒有去的項目只可標為略過、取消或想再去。"}</p>
         </PostTripStepForm>
       </main>
     );

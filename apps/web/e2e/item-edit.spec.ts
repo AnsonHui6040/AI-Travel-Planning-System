@@ -79,7 +79,7 @@ test("規劃中：手動新增並排入某天，畫面標示使用者確認；�
   await page.goto(`/trips/${tripId}/days?date=2026-12-01`);
   await page.getByRole("link", { name: "新增地點" }).click();
   await expect(page.getByRole("heading", { name: "新增地點" })).toBeVisible();
-  await expect(page.getByText("輸入 Google Maps key 後可以搜尋地點")).toBeVisible();
+  await expect(page.getByRole("search")).toHaveCount(0);
   await expect(page.getByRole("searchbox")).toHaveCount(0);
   await expectNoScroll(page, "新增地點（沒有 key）");
   await expectPrimaryInThumbZone(page, "新增地點（沒有 key）");
@@ -169,7 +169,7 @@ test("編輯：修改停留、上移下移、移到另一天、移回候選清�
   await capture(page, "edit");
   const up = page.getByRole("button", { name: "上移" });
   await expect(up).toBeEnabled();
-  expect((await up.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+  expect(await up.evaluate((el) => { const r = el.getBoundingClientRect().height; const a = getComputedStyle(el, "::after"); return a.position === "absolute" ? r + Math.max(0, -parseFloat(a.top)) + Math.max(0, -parseFloat(a.bottom)) : r; })).toBeGreaterThanOrEqual(44);
   await expect(page.getByRole("button", { name: "下移" })).toBeDisabled();
 
   await page.getByLabel("停留（分鐘）").fill("30");
@@ -217,7 +217,7 @@ test("鎖定後（決策 0011）：Companion 的修改成為待批准提案，�
   await setDayStatusAsAdmin(tripId, "2026-12-02", "approved");
 
   await page.goto(`/trips/${tripId}/items/${item}/edit`);
-  await expect(page.getByText("修改會成為提案")).toBeVisible();
+  await expect(page.getByRole("button", { name: "提出修改" })).toBeVisible();
   await page.getByLabel("停留（分鐘）").fill("120");
   await page.getByRole("button", { name: "提出修改" }).click();
   await expect(page.getByRole("status").first()).toContainText("已送出提案");

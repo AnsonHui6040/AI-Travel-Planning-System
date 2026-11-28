@@ -350,9 +350,7 @@ export function BaselineForm({ tripId, saved }: { tripId: string; saved: TripBas
             <IssueList issues={checked.issues} />
             <ConstraintGroups constraints={checked.constraints} />
           </>
-        ) : (
-          <p className="muted">填寫日期與各列必填欄位後顯示限制分類與矛盾檢查。</p>
-        )}
+        ) : null}
         <form action={confirmAction} className="confirm-form">
           <input type="hidden" name="tripId" value={tripId} />
           <button className="primary" type="submit" name="intent" value="save" disabled={dirty || conflicts > 0 || !checked || saving || confirming}>
