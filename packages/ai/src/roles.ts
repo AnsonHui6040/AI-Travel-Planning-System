@@ -1,5 +1,5 @@
 import { defaultRoleSetting, type AiRole, type Registry, type RoleSpec } from "@atps/core";
-import { roleOutputs, zoningOutput } from "@atps/schemas";
+import { importOutput, roleOutputs, zoningOutput } from "@atps/schemas";
 import { z } from "zod";
 import { createRoleRegistry } from "./registries";
 
@@ -75,6 +75,23 @@ export function zoningSpec(): RoleSpec {
     memoryScope: { layers: [], kinds: [] },
     output: zoningOutput,
     outputJsonSchema: z.toJSONSchema(zoningOutput, { target: "draft-2020-12", io: "output" }) as Record<string, unknown>,
+    maxSteps,
+    maxTokens,
+  };
+}
+
+// 決策 0010 I：行程匯入。以 Master Planner 的模型設定與上限執行（同樣只產生需要使用者確認的內容），沒有工具。
+// 輸入只有使用者貼上的文字（資料區塊，已移除全名、電話、電子郵件）；輸出只是預覽，使用者確認後才以本人 session 寫入（S-01）
+export function importSpec(): RoleSpec {
+  const { maxSteps, maxTokens } = defaultRoleSetting("master_planner");
+  return {
+    id: "import",
+    instructions: `你是行程匯入員。從貼上的文字（預訂確認信、其他 App 匯出的行程或使用者自己寫的清單）整理出預訂與地點：預訂含類型、標題、開始與結束的日期時間、時區、地點與預約碼；地點含名稱、類型，有寫到的日期與時間，以及簡短備註。文字沒有寫到的欄位填 null，不要猜測；同一筆預訂或地點只列一次；不是旅行預訂或地點的內容不要列出。已移除的姓名、電話、電子郵件不要還原。${UNTRUSTED}`,
+    tools: [],
+    dataScope: [],
+    memoryScope: { layers: [], kinds: [] },
+    output: importOutput,
+    outputJsonSchema: z.toJSONSchema(importOutput, { target: "draft-2020-12", io: "output" }) as Record<string, unknown>,
     maxSteps,
     maxTokens,
   };

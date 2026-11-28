@@ -6,6 +6,7 @@ import {
   parseCrossCheckScenario,
   parseFeasibilityScenario,
   parseIncidentScenario,
+  parseImportScenario,
   parseMorningScenario,
   parseZoningScenario,
   parseRecording,
@@ -14,6 +15,7 @@ import {
   renderCrossCheckReport,
   renderFeasibilityReport,
   renderIncidentReport,
+  renderImportReport,
   renderMorningReport,
   renderZoningReport,
   renderReport,
@@ -22,6 +24,7 @@ import {
   runCrossCheckScenario,
   runFeasibilityScenario,
   runIncidentScenario,
+  runImportScenario,
   runMorningScenario,
   runZoningScenario,
   runScenario,
@@ -71,9 +74,23 @@ const incidentFiles = readdirSync(join(import.meta.dirname, "incident"))
   .filter((f) => f.endsWith(".json"))
   .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
 
+// 決策 0010 I：行程匯入場景（錄製回應）
+const importFiles = readdirSync(join(import.meta.dirname, "import"))
+  .filter((f) => f.endsWith(".json"))
+  .filter((f) => !wanted || wanted.includes(f.replace(/\.json$/, "")));
+
+for (const file of importFiles) {
+  it(`評估 ${file}`, () => {
+    const report = runImportScenario(parseImportScenario(read(join(import.meta.dirname, "import", file))));
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(join(outDir, `${date}-${report.scenario.id}.md`), renderImportReport(report, { date }));
+    expect(report.passed).toBe(true);
+  });
+}
+
 it("有要執行的場景", () => {
   expect(
-    files.length + baselineFiles.length + crossCheckFiles.length + zoningFiles.length + feasibilityFiles.length + morningFiles.length + incidentFiles.length,
+    files.length + importFiles.length + baselineFiles.length + crossCheckFiles.length + zoningFiles.length + feasibilityFiles.length + morningFiles.length + incidentFiles.length,
   ).toBeGreaterThan(0);
 });
 

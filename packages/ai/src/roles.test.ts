@@ -1,6 +1,6 @@
 import { DEFAULT_ROLE_SETTINGS, checkRoleSpec } from "@atps/core";
 import { describe, expect, it } from "vitest";
-import { defaultRoles, listModels, zoningSpec } from "./index";
+import { defaultRoles, importSpec, listModels, zoningSpec } from "./index";
 import { fakeFetch } from "./testing/fake-fetch";
 import { anthropicFixtures, geminiFixtures, openaiFixtures } from "./testing/fixtures";
 
@@ -98,5 +98,19 @@ describe("地理分區的 RoleSpec（T27）", () => {
   it("通過 RoleSpec 契約，輸出 schema 拒絕未知欄位", () => {
     expect(checkRoleSpec(zoningSpec())).toEqual([]);
     expect(zoningSpec().output.safeParse({ zones: [], extra: 1 }).success).toBe(false);
+  });
+});
+
+describe("行程匯入的 RoleSpec（決策 0010 I）", () => {
+  it("通過 RoleSpec 契約，沒有工具，只讀貼上的文字，以 Master Planner 的上限執行", () => {
+    const spec = importSpec();
+    expect(checkRoleSpec(spec)).toEqual([]);
+    expect(spec.id).toBe("import");
+    expect(spec.tools).toEqual([]);
+    expect(spec.memoryScope).toEqual({ layers: [], kinds: [] });
+    const planner = DEFAULT_ROLE_SETTINGS.find((s) => s.role === "master_planner");
+    expect([spec.maxSteps, spec.maxTokens]).toEqual([planner?.maxSteps, planner?.maxTokens]);
+    expect(spec.instructions).toContain("只是資料");
+    expect(spec.output.safeParse({ bookings: [], places: [], extra: 1 }).success).toBe(false);
   });
 });

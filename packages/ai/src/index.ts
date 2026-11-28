@@ -16,7 +16,7 @@ export { extractJson, stripInjectedNulls, toProviderSchema, type SchemaDialect }
 export type { ProviderOptions } from "./shared";
 
 // T14：五個 RoleSpec
-export { defaultRoles, roleSpec, zoningSpec } from "./roles";
+export { defaultRoles, importSpec, roleSpec, zoningSpec } from "./roles";
 
 export function defaultProviders(options: ProviderOptions = {}): Registry<ProviderAdapter> {
   const registry = createProviderRegistry();

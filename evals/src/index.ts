@@ -8,3 +8,4 @@ export { parseZoningScenario, renderZoningReport, runZoningScenario, type Zoning
 export { parseFeasibilityScenario, renderFeasibilityReport, runFeasibilityScenario, type FeasibilityScenario, type FeasibilityScenarioReport } from "./feasibility";
 export { parseMorningScenario, renderMorningReport, runMorningScenario, type MorningScenario, type MorningScenarioReport } from "./morning";
 export { parseIncidentScenario, renderIncidentReport, runIncidentScenario, type IncidentScenario, type IncidentScenarioReport } from "./incident";
+export { parseImportScenario, renderImportReport, runImportScenario, type ImportScenario, type ImportScenarioReport } from "./import";
