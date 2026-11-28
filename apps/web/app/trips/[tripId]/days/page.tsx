@@ -62,9 +62,14 @@ export default async function DaysPage({ params, searchParams }: { params: Promi
           <p className="trip-line">
             {view.tripName}（{TRIP_STATUS_LABELS[view.tripStatus] ?? view.tripStatus}）
           </p>
-          <Link className="days-bookings" href={`/trips/${tripId}/bookings`}>
-            預訂
-          </Link>
+          <span className="days-links">
+            <Link className="days-bookings" href={`/trips/${tripId}/bookings`}>
+              預訂
+            </Link>
+            <Link className="days-bookings" href={`/trips/${tripId}/import`}>
+              匯入
+            </Link>
+          </span>
         </div>
       </header>
       <div className="split" data-detail="none">

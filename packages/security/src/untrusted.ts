@@ -1,7 +1,7 @@
 // T18、S-03：網頁、搜尋結果與成員自由文字以資料區塊傳入 prompt，不作為指令。
 // 區塊以每次請求的隨機編號標示；內容中偽造的標記與工作說明被中和，控制字元、零寬與雙向控制字元被移除。
 
-export type DataKind = "trip" | "webpage" | "search_result" | "member_note" | "member_preference" | "live_status";
+export type DataKind = "trip" | "webpage" | "search_result" | "member_note" | "member_preference" | "live_status" | "pasted_text";
 
 const KIND_NAMES: Record<DataKind, string> = {
   trip: "行程資料",
@@ -10,6 +10,8 @@ const KIND_NAMES: Record<DataKind, string> = {
   member_note: "成員備註",
   member_preference: "成員偏好",
   live_status: "即時狀態",
+  // 決策 0010 I：使用者貼上的確認信或行程（已移除全名、電話、電子郵件）
+  pasted_text: "貼上的文字",
 };
 
 export interface DataBlock {

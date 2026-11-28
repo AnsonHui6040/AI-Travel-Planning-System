@@ -34,6 +34,8 @@ export {
   type PayloadMember,
   type SensitiveEntry,
 } from "./payload";
+// 決策 0010 I、S-07：匯入時貼上的文字移除全名、電話、電子郵件
+export { IMPORT_TEXT_MAX, buildImportPayload, type ImportPayload } from "./import-payload";
 export { createLogger, redactSensitive, type Logger, type LoggerOptions, type LogLevel, type RedactOptions } from "./logger";
 // 測試用合成資料（outbound payload 快照測試共用）
 export * as payloadFixtures from "./testing/payload-fixtures";

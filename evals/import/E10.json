@@ -1,0 +1,56 @@
+{
+  "id": "E10",
+  "title": "貼上訂房確認信與航班確認，整理出預訂與地點",
+  "rule": "決策 0010 I：全名、電話、電子郵件不送 AI；輸出經 gateImportOutput，預覽列含預訂（類型、時間、時區、預約碼）與地點；沒有時間的預訂不預設勾選",
+  "trip": { "timezone": "Asia/Tokyo", "dates": ["2026-12-20", "2026-12-21", "2026-12-22", "2026-12-23"] },
+  "known_values": ["陳美華"],
+  "pasted": "【訂房確認】新宿華盛頓飯店\n預訂者姓名：陳美華\nEmail: meihua.chen@example.com\n聯絡電話：+886 912-345-678\n入住：2026-12-20 15:00\n退房：2026-12-23 11:00\n訂單編號：HTL-55821\n地址：東京都新宿區西新宿 3-2-9\n\n【航班確認】JL802 台北桃園 TPE → 東京成田 NRT\n2026-12-20 08:30 起飛（台北時間），12:45 抵達（東京時間）\n訂位代號：Q7XK2P\n乘客姓名：CHEN/MEIHUA MS\n\n想去的地方：12/21 09:00 淺草寺、晴空塔、築地場外市場（吃早餐）\n12/22 晚上 銀座壽司（還沒訂位）",
+  "recording": {
+    "bookings": [
+      {
+        "kind": "lodging",
+        "title": "新宿華盛頓飯店",
+        "start_date": "2026-12-20",
+        "start_time": "15:00",
+        "end_date": "2026-12-23",
+        "end_time": "11:00",
+        "timezone": "Asia/Tokyo",
+        "location": "東京都新宿區西新宿 3-2-9",
+        "confirmation_code": "HTL-55821",
+        "note": null
+      },
+      {
+        "kind": "flight",
+        "title": "JL802 台北桃園 → 東京成田",
+        "start_date": "2026-12-20",
+        "start_time": "08:30",
+        "end_date": null,
+        "end_time": null,
+        "timezone": "Asia/Taipei",
+        "location": "台北桃園機場",
+        "confirmation_code": "Q7XK2P",
+        "note": "12:45 抵達成田（東京時間）"
+      }
+    ],
+    "places": [
+      { "name": "淺草寺", "type": "attraction", "date": "2026-12-21", "start_time": "09:00", "note": null },
+      { "name": "晴空塔", "type": "attraction", "date": null, "start_time": null, "note": null },
+      { "name": "築地場外市場", "type": "restaurant", "date": null, "start_time": null, "note": "吃早餐" },
+      { "name": "銀座壽司", "type": "restaurant", "date": "2026-12-22", "start_time": null, "note": "還沒訂位" }
+    ]
+  },
+  "expect": {
+    "not_sent": ["陳美華", "meihua.chen@example.com", "912-345-678", "CHEN/MEIHUA"],
+    "sent": ["HTL-55821", "Q7XK2P", "2026-12-20 15:00", "JL802"],
+    "bookings": [
+      { "kind": "lodging", "title": "新宿華盛頓飯店", "startDate": "2026-12-20", "startTime": "15:00", "timezone": "Asia/Tokyo", "confirmationCode": "HTL-55821", "selected": true },
+      { "kind": "flight", "title": "JL802 台北桃園 → 東京成田", "startDate": "2026-12-20", "startTime": "08:30", "timezone": "Asia/Taipei", "confirmationCode": "Q7XK2P", "selected": true }
+    ],
+    "places": [
+      { "name": "淺草寺", "date": "2026-12-21", "start": "09:00" },
+      { "name": "晴空塔", "date": "", "start": "" },
+      { "name": "築地場外市場", "date": "", "start": "" },
+      { "name": "銀座壽司", "date": "", "start": "" }
+    ]
+  }
+}

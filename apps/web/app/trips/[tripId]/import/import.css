@@ -1,0 +1,143 @@
+/* 決策 0010 I：行程匯入。顏色、字級、圓角只用 globals.css 的變數；共用的版面在 shell.css */
+
+.import .import-paste {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.import .import-text {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.import .import-text textarea {
+  flex: 1 1 auto;
+  min-height: 8rem;
+  width: 100%;
+  resize: none;
+  color: var(--text);
+}
+
+.import .import-hint {
+  flex: none;
+  margin: 0;
+  font-size: var(--fs-small);
+}
+
+.import .import-notice {
+  flex: none;
+}
+
+.import .import-notice p {
+  margin: 0;
+}
+
+.import .import-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.import .import-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.import button.back-link {
+  align-self: flex-start;
+  padding: 0;
+}
+
+/* 預覽：勾選框加一行摘要；點摘要開啟詳情 */
+.import-rows > li > .row {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.import-rows input[type="checkbox"] {
+  width: 1.4rem;
+  height: 1.4rem;
+  margin: 0;
+}
+
+.import-rows .import-open {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  font-weight: inherit;
+}
+
+.import-rows .import-open[aria-current="true"] .row-name {
+  text-decoration: underline;
+}
+
+.import .split-list h2 {
+  margin: 0.5rem 0 0;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.import .split-list > [role="status"] {
+  flex: none;
+  margin: 0;
+}
+
+.import-detail {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.import-detail h2 {
+  margin: 0;
+}
+
+.import-fields {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 0.4rem 0.75rem;
+}
+
+.import-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.import-fields label.wide {
+  grid-column: 1 / -1;
+}
+
+.import-fields input,
+.import-fields select {
+  width: 100%;
+  min-width: 0;
+  color: var(--text);
+}
+
+@media (min-width: 1024px) {
+  .import .import-detail-actions {
+    display: none;
+  }
+}

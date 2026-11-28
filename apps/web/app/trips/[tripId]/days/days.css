@@ -111,6 +111,12 @@
   gap: 0.75rem;
 }
 
+.days .days-links {
+  display: inline-flex;
+  flex: none;
+  gap: 1rem;
+}
+
 .days .days-bookings {
   display: inline-flex;
   align-items: center;
