@@ -104,11 +104,18 @@
 }
 
 /* 決策 0010 B：由行程分頁到預訂 */
+.days .days-head-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
 .days .days-bookings {
   display: inline-flex;
   align-items: center;
+  flex: none;
   min-height: var(--control);
-  margin-left: 0.75rem;
   color: var(--text);
   font-weight: 500;
 }

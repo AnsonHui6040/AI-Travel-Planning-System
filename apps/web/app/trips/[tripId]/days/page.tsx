@@ -58,12 +58,14 @@ export default async function DaysPage({ params, searchParams }: { params: Promi
     <main className="screen wide days">
       <header className="screen-head">
         <h1>行程</h1>
-        <p className="trip-line">
-          {view.tripName}（{TRIP_STATUS_LABELS[view.tripStatus] ?? view.tripStatus}）
+        <div className="days-head-line">
+          <p className="trip-line">
+            {view.tripName}（{TRIP_STATUS_LABELS[view.tripStatus] ?? view.tripStatus}）
+          </p>
           <Link className="days-bookings" href={`/trips/${tripId}/bookings`}>
             預訂
           </Link>
-        </p>
+        </div>
       </header>
       <div className="split" data-detail="none">
         <section aria-label={day.date} className="split-list">
