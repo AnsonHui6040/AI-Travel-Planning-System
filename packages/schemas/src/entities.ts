@@ -14,6 +14,7 @@ import {
   uuid,
 } from "./common";
 import { bookingRow, checklistItemRow, checklistRow } from "./bookings";
+import { travelLegRow } from "./travel-legs";
 import * as E from "./enums";
 import { expenseRateRow, expenseRow, expenseSettingsRow, expenseSettlementRow, expenseShareRow } from "./expenses";
 import { memberSensitiveFieldRow } from "./sensitive";
@@ -542,6 +543,8 @@ export const tableSchemas = {
   bookings: bookingRow,
   checklists: checklistRow,
   checklist_items: checklistItemRow,
+  // 決策 0011：兩站之間的交通
+  travel_legs: travelLegRow,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;

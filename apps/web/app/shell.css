@@ -530,3 +530,38 @@ a.ghost {
   grid-column: 1 / -1;
   margin: 0;
 }
+
+/* ---- 表單格線（決策 0011：iPhone 390px 的版面修正）----
+   iOS 的日期與時間輸入欄有固有寬度，放在格線或並排欄位內會超出右緣或與旁邊的欄位重疊。
+   格線的子項目一律可縮小（min-width: 0），日期與時間輸入欄去掉原生外觀後填滿欄寬 */
+.field-pair > *,
+.fields > *,
+.form-grid > * {
+  min-width: 0;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+}
+
+label > input[type="date"],
+label > input[type="time"],
+label > input[type="datetime-local"],
+.field-pair input,
+.field-pair select,
+.fields input,
+.fields select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
+  text-align: left;
+}

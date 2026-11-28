@@ -135,7 +135,7 @@ test("規劃中：貼上確認信 → 預覽逐項修改、取消勾選 → 預�
   await expect(page.getByRole("list", { name: "預訂" })).toContainText("JL802");
 });
 
-test("行程鎖定後：地點成為待批准提案", async ({ page, context, baseURL }) => {
+test("行程鎖定後（決策 0011）：Owner 匯入的地點直接套用", async ({ page, context, baseURL }) => {
   const owner = await signInAsNewUser(context, baseURL ?? "");
   const tripId = seedDemo(owner.email, "trip");
   await saveApiKeyAsAdmin(owner.userId, "anthropic", "test-only-import-key");
@@ -145,15 +145,13 @@ test("行程鎖定後：地點成為待批准提案", async ({ page, context, ba
   await page.getByRole("link", { name: /^匯入/ }).click();
   await page.getByLabel("貼上確認信、其他 App 匯出的行程或自己的清單").fill(pasted(today));
   await page.getByRole("button", { name: "整理" }).click();
-  await expect(page.getByText("行程已鎖定：預訂直接加入，地點會成為待批准提案。")).toBeVisible();
+  await expect(page.getByText("勾選要加入的項目，點項目可以修改。")).toBeVisible();
   for (const name of ["新宿華盛頓飯店", "JL802 台北桃園 → 東京成田", "晴空塔", "築地場外市場", "銀座壽司"]) {
     await page.getByRole("checkbox", { name: `加入 ${name}` }).uncheck();
   }
   await page.getByRole("button", { name: "加入 1 項" }).click();
-  await expect(page.getByRole("status")).toHaveText("已送出 1 個地點的提案，批准後生效");
-  await page.getByRole("link", { name: "查看提案" }).click();
-  await expect(page.locator("main")).toContainText("淺草寺");
-  expect((await listItemsAsAdmin(tripId)).filter((i) => i.origin === "user")).toEqual([]);
+  await expect(page.getByRole("status")).toHaveText("已加入 1 個地點");
+  expect((await listItemsAsAdmin(tripId)).filter((i) => i.origin === "user").map((i) => i.name_zh)).toEqual(["淺草寺"]);
 });
 
 test("沒有 AI key 時提示到設定；沒有辨識到內容或無法辨識時清楚說明", async ({ page, context, baseURL }) => {

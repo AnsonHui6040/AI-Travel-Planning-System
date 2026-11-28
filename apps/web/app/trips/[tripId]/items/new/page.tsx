@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { EDIT_HINTS, viewEditMode } from "../../../../../lib/edit-mode";
 import Link from "next/link";
 import { loadDayDraft } from "../../../../../lib/server/day-draft";
 import { searchPlaces } from "../../../../../lib/server/places";
@@ -41,7 +42,7 @@ export default async function NewItemPage({ params, searchParams }: { params: Pr
   const results = search.state === "ok" ? search.results : [];
   const selected = results.find((r) => r.placeId === place);
   const query = search.state === "ok" || search.state === "error" ? search.query : "";
-  const locked = view.tripStatus === "locked" || view.tripStatus === "in_progress";
+  const mode = viewEditMode(view.tripStatus, view.tripStatus === "locked" || view.tripStatus === "in_progress" ? ["approved"] : [], view.isOwner);
 
   return (
     <main className="screen add-item">
@@ -53,7 +54,7 @@ export default async function NewItemPage({ params, searchParams }: { params: Pr
           行程
         </Link>
         <h1>新增地點</h1>
-        {locked ? <p className="muted">行程已鎖定：新增會成為提案，批准後生效。</p> : null}
+        {EDIT_HINTS[mode] ? <p className="muted">{EDIT_HINTS[mode]}</p> : null}
       </header>
       {search.state === "no_key" ? (
         <p className="muted">
@@ -95,7 +96,7 @@ export default async function NewItemPage({ params, searchParams }: { params: Pr
         )
       ) : null}
       {selected ? <p className="selected-place">已選：{selected.name}</p> : null}
-      <AddItemForm key={`${query}:${selected?.placeId ?? ""}`} tripId={tripId} dates={view.days.map((d) => d.date)} defaultName={query} placeId={selected?.placeId ?? null} mode={locked ? "proposal" : "direct"} />
+      <AddItemForm key={`${query}:${selected?.placeId ?? ""}`} tripId={tripId} dates={view.days.map((d) => d.date)} defaultName={query} placeId={selected?.placeId ?? null} mode={mode === "proposal" ? "proposal" : "direct"} />
     </main>
   );
 }

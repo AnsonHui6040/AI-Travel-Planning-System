@@ -143,3 +143,17 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 ## 沒有負責 Task 的規則
 
 無。C-11 於 2026-11-22 分配至 T03；S-08 的安全標頭分配至 T01，Markdown sanitize 與連結限制分配至 T24。
+
+## 決策 0011 完整的行程編輯
+
+| 項目 | 負責 Task | 對應測試或項目 | 狀態 |
+|---|---|---|---|
+| 鎖定後 Owner 直接套用（Change Log、通知、SH-04），Companion 成為提案 | EDIT-full | `packages/core/src/full-edit.test.ts`（`editMode`）；`apps/web/lib/server/item-edit-core.test.ts`；pgTAP `supabase/tests/30_full_editing.test.sql`（Companion 42501、版本、通知、失效、D07、日期範圍）；E2E `apps/web/e2e/full-edit.spec.ts` | 已驗收 |
+| 清單內編輯模式（拖曳把手、鍵盤、44px 上下移、刪除先確認、開始與結束時間、插入） | EDIT-full | E2E `full-edit.spec.ts`（鍵盤與按鈕排序、刪除確認文字、插入、按鈕尺寸） | 已驗收 |
+| 「完成」一個批次：草案日一個交易、Owner 一筆 Change Log、Companion 一個提案 | EDIT-full | pgTAP（`edit_trip_items` 整批拒絕時不寫入）；`item-edit-core.test.ts`（`submitBatch`）；E2E 版本與提案筆數 | 已驗收 |
+| 自動順延（停留加交通、withBuffer、固定活動不動、不要順延、排不下） | EDIT-full | `full-edit.test.ts`（`shiftDay`、`reorderDesired`、`legGapMinutes`）；E2E 順延預覽與不要順延時重疊不送出 | 已驗收 |
+| 複製與整天交換 | EDIT-full | `item-edit-core.test.ts`；`full-edit.test.ts`（`swapDaySlots`）；pgTAP 整天交換；E2E 整天交換 | 已驗收 |
+| 兩站之間的交通（成員輸入、估算、未設定；D28） | EDIT-full | pgTAP（Companion 可寫、Viewer 與非成員不可）；`apps/web/lib/server/trip-edit-core.test.ts`；E2E 設定交通後用於順延 | 已驗收 |
+| 行程設定（只限 Owner、日期同步基線、移除日期先確認、鎖定後新增已批准的空白日） | EDIT-full | pgTAP；`trip-edit-core.test.ts`（`checkBaseline` 新矛盾不送出）；`full-edit.test.ts`（`tripDateChange`）；E2E | 已驗收 |
+| 390px 版面（日期與時間輸入欄、移動按鈕、移回候選清單背景） | EDIT-full | E2E `full-edit.spec.ts` 的不超出畫面與不重疊檢查（390、1280） | 已驗收 |
+| 真機：iPhone 上拖曳、時間輸入與版面 | EDIT-full | `docs/verification/EDIT-full.md` EDIT-R1–R3 | TBD |

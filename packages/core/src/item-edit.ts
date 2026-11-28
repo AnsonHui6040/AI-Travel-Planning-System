@@ -6,16 +6,19 @@ import { classifyVersionKind } from "./versions";
 // 決策 0010 E：行程編輯。純函式：生效方式、時段計算、手動排程的每日行程、鎖定後的提案內容。
 // 鎖定前（且影響的日期都是草案）經資料庫函式直接寫入；鎖定後或該日已批准時成為待批准提案，批准規則不變。
 
-export type EditMode = "direct" | "proposal" | "closed";
+export type EditMode = "direct" | "applied" | "proposal" | "closed";
 
-export function editMode(tripStatus: TripStatus, affectedDays: readonly DayStatus[]): EditMode {
+// 決策 0011：鎖定前且影響的日期都是草案時 Owner、Companion 直接寫入（direct）；
+// 鎖定後或該日已批准時 Owner 直接套用並留下 Change Log 與通知（applied），Companion 成為待批准提案（proposal）
+export function editMode(tripStatus: TripStatus, affectedDays: readonly DayStatus[], role: "owner" | "companion"): EditMode {
   switch (tripStatus) {
     case "baseline":
     case "planning":
-      return affectedDays.every((d) => d === "draft") ? "direct" : "proposal";
+      if (affectedDays.every((d) => d === "draft")) return "direct";
+      return role === "owner" ? "applied" : "proposal";
     case "locked":
     case "in_progress":
-      return "proposal";
+      return role === "owner" ? "applied" : "proposal";
     case "ended":
     case "archived":
       return "closed";

@@ -2,6 +2,7 @@ import "server-only";
 import {
   DEFAULT_TRAVEL_MINUTES,
   bookedItemIds,
+  legGapMinutes,
   withBookings,
   categorizeForSchedule,
   checkDay,
@@ -52,6 +53,8 @@ export interface TravelInfo {
   minutes: number;
   mode: string | null;
   estimated: boolean;
+  // 決策 0011：user 為成員輸入（門到門，未含緩衝）；estimate 為 T28 估算（含緩衝）；none 為沒有資料
+  source: "user" | "estimate" | "none";
 }
 
 export type DayStatus = DayPlan["days"][number]["status"];
@@ -184,7 +187,17 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
       });
     }
   }
-  const segmentOf = (from: string, to: string) => segments.get(`${from}>${to}`) ?? segments.get(`${to}>${from}`) ?? null;
+  // 決策 0011：成員輸入的交通優先，依 withBuffer 規則加緩衝後用於可行性檢查與自動順延
+  const { data: legRows } = await session.from("travel_legs").select("from_item_id, to_item_id, mode, minutes").eq("trip_id", tripId).limit(500);
+  const legs = new Map<string, { mode: string; minutes: number }>();
+  for (const l of legRows ?? []) legs.set(`${String(l.from_item_id)}>${String(l.to_item_id)}`, { mode: String(l.mode), minutes: Number(l.minutes) });
+  const segmentOf = (from: string, to: string): SegmentInfo | null => {
+    const leg = legs.get(`${from}>${to}`);
+    if (leg) {
+      return { minutes: legGapMinutes({ source: "user", minutes: leg.minutes }), walk_minutes: leg.mode === "walk" ? leg.minutes : 0, luggage: "medium" };
+    }
+    return segments.get(`${from}>${to}`) ?? segments.get(`${to}>${from}`) ?? null;
+  };
 
   const rowList = (rows ?? []) as Array<Record<string, unknown>>;
   const bookings = await loadBookingConstraints(session, tripId);
@@ -284,8 +297,13 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
     const placed = day.entries.flatMap((e) => (e.kind === "item" ? [e.item_id] : []));
     placed.slice(0, -1).forEach((from, k) => {
       const to = placed[k + 1] ?? "";
-      const seg = segmentOf(from, to);
-      travel[`${from}>${to}`] = seg ? { minutes: seg.minutes, mode: seg.mode, estimated: true } : { minutes: DEFAULT_TRAVEL_MINUTES, mode: null, estimated: false };
+      const leg = legs.get(`${from}>${to}`);
+      const seg = segments.get(`${from}>${to}`) ?? segments.get(`${to}>${from}`);
+      travel[`${from}>${to}`] = leg
+        ? { minutes: leg.minutes, mode: leg.mode, estimated: false, source: "user" }
+        : seg
+          ? { minutes: seg.minutes, mode: seg.mode, estimated: true, source: "estimate" }
+          : { minutes: DEFAULT_TRAVEL_MINUTES, mode: null, estimated: false, source: "none" };
     });
   }
   return {

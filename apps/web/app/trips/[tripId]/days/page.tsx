@@ -3,10 +3,13 @@ import Link from "next/link";
 import { FEASIBILITY_LABELS, isDayBlocked } from "@atps/core";
 import { loadDayDraft } from "../../../../lib/server/day-draft";
 import { ApproveDayForm } from "./approve-day-form";
-import { DayList, pickDay, weekday } from "./day-list";
+import { viewEditMode } from "../../../../lib/edit-mode";
+import { VERIFICATION_LABELS } from "../../../../lib/item-labels";
+import { DayChips, DAY_STATUS_LABELS, pickDay, weekday } from "./day-list";
+import { DayEditor, type EditorLeg, type EditorRow } from "./day-editor";
 import "./days.css";
 
-// 行程分頁（T29、T30）：日期切換，該日項目每項一行，點進去看項目詳情。
+// 行程分頁（T29、T30、決策 0011）：日期切換，該日項目每項一行，點進去看項目詳情；「編輯」進入清單內編輯模式。
 // 規劃中的草案在這裡批准（一天一個主要按鈕）；草案在批准前不會改動行程
 
 export const metadata: Metadata = { title: "行程" };
@@ -54,6 +57,15 @@ export default async function DaysPage({ params, searchParams }: { params: Promi
   }
   const nameOf = (id: string | null) => (id ? (view.items[id]?.nameZh ?? "") : "");
   const placed = day.entries.some((e) => e.kind === "item");
+  const closed = view.tripStatus === "ended" || view.tripStatus === "archived";
+  const rows: EditorRow[] = day.entries.flatMap((e) => {
+    if (e.kind !== "item") return [];
+    const item = view.items[e.item_id];
+    if (!item) return [];
+    return [{ itemId: e.item_id, name: item.nameZh, start: e.start, end: e.end, meta: item.atRisk ? "At Risk" : (VERIFICATION_LABELS[item.verificationStatus] ?? ""), risk: item.atRisk }];
+  });
+  const fixed = day.entries.flatMap((e) => (e.kind === "fixed" ? [{ name: e.name, start: e.start, end: e.end }] : []));
+  const legs: Record<string, EditorLeg> = Object.fromEntries(Object.entries(view.travel).map(([k, t]) => [k, { minutes: t.minutes, mode: t.mode, source: t.source }]));
   return (
     <main className="screen wide days">
       <header className="screen-head">
@@ -63,6 +75,11 @@ export default async function DaysPage({ params, searchParams }: { params: Promi
             {view.tripName}（{TRIP_STATUS_LABELS[view.tripStatus] ?? view.tripStatus}）
           </p>
           <span className="days-links">
+            {view.isOwner && !closed ? (
+              <Link className="days-bookings" href={`/trips/${tripId}/settings`}>
+                設定
+              </Link>
+            ) : null}
             <Link className="days-bookings" href={`/trips/${tripId}/bookings`}>
               預訂
             </Link>
@@ -74,48 +91,64 @@ export default async function DaysPage({ params, searchParams }: { params: Promi
       </header>
       <div className="split" data-detail="none">
         <section aria-label={day.date} className="split-list">
-          <DayList tripId={tripId} view={view} day={day} currentItem={null} />
-          <div className="day-notes">
-            {day.backups.length > 0 ? <p className="muted">Backup：{day.backups.map((id) => nameOf(id)).join("、")}</p> : null}
-            {day.issues.length > 0 ? (
-              <ul className="day-issues" aria-label={`${day.date} 提醒`}>
-                {day.issues.map((issue) => (
-                  <li key={`${issue.check}-${issue.item_id ?? ""}`}>
-                    {issue.item_id ? `${nameOf(issue.item_id)}：` : ""}
-                    {FEASIBILITY_LABELS[issue.check]}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            {day.returned.length > 0 ? (
-              <details className="day-returned">
-                <summary>{day.returned.length} 個項目留在 Candidate List</summary>
-                <p className="muted">
-                  {day.returned
-                    .map((r) => `${nameOf(r.item_id)}${r.checks.length > 0 ? `（${r.checks.map((c) => FEASIBILITY_LABELS[c]).join("、")}）` : "（當天放不下）"}`)
-                    .join("、")}
-                </p>
-              </details>
-            ) : null}
-          </div>
-          {view.canEdit ? (
-            <div className="screen-actions">
-              {view.tripStatus !== "ended" && view.tripStatus !== "archived" ? (
-                <Link className="secondary" href={`/trips/${tripId}/items/new`}>
-                  新增地點
-                </Link>
-              ) : null}
-              {placed ? (
-              <ApproveDayForm
-                tripId={tripId}
-                date={day.date}
-                baseVersion={view.baseVersion}
-                label={weekday(day.date)}
-                mode={!view.canApprove || day.status !== "draft" ? "hidden" : isDayBlocked(day.issues, day.date) ? "blocked" : "ready"}
-              />
-              ) : null}
-            </div>
-          ) : null}
+          <DayChips tripId={tripId} view={view} day={day} />
+          <DayEditor
+            key={day.date}
+            tripId={tripId}
+            date={day.date}
+            rows={rows}
+            fixed={fixed}
+            legs={legs}
+            canEdit={view.canEdit && !closed}
+            mode={viewEditMode(view.tripStatus, [day.status], view.isOwner)}
+            otherDates={view.days.filter((d) => d.date !== day.date).map((d) => ({ date: d.date, label: weekday(d.date) }))}
+            heading={weekday(day.date)}
+            statusLabel={DAY_STATUS_LABELS[day.status]}
+            below={
+              <div className="day-notes">
+                {day.backups.length > 0 ? <p className="muted">Backup：{day.backups.map((id) => nameOf(id)).join("、")}</p> : null}
+                {day.issues.length > 0 ? (
+                  <ul className="day-issues" aria-label={`${day.date} 提醒`}>
+                    {day.issues.map((issue) => (
+                      <li key={`${issue.check}-${issue.item_id ?? ""}`}>
+                        {issue.item_id ? `${nameOf(issue.item_id)}：` : ""}
+                        {FEASIBILITY_LABELS[issue.check]}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {day.returned.length > 0 ? (
+                  <details className="day-returned">
+                    <summary>{day.returned.length} 個項目留在 Candidate List</summary>
+                    <p className="muted">
+                      {day.returned
+                        .map((r) => `${nameOf(r.item_id)}${r.checks.length > 0 ? `（${r.checks.map((c) => FEASIBILITY_LABELS[c]).join("、")}）` : "（當天放不下）"}`)
+                        .join("、")}
+                    </p>
+                  </details>
+                ) : null}
+              </div>
+            }
+            actions={
+              view.canEdit ? (
+                <div className="screen-actions">
+                  {!closed ? (
+                    <Link className="secondary" href={`/trips/${tripId}/items/new`}>
+                      新增地點
+                    </Link>
+                  ) : null}
+                  {placed ? (
+                    <ApproveDayForm
+                      tripId={tripId}
+                      date={day.date}
+                      baseVersion={view.baseVersion}
+                      mode={!view.canApprove || day.status !== "draft" ? "hidden" : isDayBlocked(day.issues, day.date) ? "blocked" : "ready"}
+                    />
+                  ) : null}
+                </div>
+              ) : null
+            }
+          />
         </section>
         <div className="split-detail">
           <p className="empty-detail">選擇一個項目查看時間、交通、可移動範圍與照片。</p>

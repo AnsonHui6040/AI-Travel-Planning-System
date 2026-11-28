@@ -24,6 +24,7 @@ export * from "./transport";
 export * from "./schedule";
 export * from "./feasibility";
 export * from "./item-edit";
+export * from "./full-edit";
 export * from "./reverify";
 export * from "./morning-check";
 export * from "./departure";

@@ -125,3 +125,214 @@
   color: var(--text);
   font-weight: 500;
 }
+
+/* 決策 0011：清單內編輯模式與兩站之間的交通 */
+.day-head .day-edit {
+  margin-left: auto;
+  align-self: center;
+}
+
+.edit-hint {
+  flex: none;
+  margin: 0;
+  font-size: var(--fs-small);
+}
+
+.travel-row {
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.travel-row > .travel-text,
+.travel-details summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--control);
+  padding-left: 3.95rem;
+}
+
+.travel-details summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.travel-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.travel-set {
+  margin-left: auto;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.travel-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 5rem) auto;
+  gap: 0.5rem;
+  padding: 0 0 0.5rem 3.95rem;
+}
+
+.travel-form > * {
+  min-width: 0;
+}
+
+.travel-form select,
+.travel-form input {
+  width: 100%;
+}
+
+.travel-status {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.edit-rows > li.edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.25rem 0;
+}
+
+.edit-rows > li.edit-row.shifted {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+.edit-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.edit-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.drag-handle {
+  flex: none;
+  width: var(--control);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  cursor: grab;
+}
+
+.drag-handle svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.edit-times label {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.edit-times input {
+  display: block;
+  width: 100%;
+  padding: 0 0.4rem;
+}
+
+/* 編輯模式需要較寬的清單：1024px 以上左欄放寬 */
+@media (min-width: 1024px) {
+  .split:has(.edit-rows) {
+    grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+  }
+}
+
+.icon-button {
+  flex: none;
+  width: var(--control);
+  padding: 0;
+}
+
+.insert-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.insert-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.insert-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.insert-fields select,
+.insert-fields input,
+.insert-name input {
+  width: 100%;
+  color: var(--text);
+}
+
+.insert-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.edit-tools {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.edit-tools p,
+.edit-result {
+  flex: none;
+  margin: 0;
+}
+
+.no-shift {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--control);
+}
+
+.no-shift input {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.swap-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+}
+
+.swap-form > * {
+  min-width: 0;
+}
+
+.swap-form select {
+  width: 100%;
+}

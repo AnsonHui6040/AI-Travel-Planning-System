@@ -6,7 +6,7 @@ import { loadDayDraft } from "./day-draft";
 import { EditStoreError, type EditContext, type EditDeps } from "./item-edit-core";
 import { createSupabaseServerClient, supabaseGuardDeps } from "./supabase";
 
-// 決策 0010 E：編輯以使用者本人的 session 呼叫資料庫函式（以 atps_item_editor 身分執行）或建立提案（RLS：Owner、Companion）
+// 決策 0010 E、決策 0011：編輯以使用者本人的 session 呼叫資料庫函式（以 atps_item_editor 身分執行）或建立提案（RLS：Owner、Companion）
 
 function storeError(code: string | undefined): EditStoreError {
   if (code === "42501") return new EditStoreError("forbidden");
@@ -22,6 +22,7 @@ export async function loadEditContext(tripId: string): Promise<EditContext | nul
     tripStatus: view.tripStatus as EditContext["tripStatus"],
     baseVersion: view.baseVersion,
     canEdit: view.canEdit,
+    role: view.isOwner ? "owner" : view.canEdit ? "companion" : null,
     manualSchedule: view.manualSchedule,
     dates: view.days.map((d) => d.date),
     days: view.days.map((d) => ({
@@ -68,6 +69,15 @@ export async function itemEditDeps(): Promise<EditDeps> {
         impact_scope: { dates },
       });
       if (error) throw storeError(error.code);
+    },
+    async applyOwner(tripId, baseVersion, change, dates) {
+      const result = (await rpc("apply_owner_change", { p_trip: tripId, p_base_version: baseVersion, p_change: change, p_dates: dates })) as {
+        outcome?: string;
+      } | null;
+      return result?.outcome === "applied" ? "applied" : "invalidated";
+    },
+    async editBatch(tripId, operations, draft) {
+      await rpc("edit_trip_items", { p_trip: tripId, p_ops: operations, p_draft: draft });
     },
     async warnings(tripId, dates) {
       const view = await loadDayDraft(tripId);

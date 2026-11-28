@@ -27,6 +27,7 @@ export default async function MorePage({ params }: { params: Promise<{ tripId: s
     {
       title: "行程資料",
       links: [
+        ...(view.role === "owner" ? [{ href: `${base}/settings`, label: "行程設定", note: "名稱、目的地、日期" }] : []),
         { href: `${base}/baseline`, label: "旅行基線", note: "日期、航班、住宿、固定活動" },
         { href: `${base}/candidates`, label: "候選", note: "研究結果與核實" },
         { href: `${base}/bookings`, label: "預訂", note: "航班、住宿、餐廳、票券與預約碼" },
