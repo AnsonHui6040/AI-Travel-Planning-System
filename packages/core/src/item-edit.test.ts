@@ -5,20 +5,20 @@ import { draftPlacements, editMode, endFor, manualDayDraft, memberChange, reorde
 
 describe("編輯的生效方式", () => {
   it("基線與規劃中、影響的日期都是草案：直接寫入", () => {
-    expect(editMode("baseline", [])).toBe("direct");
-    expect(editMode("planning", ["draft"])).toBe("direct");
-    expect(editMode("planning", [])).toBe("direct");
+    expect(editMode("baseline", [], "companion")).toBe("direct");
+    expect(editMode("planning", ["draft"], "companion")).toBe("direct");
+    expect(editMode("planning", [], "companion")).toBe("direct");
   });
 
   it("規劃中但影響已批准的日期：成為提案", () => {
-    expect(editMode("planning", ["draft", "approved"])).toBe("proposal");
+    expect(editMode("planning", ["draft", "approved"], "companion")).toBe("proposal");
   });
 
   it("鎖定與旅行中一律成為提案；旅後不可編輯", () => {
-    expect(editMode("locked", ["draft"])).toBe("proposal");
-    expect(editMode("in_progress", [])).toBe("proposal");
-    expect(editMode("ended", [])).toBe("closed");
-    expect(editMode("archived", [])).toBe("closed");
+    expect(editMode("locked", ["draft"], "companion")).toBe("proposal");
+    expect(editMode("in_progress", [], "companion")).toBe("proposal");
+    expect(editMode("ended", [], "companion")).toBe("closed");
+    expect(editMode("archived", [], "companion")).toBe("closed");
   });
 });
 
