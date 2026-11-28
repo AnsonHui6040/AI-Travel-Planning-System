@@ -268,16 +268,16 @@ test("整天交換與行程設定：Owner 交換兩天、延長與縮短日期�
 test("版面：新增地點、編輯項目、預訂、行程設定的輸入欄與按鈕不超出畫面、不重疊", async ({ page, context, baseURL }) => {
   const owner = await signInAsNewUser(context, baseURL ?? "");
   const { tripId, ids } = await lockedTrip(owner.userId, "東京版面");
-  for (const [path, name] of [
-    [`/trips/${tripId}/items/new`, "新增地點"],
-    [`/trips/${tripId}/items/${String(ids["淺草寺"])}/edit`, "編輯項目"],
-    [`/trips/${tripId}/bookings/new`, "新增預訂"],
-    [`/trips/${tripId}/settings`, "行程設定"],
+  for (const [path, name, file] of [
+    [`/trips/${tripId}/items/new`, "新增地點", "add-item"],
+    [`/trips/${tripId}/items/${String(ids["淺草寺"])}/edit`, "編輯項目", "edit-item"],
+    [`/trips/${tripId}/bookings/new`, "新增預訂", "booking"],
+    [`/trips/${tripId}/settings`, "行程設定", "settings-page"],
   ] as const) {
     await page.goto(path);
     await expect(page.locator("main h1")).toBeVisible();
     await expectNoOverlap(page, name);
-    await capture(page, name);
+    await capture(page, file);
   }
   await page.goto(`/trips/${tripId}/items/${String(ids["淺草寺"])}/edit`);
   await expectNoScroll(page, "編輯項目");
