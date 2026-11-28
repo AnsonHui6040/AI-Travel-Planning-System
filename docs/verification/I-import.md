@@ -69,7 +69,7 @@
 | Build | `pnpm build` | 通過（E2E 的 webServer 先執行 build） |
 | 資料庫 | `supabase test db` | 30 個測試檔 662 個測試通過（本 Task 沒有 migration） |
 | 評估 | `EVAL_SCENARIOS=E10 pnpm evals:run` | E10 PASS |
-| E2E（390×844、1280×800，production build） | `pnpm test:e2e` | FULL_E2E |
+| E2E（390×844、1280×800，production build） | `pnpm test:e2e` | 164 個通過（82 個測試 × 2 個寬度），0 失敗；`import.spec.ts` 3 個測試 × 2 個寬度。另一次以 `E2E_PORT=3120` 執行時，`entry`、`guard`、`today` 共 8 個因 `.env.local` 的登入轉址與允許來源固定為 3100 而失敗，與本 Task 無關 |
 
 ## 真機驗證（待測）
 
