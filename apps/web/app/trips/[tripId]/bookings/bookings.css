@@ -1,0 +1,77 @@
+/* 決策 0010 B：預訂畫面。顏色、字級、圓角只用 globals.css 的變數；共用的版面在 shell.css */
+
+.booking-rows .booking-when {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  font-size: var(--fs-small);
+}
+
+.bookings .booking-kind {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.bookings .booking-time {
+  margin: 0 0 0.75rem;
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.booking-facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.35rem 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.booking-facts dt {
+  color: var(--muted);
+}
+
+.booking-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.booking-facts .booking-code {
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 表單：兩欄一列，手機上不用捲動 */
+.booking-form .fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 0.75rem;
+}
+
+.booking-form label.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.booking-form label.field.wide {
+  grid-column: 1 / -1;
+}
+
+.booking-form .field input,
+.booking-form .field select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  color: var(--text);
+}
+
+.booking-form .booking-hint {
+  margin: 0.5rem 0 0;
+  font-size: var(--fs-small);
+}

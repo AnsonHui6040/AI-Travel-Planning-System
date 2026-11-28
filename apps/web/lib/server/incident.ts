@@ -4,6 +4,7 @@ import { availabilitySlot, storedMobilityEstimate, tripBaselineData, uuid } from
 import { createLogger } from "@atps/security";
 import { IncidentStoreError, type IncidentDeps } from "./incident-core";
 import { createSupabaseServerClient, supabaseGuardDeps } from "./supabase";
+import { loadBookingConstraints } from "./bookings";
 
 // T38：Incident Mode 以使用者本人的 session 讀取（RLS）並呼叫 start_incident；批准經 /proposals 的 approve_proposal
 
@@ -93,6 +94,7 @@ export async function incidentDeps(): Promise<IncidentDeps> {
         items,
         segments,
         weather: typeof weather === "string" ? weather.slice(0, 200) : null,
+        bookings: await loadBookingConstraints(session, tripId),
       };
     },
     async start(tripId, level, snapshot, availableMinutes, alternatives) {

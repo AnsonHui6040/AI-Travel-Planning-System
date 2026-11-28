@@ -7,3 +7,4 @@ export * from "./sensitive";
 export * from "./photos";
 export * from "./live-status";
 export * from "./expenses";
+export * from "./bookings";

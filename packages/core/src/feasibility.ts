@@ -64,6 +64,8 @@ export interface FeasibilityInput {
   items: readonly FeasibilityItem[];
   segment: (fromId: string, toId: string) => SegmentInfo | null;
   dates?: readonly string[];
+  // 決策 0010 B：已有關聯預訂的項目，不再提醒確認預約
+  bookedItemIds?: ReadonlySet<string>;
 }
 
 export interface FeasibilityIssue {
@@ -121,7 +123,7 @@ export function checkDay(day: DayDraft, input: FeasibilityInput): FeasibilityIss
     const windows = availabilityOn(item, date);
     if (windows !== null && windows.length === 0) add("closed_day", item.id);
     else if (windows !== null && !windows.some(([from, to]) => from <= entry.start && entry.end <= to)) add("opening_hours", item.id);
-    if (item.reservation_requirement === "required") add("reservation", item.id);
+    if (item.reservation_requirement === "required" && !input.bookedItemIds?.has(item.id)) add("reservation", item.id);
     if (item.type === "restaurant" && !MEAL_WINDOWS.some(([from, to]) => from <= entry.start && entry.start <= to)) add("meal_time", item.id);
     if (item.weather_dependency === "high") add("weather", item.id);
   }

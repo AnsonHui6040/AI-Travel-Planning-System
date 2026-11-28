@@ -33,6 +33,8 @@ const pack: DayPack = {
   fixed: [{ name: "晚餐（已付款）", start: "19:00", end: "21:00" }],
   backups: [],
   photos: [],
+  bookings: [],
+  lists: [],
 };
 
 // 東京時間

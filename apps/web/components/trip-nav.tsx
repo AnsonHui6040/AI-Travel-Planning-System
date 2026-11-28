@@ -39,7 +39,7 @@ const ICONS: Record<TabKey, ReactNode> = {
 
 const TABS: ReadonlyArray<{ key: TabKey; path: string; label: string; sections: readonly string[] }> = [
   { key: "now", path: "today", label: "現在", sections: ["today", "incident"] },
-  { key: "plan", path: "days", label: "行程", sections: ["days", "items"] },
+  { key: "plan", path: "days", label: "行程", sections: ["days", "items", "bookings"] },
   { key: "proposals", path: "proposals", label: "提案", sections: ["proposals"] },
   { key: "more", path: "more", label: "更多", sections: [] },
 ];

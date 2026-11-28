@@ -1,4 +1,4 @@
-import { morningCheck, type MorningCandidate, type MorningInput, type MorningItem, type MorningResult } from "@atps/core";
+import { bookingLocal, bookingsOn, morningCheck, withBookings, type BookingConstraint, type MorningCandidate, type MorningInput, type MorningItem, type MorningResult } from "@atps/core";
 import { isoDate, uuid, type TripBaselineData } from "@atps/schemas";
 
 // T36：Morning Check 的 Server Action 邏輯（第 2.8 節 Day Ready）。
@@ -22,6 +22,8 @@ export interface MorningContext {
   firstLegMinutes: number | null;
   items: MorningItem[];
   candidates: MorningCandidate[];
+  // 決策 0010 B：行程的預訂（不含預約碼）；當天的預訂視為固定活動
+  bookings?: BookingConstraint[];
 }
 
 export interface MorningCheckDeps {
@@ -61,9 +63,17 @@ export async function runMorningCheckAction(deps: MorningCheckDeps, tripIdRaw: u
     }
   }
 
+  // 有關聯項目、且項目排在當天的預訂以項目代表；其餘當天的預訂成為固定活動
+  const bookings = context.bookings ?? [];
+  const scheduledToday = new Set(context.items.map((i) => i.id));
+  const baseline = withBookings(context.baseline, bookings, (itemId) => (scheduledToday.has(itemId) ? date.data : null));
+  const todays = bookingsOn(bookings, date.data, context.baseline.timezone)
+    .filter((b) => b.kind !== "lodging")
+    .map((b) => ({ title: b.title, start: bookingLocal(b.starts_at, context.baseline.timezone).time, item_id: b.item_id }));
   const result = morningCheck({
     date: date.data,
-    baseline: context.baseline,
+    baseline,
+    bookings: todays,
     items: context.items,
     candidates: context.candidates,
     weather,

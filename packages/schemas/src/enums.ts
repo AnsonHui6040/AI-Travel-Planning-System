@@ -52,3 +52,7 @@ export const researchTrack = z.enum(["A", "B", "C", "D"]);
 export const factField = z.enum(["opening_hours", "closed_days", "admission", "reservation", "transport_service"]);
 export const factStatus = z.enum(["resolved", "conflict"]);
 export const completion = z.enum(["completed", "partial", "skipped"]);
+
+// 決策 0010 B：預訂類型與清單類型（migration 20261128300000_b_bookings_lists.sql）
+export const bookingKind = z.enum(["flight", "lodging", "restaurant", "ticket", "transport", "other"]);
+export const checklistKind = z.enum(["packing", "todo"]);

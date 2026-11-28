@@ -1,6 +1,8 @@
 import "server-only";
 import {
   DEFAULT_TRAVEL_MINUTES,
+  bookedItemIds,
+  withBookings,
   categorizeForSchedule,
   checkDay,
   dayApprovalEntries,
@@ -17,12 +19,15 @@ import {
 import { availabilitySlot, segmentPlans, storedMobilityEstimate, tripBaselineData, uuid, type TripBaselineData } from "@atps/schemas";
 import { photoDisplay, type PhotoView } from "../photo-display";
 import type { DayPlan } from "./day-approval-core";
+import { loadBookingConstraints } from "./bookings";
 import { createSupabaseServerClient } from "./supabase";
 
 // T29、T30：每日時段草案與可行性驗證的畫面資料。以使用者 session（RLS）讀取。
 // 已批准的日期顯示資料庫中的時段；其餘日期由 core 的 planFeasibleDays 計算（不寫入），
 // 未通過可行性驗證的項目回到地理分區、留在 Candidate List。
 // 決策 0010：成員手動排過（trips.manual_schedule）之後，草案日改為資料庫中的排程，以 checkDay 檢查並只提示。
+// 決策 0010 B：預訂以 withBookings 併入基線的固定活動（Hard Constraint）。有關聯預訂的項目由預訂的時間代表：
+// 自動草案不另外排入；已排入同一天時以項目代表，不重複列出。
 
 export interface CardItem {
   id: string;
@@ -120,6 +125,7 @@ function manualPlan(
   items: FeasibilityItem[],
   rows: ReadonlyArray<Record<string, unknown>>,
   segment: (from: string, to: string) => SegmentInfo | null,
+  booked: ReadonlySet<string>,
 ): { days: DayDraft[]; issues: FeasibilityIssue[]; returned: ReturnedItem[] } {
   const days = dates.map((date) =>
     manualDayDraft(
@@ -130,7 +136,7 @@ function manualPlan(
         .map((r) => ({ itemId: String(r.id), start: hhmm(r.scheduled_start), end: hhmm(r.scheduled_end) })),
     ),
   );
-  return { days, issues: days.flatMap((d) => checkDay(d, { baseline, items, segment })), returned: [] };
+  return { days, issues: days.flatMap((d) => checkDay(d, { baseline, items, segment, bookedItemIds: booked })), returned: [] };
 }
 
 export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
@@ -143,8 +149,8 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
   const tripName = String(trip.name);
 
   const { data: stored } = await session.from("trip_baselines").select("data, confirmed_at").eq("trip_id", tripId).eq("version", 1).maybeSingle();
-  const baseline = stored?.confirmed_at ? tripBaselineData.safeParse(stored.data) : null;
-  if (!baseline?.success) return { state: "no_baseline", tripName };
+  const parsedBaseline = stored?.confirmed_at ? tripBaselineData.safeParse(stored.data) : null;
+  if (!parsedBaseline?.success) return { state: "no_baseline", tripName };
 
   const { data: member } = await session.from("trip_members").select("role").eq("trip_id", tripId).eq("user_id", auth.user.id).maybeSingle();
   const role = (member?.role as string | undefined) ?? null;
@@ -181,6 +187,10 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
   const segmentOf = (from: string, to: string) => segments.get(`${from}>${to}`) ?? segments.get(`${to}>${from}`) ?? null;
 
   const rowList = (rows ?? []) as Array<Record<string, unknown>>;
+  const bookings = await loadBookingConstraints(session, tripId);
+  const booked = bookedItemIds(bookings);
+  const scheduledDate = new Map(rowList.map((r) => [String(r.id), (r.scheduled_date as string | null) ?? null]));
+  const baseline = { data: withBookings(parsedBaseline.data, bookings, (itemId) => scheduledDate.get(itemId) ?? null) };
   const items: FeasibilityItem[] = rowList.map((r) => {
     const availability = availabilitySlot.array().safeParse(r.availability);
     return {
@@ -211,13 +221,15 @@ export async function loadDayDraft(tripId: string): Promise<DayDraftView> {
   const draftDates = allDates.filter((d) => (statusOf.get(d) ?? "draft") === "draft");
   const openRows = rowList.filter((r) => OPEN_STATES.has(String(r.lifecycle_status)));
   const openItems = items.filter((i) => openRows.some((r) => String(r.id) === i.id));
+  // 自動草案：有關聯預訂的項目由預訂代表，不另外排入
+  const draftItems = openItems.filter((i) => !booked.has(i.id));
   const manualSchedule = trip.manual_schedule === true;
   const plan =
     draftDates.length === 0
       ? { days: [], issues: [], returned: [] }
       : manualSchedule
-        ? manualPlan(draftDates, baseline.data, openItems, openRows, segmentOf)
-        : planFeasibleDays({ baseline: baseline.data, items: openItems, segment: segmentOf, dates: draftDates });
+        ? manualPlan(draftDates, baseline.data, openItems, openRows, segmentOf, booked)
+        : planFeasibleDays({ baseline: baseline.data, items: draftItems, segment: segmentOf, dates: draftDates, bookedItemIds: booked });
 
   const days: DayView[] = allDates.map((date) => {
     const status = statusOf.get(date) ?? "draft";

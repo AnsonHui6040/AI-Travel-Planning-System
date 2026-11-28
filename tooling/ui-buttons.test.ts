@@ -60,6 +60,8 @@ describe("不可逆操作先確認", () => {
     "apps/web/app/trips/[tripId]/members/member-forms.tsx",
     "apps/web/app/trips/[tripId]/timeline/timeline-forms.tsx",
     "apps/web/app/trips/[tripId]/expenses/expense-forms.tsx",
+    "apps/web/app/trips/[tripId]/bookings/booking-forms.tsx",
+    "apps/web/app/trips/[tripId]/lists/list-forms.tsx",
   ];
   it.each(persisted)("%s 送出前以 window.confirm 確認", (file) => {
     expect(readFileSync(path.join(root, file), "utf8")).toContain("window.confirm(");

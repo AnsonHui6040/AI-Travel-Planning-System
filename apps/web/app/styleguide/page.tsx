@@ -127,6 +127,32 @@ function Panel({ theme, title }: { theme: "light" | "dark"; title: string }) {
         </li>
       </ul>
 
+      <h3>可勾選的清單項目（決策 0010）</h3>
+      <ul className="rows checklist" aria-label={`${title}清單範例`}>
+        <li className="checklist-item">
+          <label className="checklist-check">
+            <input type="checkbox" />
+            <span className="checklist-text">護照</span>
+          </label>
+          <select aria-label="護照 的負責成員" defaultValue="a">
+            <option value="">不指定</option>
+            <option value="a">小安</option>
+          </select>
+          <button className="danger" type="button" aria-label="刪除 護照">
+            刪除
+          </button>
+        </li>
+        <li className="checklist-item done">
+          <label className="checklist-check">
+            <input type="checkbox" defaultChecked />
+            <span className="checklist-text">雨傘</span>
+          </label>
+          <span className="row-meta" />
+          <span />
+        </li>
+      </ul>
+      <p className="muted">核取方塊外圍至少 44px；完成的項目排在後面並加刪除線。Viewer 只能檢視。</p>
+
       <h3>單選選項</h3>
       <fieldset className="choices">
         <legend>發生什麼事？</legend>

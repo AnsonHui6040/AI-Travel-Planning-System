@@ -142,4 +142,25 @@ describe("morningCheck", () => {
     expect(byCheck.first_leg).toMatchObject({ status: "ok", detail: "第一站 10:00，約需 35 分鐘，09:25 前出發" });
     expect(byCheck.backups).toMatchObject({ status: "attention", detail: "沒有 Backup 的區域：ueno" });
   });
+
+  it("決策 0010 B：今天的預訂列在預約；有關聯預訂的項目不再提醒確認", () => {
+    const today = baseline.start_date;
+    const result = morningCheck(
+      input({
+        items: [item({ id: "sushi", name_zh: "壽司店", reservation_requirement: "required" }), item({ id: "ramen", name_zh: "拉麵", reservation_requirement: "required" })],
+        bookings: [
+          { title: "壽司晚餐", start: "19:00", item_id: "sushi" },
+          { title: "美術館門票", start: "10:00", item_id: null },
+        ],
+      }),
+    );
+    expect(today).toBeTruthy();
+    expect(result.checks.find((c) => c.check === "reservation")).toEqual({
+      check: "reservation",
+      status: "attention",
+      detail: "需確認預約：拉麵；已預訂：10:00 美術館門票、19:00 壽司晚餐",
+    });
+    const booked = morningCheck(input({ items: [item({ id: "sushi", reservation_requirement: "required" })], bookings: [{ title: "壽司晚餐", start: "19:00", item_id: "sushi" }] }));
+    expect(booked.checks.find((c) => c.check === "reservation")).toEqual({ check: "reservation", status: "ok", detail: "已預訂：19:00 壽司晚餐" });
+  });
 });

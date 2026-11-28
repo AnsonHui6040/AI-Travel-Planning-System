@@ -459,3 +459,9 @@ export async function listItemsAsAdmin(tripId: string): Promise<Array<Record<str
   if (result.error) throw new Error("讀取測試項目失敗");
   return result.data as Array<Record<string, unknown>>;
 }
+
+// 決策 0010 B：把使用者加入已存在的行程（例如示範資料建立的行程）
+export async function addMemberAsAdmin(tripId: string, userId: string, role: "companion" | "viewer"): Promise<void> {
+  const result = await adminClient().from("trip_members").insert({ trip_id: tripId, user_id: userId, role });
+  if (result.error) throw new Error("加入測試成員失敗");
+}

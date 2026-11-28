@@ -33,6 +33,14 @@ describe("buildAiPayload", () => {
     }
   });
 
+  it("決策 0010 B：項目或行程物件即使帶有預約碼等額外欄位，也不會輸出", () => {
+    const withCode = { ...fullItem, confirmation_code: "ZX9QK2", booking_note: "靠窗" } as typeof fullItem;
+    const text = JSON.stringify(buildAiPayload(input({ trip: { ...fullTrip, confirmation_code: "ZX9QK2" } as typeof fullTrip, items: [withCode] })));
+    expect(text).not.toContain("ZX9QK2");
+    expect(text).not.toContain("confirmation_code");
+    expect(text).not.toContain("靠窗");
+  });
+
   it("成員以內部代號識別，付款人對應到代號", () => {
     const payload = buildAiPayload(input({ items: [{ ...fullItem, payer_id: MEMBER_B }] }));
     expect(payload.members.map((m) => m.ref)).toEqual(["M1", "M2"]);

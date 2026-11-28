@@ -118,4 +118,24 @@ describe("runMorningCheckAction", () => {
     expect((await runMorningCheckAction(broken.d, TRIP, "2026-12-10")).message).toBe("Morning Check 失敗，請稍後再試");
     expect(broken.logs).toEqual(["Morning Check 寫入失敗"]);
   });
+
+  it("決策 0010 B：當天的預訂列在固定活動與預約；有關聯預訂的項目不再提醒確認", async () => {
+    const base = await context();
+    const { d, writes } = deps({
+      loadContext: async () => ({
+        ...base,
+        items: base.items.map((i) => ({ ...i, reservation_requirement: "required" as const })),
+        bookings: [
+          { id: "bk1", kind: "other", title: "攝影導覽", starts_at: "2026-12-10T13:00:00+09:00", ends_at: "2026-12-10T15:00:00+09:00", timezone: "Asia/Tokyo", location: null, item_id: "photo" },
+          { id: "bk2", kind: "restaurant", title: "壽司晚餐", starts_at: "2026-12-10T10:00:00+08:00", ends_at: null, timezone: "Asia/Taipei", location: "銀座", item_id: null },
+          { id: "bk3", kind: "restaurant", title: "隔天午餐", starts_at: "2026-12-11T12:00:00+09:00", ends_at: null, timezone: "Asia/Tokyo", location: null, item_id: null },
+        ],
+      }),
+    });
+    expect((await runMorningCheckAction(d, TRIP, "2026-12-10")).ok).toBe(true);
+    const saved = (writes[0] as [string, string, { checks: Array<{ check: string; status: string; detail: string }> }])[2];
+    expect(saved.checks.find((c) => c.check === "reservation")).toEqual({ check: "reservation", status: "ok", detail: "已預訂：11:00 壽司晚餐、13:00 攝影導覽" });
+    expect(saved.checks.find((c) => c.check === "fixed_activities")?.detail).toContain("11:00 壽司晚餐");
+    expect(saved.checks.find((c) => c.check === "fixed_activities")?.detail).not.toContain("攝影導覽");
+  });
 });

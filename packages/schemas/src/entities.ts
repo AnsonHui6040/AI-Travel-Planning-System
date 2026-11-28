@@ -13,6 +13,7 @@ import {
   text,
   uuid,
 } from "./common";
+import { bookingRow, checklistItemRow, checklistRow } from "./bookings";
 import * as E from "./enums";
 import { expenseRateRow, expenseRow, expenseSettingsRow, expenseSettlementRow, expenseShareRow } from "./expenses";
 import { memberSensitiveFieldRow } from "./sensitive";
@@ -537,6 +538,10 @@ export const tableSchemas = {
   expenses: expenseRow,
   expense_shares: expenseShareRow,
   expense_settlements: expenseSettlementRow,
+  // 決策 0010 B：預訂與清單
+  bookings: bookingRow,
+  checklists: checklistRow,
+  checklist_items: checklistItemRow,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;

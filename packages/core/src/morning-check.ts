@@ -81,6 +81,8 @@ export interface MorningInput {
   transit: ReadonlyArray<{ route: string; abnormal: boolean }> | null;
   // 由住宿到第一站的交通分鐘數；沒有估算時為 null
   firstLegMinutes: number | null;
+  // 決策 0010 B：今天的預訂（行程時區的開始時間）；有關聯項目的預訂視為該項目已預約
+  bookings?: ReadonlyArray<{ title: string; start: string; item_id: string | null }>;
 }
 
 export interface MorningCheckEntry {
@@ -193,7 +195,15 @@ export function morningCheck(input: MorningInput): MorningResult {
   const fixed = baseline.fixed_activities
     .filter((a) => a.date === date)
     .sort((a, b) => a.start.localeCompare(b.start));
-  const reserve = items.filter((i) => i.reservation_requirement === "required");
+  const booked = new Set((input.bookings ?? []).flatMap((b) => (b.item_id ? [b.item_id] : [])));
+  const reserve = items.filter((i) => i.reservation_requirement === "required" && !booked.has(i.id));
+  const bookingText =
+    (input.bookings ?? []).length > 0
+      ? `已預訂：${[...(input.bookings ?? [])]
+          .sort((a, b) => a.start.localeCompare(b.start))
+          .map((b) => `${b.start} ${b.title}`)
+          .join("、")}`
+      : null;
   const first = items[0];
   const luggageDay =
     baseline.lodgings.some(
@@ -258,9 +268,9 @@ export function morningCheck(input: MorningInput): MorningResult {
       ? {
           check: "reservation",
           status: "attention",
-          detail: `需確認預約：${reserve.map((i) => i.name_zh).join("、")}`,
+          detail: [`需確認預約：${reserve.map((i) => i.name_zh).join("、")}`, bookingText].filter(Boolean).join("；"),
         }
-      : { check: "reservation", status: "ok", detail: "沒有需要預約的項目" },
+      : { check: "reservation", status: "ok", detail: bookingText ?? "沒有需要預約的項目" },
     closed.length > 0
       ? {
           check: "opening",
