@@ -4,6 +4,8 @@
 // - trip（預設）：旅行中，第一天是今天
 // - planning：規劃中，基線已確認、有候選、每日尚未批准（「現在」顯示步驟）
 // - post：已結束，三天都在過去、尚未標記旅後狀態
+// 決策 0010 B：另建立住宿、第二天晚餐、回程航班三筆預訂與一份打包清單。service_role 沒有預訂與清單的權限，
+// 這部分以該使用者本人的 session（magic link 的 token 換取）寫入。
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
@@ -168,6 +170,36 @@ if (phase === "trip") {
     }),
     "建立提案",
   );
+}
+
+// 預訂與清單：以使用者本人的 session 寫入（RLS：Owner 可寫）
+const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+if (!anonKey) throw new Error("apps/web/.env.local 缺少 NEXT_PUBLIC_SUPABASE_ANON_KEY");
+const link = await admin.auth.admin.generateLink({ type: "magiclink", email });
+if (link.error || !link.data.properties?.hashed_token) throw new Error("產生使用者 session 失敗");
+const member = createClient(url, anonKey, { auth: { persistSession: false } });
+const verified = await member.auth.verifyOtp({ type: "magiclink", token_hash: link.data.properties.hashed_token });
+if (verified.error) throw new Error("取得使用者 session 失敗");
+const at = (date, time, offsetHours = 9) => `${date}T${time}:00+${String(offsetHours).padStart(2, "0")}:00`;
+const dinnerItem = items.find((i) => i.name_zh === "築地場外市場");
+must(
+  await member.from("bookings").insert([
+    { trip_id: tripId, created_by: userId, kind: "lodging", title: "新宿華盛頓飯店", starts_at: at(days[0], "15:00"), ends_at: at(days[2], "11:00"), timezone: "Asia/Tokyo", location: "新宿", confirmation_code: "HTL-58213", note: "含早餐" },
+    { trip_id: tripId, created_by: userId, kind: "restaurant", title: "銀座壽司晚餐", starts_at: at(days[1], "19:00"), ends_at: at(days[1], "20:30"), timezone: "Asia/Tokyo", location: "銀座", confirmation_code: "SUSHI-0412", note: null },
+    { trip_id: tripId, created_by: userId, kind: "restaurant", title: "築地早餐", starts_at: at(days[1], "08:30"), ends_at: at(days[1], "10:00"), timezone: "Asia/Tokyo", location: "築地", confirmation_code: null, note: null, item_id: dinnerItem?.id ?? null },
+    { trip_id: tripId, created_by: userId, kind: "flight", title: "回程 BR197", starts_at: at(days[2], "15:00"), ends_at: at(days[2], "18:00", 8), timezone: "Asia/Tokyo", location: "成田機場第二航廈", confirmation_code: "6QK2ZP", note: null },
+  ]),
+  "建立預訂",
+);
+const list = must(await member.from("checklists").insert({ trip_id: tripId, kind: "packing", title: "打包", created_by: userId }).select("id").single(), "建立清單");
+// 逐筆寫入，讓建立順序（created_at）固定
+for (const [text, assignee, checked] of [
+  ["護照", userId, false],
+  ["行動電源", null, false],
+  ["Suica 卡", userId, false],
+  ["雨傘", null, true],
+]) {
+  must(await member.from("checklist_items").insert({ trip_id: tripId, list_id: list.id, text, assignee, checked, created_by: userId }), "建立清單項目");
 }
 
 console.log(`已建立示範行程：/trips/${tripId}/today`);

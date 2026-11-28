@@ -483,3 +483,50 @@ a.ghost {
     scroll-padding-bottom: calc(var(--tabbar) + env(safe-area-inset-bottom));
   }
 }
+
+/* ---- 可勾選的清單項目（決策 0010 B：清單；樣板見 /styleguide）---- */
+
+.checklist > li.checklist-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7.5rem auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+}
+
+.checklist-check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: var(--control);
+  min-width: 0;
+}
+
+.checklist-check input {
+  flex: none;
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.checklist-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checklist-item.done .checklist-text {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.checklist-item select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  color: var(--text);
+}
+
+.checklist-item [role="status"] {
+  grid-column: 1 / -1;
+  margin: 0;
+}

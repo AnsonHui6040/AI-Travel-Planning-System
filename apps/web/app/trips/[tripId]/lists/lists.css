@@ -1,0 +1,39 @@
+/* 決策 0010 B：清單畫面。顏色、字級、圓角只用 globals.css 的變數；共用的版面在 shell.css */
+
+.list-add-form,
+.screen-actions form.list-add-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.list-add-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.list-add-form input,
+.list-add-form select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  color: var(--text);
+}
+
+.list-add-form [role="status"] {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.lists .list-actions {
+  flex-direction: column;
+}
+
+.screen-actions form.list-add-form button {
+  width: auto;
+}

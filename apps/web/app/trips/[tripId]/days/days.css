@@ -102,3 +102,13 @@
   align-items: center;
   min-height: var(--control);
 }
+
+/* 決策 0010 B：由行程分頁到預訂 */
+.days .days-bookings {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control);
+  margin-left: 0.75rem;
+  color: var(--text);
+  font-weight: 500;
+}

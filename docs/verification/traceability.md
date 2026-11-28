@@ -126,6 +126,12 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 | S 只保存 place_id（D28） | E＋S | E2E：保存後名稱為輸入的搜尋字、地址為空、place_id 為選定的地點 | 已驗收 |
 | S 沒有 Maps key 只手動新增 | E＋S | `places-core.test.ts`；E2E 顯示到設定輸入 key 的提示 | 已驗收 |
 | 真實 Places 回應 | E＋S | 以使用者本人 key 在設定頁實測 | TBD |
+| B 預訂（六種類型、時間與時區、地點、預約碼、備註、關聯項目） | B | `supabase/tests/29_bookings_lists.test.sql`；`packages/schemas/src/bookings.test.ts`；`apps/web/lib/server/bookings-core.test.ts`；E2E `apps/web/e2e/bookings.spec.ts` | 已驗收 |
+| B 權限（Owner、Companion 可寫，Viewer 唯讀，非成員看不到） | B | pgTAP 29；E2E Viewer 與非成員 | 已驗收 |
+| B 預約碼不送 AI、不出現在唯讀連結 | B | pgTAP 29（anon、service_role、`atps_readonly_reader` 沒有權限；`readonly_trip` 不含預約碼）；`tooling/booking-ai-boundary.test.ts`；`packages/security/src/payload.test.ts`；`apps/web/lib/server/readonly-boundary.test.ts`；E2E 唯讀連結頁面不含預約碼 | 已驗收 |
+| B 當天的預訂是固定活動（Hard Constraint） | B | `packages/core/src/bookings.test.ts`（`withBookings`、草案不重疊、`checkDay` 預約）；`morning-check.test.ts`；`apps/web/lib/server/morning-check-core.test.ts`、`incident-core.test.ts`；E2E「行程」「現在」顯示預訂 | 已驗收 |
+| B 清單（打包、待辦、指定成員、勾選、離線可讀） | B | pgTAP 29；`packages/offline/src/offline.test.ts`；E2E 清單與當日包 | 已驗收 |
+| B 真機：離線時在 iPhone 開啟當日包查看預約碼與清單 | B | `docs/verification/B-bookings.md` B-R1 | TBD |
 
 ## 沒有負責 Task 的規則
 

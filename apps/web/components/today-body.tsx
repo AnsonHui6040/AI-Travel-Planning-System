@@ -130,6 +130,35 @@ export function TodayBody({ pack, canEdit, offline }: { pack: DayPack; canEdit: 
           </ul>
         </section>
       ) : null}
+      {(pack.bookings ?? []).length > 0 ? (
+        <section aria-label="今天的預訂">
+          <h2>今天的預訂</h2>
+          <ul className="today-plain">
+            {(pack.bookings ?? []).map((b) => (
+              <li key={`${b.title}-${b.start}`}>
+                {b.start}
+                {b.end ? `–${b.end}` : ""} {b.title}
+                {b.location ? `，${b.location}` : ""}
+                {b.confirmationCode ? `，預約碼 ${b.confirmationCode}` : ""}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {(pack.lists ?? []).map((l) => (
+        <section key={l.title} aria-label={`清單 ${l.title}`}>
+          <h2>{l.title}</h2>
+          <ul className="today-plain">
+            {l.items.map((i, k) => (
+              <li key={`${i.text}-${k}`}>
+                {i.checked ? "已完成：" : "未完成："}
+                {i.text}
+                {i.assignee ? `（${i.assignee}）` : ""}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
       <section aria-label="Backup">
         <h2>Backup</h2>
         {pack.backups.length === 0 ? <p className="muted">沒有 Backup。</p> : null}

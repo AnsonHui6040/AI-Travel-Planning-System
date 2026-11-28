@@ -29,6 +29,8 @@ export default async function MorePage({ params }: { params: Promise<{ tripId: s
       links: [
         { href: `${base}/baseline`, label: "旅行基線", note: "日期、航班、住宿、固定活動" },
         { href: `${base}/candidates`, label: "候選", note: "研究結果與核實" },
+        { href: `${base}/bookings`, label: "預訂", note: "航班、住宿、餐廳、票券與預約碼" },
+        { href: `${base}/lists`, label: "清單", note: "打包與待辦，離線可看" },
         { href: `${base}/today/check`, label: "Morning Check", note: "今天的十項檢查" },
         { href: `${base}/timeline`, label: "Actual Timeline", note: "記錄實際到達與離開" },
         { href: `${base}/incident`, label: "Incident 紀錄", note: "出狀況時的替代方案" },
