@@ -31,7 +31,7 @@
 | `pnpm lint`（含 depcruise） | 通過 |
 | `pnpm build` | 通過 |
 | `supabase test db` | 31 個檔案、698 個測試 PASS |
-| `pnpm test:e2e`（production build，390 與 1280） | 見下方「完整 E2E」 |
+| `pnpm test:e2e`（production build，390 與 1280） | 174 passed（含 `full-edit.spec.ts` 10 個） |
 
 ## 設計說明
 
@@ -40,6 +40,7 @@
 | Owner 直接套用 | 不另寫一套直接寫入：`apply_owner_change` 以 Owner 名義建立提案後立即 `commit_proposal`，Change Log、通知、SH-04、生命週期 trigger 與 Companion 的提案完全相同 |
 | `commit_proposal` 的修正 | 新增項目排入草案日時為已核實（原本規劃中一律為已批准）；排入已批准的日期為已批准；鎖定後為已修改 |
 | 草案不產生版本 | 第 2.8 節的版本從批准每日開始（第一版 v1.0）；`versions.major` 的下限為 1，草案日的批次只增加 `current_version` |
+| 匯入 | 鎖定後 Owner 匯入的地點同樣直接套用；Companion 照舊成為提案（`import-view.ts`） |
 | 交通不經提案 | 交通是估算而非行程內容；因交通而順延的時間照決策 0011 第 2 節生效 |
 | 拖曳 | Pointer Events 加 pointer capture，滑鼠與觸控相同；把手 `touch-action: none` |
 | iOS 時間輸入欄 | 去掉原生外觀、`min-width: 0`、填滿欄寬；格線子項目一律 `min-width: 0` |
