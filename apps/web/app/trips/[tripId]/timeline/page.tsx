@@ -119,14 +119,12 @@ export default async function TimelinePage({ params, searchParams }: { params: P
       {editable && extra.length > 0 ? (
         <section aria-label="計畫外">
           <h2>計畫外</h2>
-          <p className="muted">現場改去 Backup 或 Standby 時在這裡記錄。</p>
           <RecordForm tripId={tripId} date={day} items={extra} label="記錄計畫外項目" />
         </section>
       ) : null}
       {editable ? (
         <section aria-label="產生">
           <h2>結束今天</h2>
-          <p className="muted">產生後這天標示為已完成，不能再記錄。只有記錄為已完成的項目會標為已去過。</p>
           <ProduceForm tripId={tripId} date={day} />
         </section>
       ) : null}

@@ -23,9 +23,11 @@
   --fs-h2: 20px;
   --fs-h1: 28px;
 
-  --radius-control: 10px;
+  --radius-control: 8px;
   --radius-card: 12px;
-  --control: 44px;
+  /* 外觀高度；觸控範圍以 --hit 補足（Apple HIG 44pt） */
+  --control: 36px;
+  --hit: 44px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -121,7 +123,7 @@ a:hover {
   color: var(--muted);
 }
 
-/* Astryx：四種變體以填色區分、沒有外框；高度 44px（Astryx 原為 32px，旅行當天的觸控需要更大） */
+/* Astryx：四種變體以填色區分、沒有外框；外觀 36px，以 ::after 把觸控範圍補到 44px */
 button,
 .pill-link {
   font: inherit;
@@ -134,6 +136,14 @@ button,
   background: color-mix(in srgb, var(--text) 10%, transparent);
   color: var(--text);
   cursor: pointer;
+  position: relative;
+}
+
+button::after,
+.pill-link::after {
+  content: "";
+  position: absolute;
+  inset: calc((var(--control) - var(--hit)) / 2) 0;
 }
 
 /* 每個畫面只有一個主要動作 */
@@ -182,6 +192,27 @@ textarea {
 
 textarea {
   padding: 0.5rem 0.75rem;
+}
+
+/* iOS Safari 對 select 不套用 min-height */
+select {
+  height: var(--control);
+}
+
+/* iOS Safari 的日期與時間欄位：文字垂直置中、靠左 */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  line-height: calc(var(--control) - 2px);
+}
+
+input::-webkit-date-and-time-value {
+  margin: 0;
+  text-align: left;
 }
 
 input[type="checkbox"],

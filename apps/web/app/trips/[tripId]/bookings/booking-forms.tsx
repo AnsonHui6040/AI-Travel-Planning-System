@@ -134,7 +134,6 @@ export function BookingForm({
             <input maxLength={500} autoComplete="off" value={v.note} onChange={(e) => set("note", e.target.value)} />
           </label>
         </div>
-        <p className="muted booking-hint">預約碼只有行程成員看得到，不會送給 AI，也不會出現在唯讀連結。</p>
         <Status result={result} />
       </div>
       <div className="screen-actions">

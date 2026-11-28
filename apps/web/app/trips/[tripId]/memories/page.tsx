@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { CONSTRAINT_CATALOG } from "@atps/memory";
 import { loadTripMemories } from "../../../../lib/server/memories";
 import { EditMemoryForm, NewMemoryForm } from "../../../settings/memories/memory-forms";
@@ -52,9 +51,6 @@ export default async function TripMemoriesPage({ params }: { params: Promise<{ t
     <main className="settings memories">
       <h1>行程記憶</h1>
       <p className="trip-line muted">{view.tripName}</p>
-      <p className="muted">
-        合併這趟所有成員的記憶（含健康、體力與飲食限制）。AI 只收到各角色需要的部分。自己的個人偏好在<Link href="/settings/memories">記憶</Link>頁修改。
-      </p>
       <section aria-label="合併後的限制">
         <h2>限制</h2>
         {list(constraints)}
@@ -65,7 +61,6 @@ export default async function TripMemoriesPage({ params }: { params: Promise<{ t
       </section>
       <section aria-label="我的本趟記憶">
         <h2>我的本趟記憶</h2>
-        <p className="muted">只用於這趟旅行；你離開行程時會刪除。</p>
         {view.own.length > 0 ? (
           <ul className="memory-list">
             {view.own.map((m) => (

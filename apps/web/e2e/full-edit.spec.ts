@@ -128,13 +128,13 @@ test("鎖定後 Owner：編輯模式以鍵盤與按鈕排序、改時間自動�
   await expectNoScroll(page, "行程");
   await expectNoOverlap(page, "行程");
   await page.getByRole("button", { name: "編輯" }).click();
-  await expect(page.getByText("你是 Owner，修改會直接套用")).toBeVisible();
+  await expect(page.getByRole("button", { name: "完成", exact: true })).toBeVisible();
   await expectNoScroll(page, "編輯模式");
   await expectNoOverlap(page, "編輯模式");
   await capture(page, "edit-mode");
   const handle = page.getByRole("button", { name: /拖曳排序：淺草寺/ });
-  expect((await handle.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
-  expect((await page.getByRole("button", { name: "下移淺草寺" }).boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(44);
+  expect(await handle.evaluate((el) => { const r = el.getBoundingClientRect().height; const a = getComputedStyle(el, "::after"); return a.position === "absolute" ? r + Math.max(0, -parseFloat(a.top)) + Math.max(0, -parseFloat(a.bottom)) : r; })).toBeGreaterThanOrEqual(44);
+  expect(await page.getByRole("button", { name: "下移淺草寺" }).evaluate((el) => { const w = el.getBoundingClientRect().width; const a = getComputedStyle(el, "::after"); return a.position === "absolute" ? w + Math.max(0, -parseFloat(a.left)) + Math.max(0, -parseFloat(a.right)) : w; })).toBeGreaterThanOrEqual(44);
 
   // 鍵盤：淺草寺下移一位（每個位置沿用原本的開始時間）
   await handle.focus();
@@ -178,7 +178,6 @@ test("鎖定後 Companion：同一個批次成為一個待批准提案，行程�
 
   await page.goto(`/trips/${tripId}/days?date=2026-12-01`);
   await page.getByRole("button", { name: "編輯" }).click();
-  await expect(page.getByText("修改會成為提案，批准後生效")).toBeVisible();
   await page.getByRole("button", { name: "下移淺草寺" }).click();
   await page.getByRole("button", { name: "完成並提出" }).click();
   await expect(page.getByRole("status").filter({ hasText: "已送出提案" })).toBeVisible();

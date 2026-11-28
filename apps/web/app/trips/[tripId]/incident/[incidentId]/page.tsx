@@ -186,7 +186,6 @@ export default async function IncidentPage({
             ))}
           </dl>
           {chosen.transport ? <Transport t={chosen.transport} /> : null}
-          <p className="muted">批准後寫入行程並更新版本，其他方案即失效。{chosen.versionKind === "major" ? "這是 Major 變更。" : ""}</p>
         </article>
         {view.canEdit ? (
           <div className="screen-actions">

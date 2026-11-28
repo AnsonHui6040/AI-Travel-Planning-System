@@ -246,7 +246,7 @@
 }
 
 .edit-times input {
-  display: block;
+  display: flex;
   width: 100%;
   padding: 0 0.4rem;
 }
@@ -262,6 +262,12 @@
   flex: none;
   width: var(--control);
   padding: 0;
+}
+
+/* 方形按鈕的觸控範圍四邊都補到 44px */
+.drag-handle::after,
+.icon-button::after {
+  inset: calc((var(--control) - var(--hit)) / 2);
 }
 
 .insert-panel {

@@ -39,7 +39,7 @@ export function BookingRows({ view, currentId }: { view: OkBookings; currentId: 
   ].sort((a, b) => a.at - b.at || a.key.localeCompare(b.key));
   return (
     <ScrollKeeper scrollKey={`bookings:${view.tripId}`}>
-      {rows.length === 0 ? <p className="muted">還沒有預訂。航班、住宿、餐廳、票券都可以記在這裡。</p> : null}
+      {rows.length === 0 ? <p className="muted">還沒有預訂。</p> : null}
       <ul aria-label="預訂" className="rows booking-rows">
         {rows.map(({ key, booking, base }) => {
           if (booking) {

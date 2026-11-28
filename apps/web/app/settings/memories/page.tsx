@@ -30,9 +30,6 @@ export default async function MemoriesPage() {
   return (
     <main className="settings memories">
       <h1>記憶</h1>
-      <p className="muted">
-        記憶存在本系統，三家 AI 共用同一份。共同行程會合併所有成員的記憶，限制有衝突時取最保守值，不顯示是哪位成員。姓名、電話、電子郵件、地址與證件號碼不寫入記憶。
-      </p>
 
       {proposals.length > 0 ? (
         <section aria-label="旅後記憶提案">
@@ -85,7 +82,6 @@ export default async function MemoriesPage() {
 
       <section aria-label="新增">
         <h2>新增記憶</h2>
-        <p className="muted">清單內的限制（{CONSTRAINT_CATALOG.map((c) => c.item).join("、")}）會依固定單位比較；單趟旅行的記憶在各行程的「記憶」頁新增。</p>
         <NewMemoryForm catalog={CONSTRAINT_CATALOG.map((c) => c.item)} />
       </section>
     </main>

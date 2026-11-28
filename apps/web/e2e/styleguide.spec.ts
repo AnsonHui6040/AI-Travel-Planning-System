@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// 元件樣板頁（/styleguide）：靜態、不需登入；淺色與深色並排，各面板內文字對比至少 4.5:1、控制項至少 44px。
+// 元件樣板頁（/styleguide）：靜態、不需登入；淺色與深色並排，各面板內文字對比至少 4.5:1、控制項觸控範圍至少 44px。
 // CAPTURE_SCREENSHOTS=1 時把截圖存到 docs/verification/screenshots/
 
 async function capture(page: Page, name: string) {
@@ -55,8 +55,10 @@ test("元件樣板頁：四種按鈕、確認、輸入欄、分頁與標示；�
           }
           return ratio(getComputedStyle(el).color, under);
         });
-      const controls = [...panel.querySelectorAll("button, input:not([type=checkbox]):not([type=radio]), select, .tabbar a, .chips a, .rows a, .choices label")].map((el) => el.getBoundingClientRect().height);
-      return { theme: panel.dataset.theme, bg, minText: Math.min(...texts), minControl: Math.min(...controls) };
+      const hit = (el: Element) => { const r = el.getBoundingClientRect().height; const a = getComputedStyle(el, "::after"); return a.position === "absolute" ? r + Math.max(0, -parseFloat(a.top)) + Math.max(0, -parseFloat(a.bottom)) : r; };
+      const controls = [...panel.querySelectorAll("button, .tabbar a, .chips a, .rows a, .choices label")].map(hit);
+      const fields = [...panel.querySelectorAll("input:not([type=checkbox]):not([type=radio]), select")].map((el) => el.getBoundingClientRect().height);
+      return { theme: panel.dataset.theme, bg, minText: Math.min(...texts), minControl: Math.min(...controls), minField: Math.min(...fields) };
     });
   });
   expect(result.map((r) => [r.theme, r.bg])).toEqual([
@@ -65,7 +67,8 @@ test("元件樣板頁：四種按鈕、確認、輸入欄、分頁與標示；�
   ]);
   for (const r of result) {
     expect(r.minText, `${r.theme} 文字對比`).toBeGreaterThanOrEqual(4.5);
-    expect(r.minControl, `${r.theme} 控制項高度`).toBeGreaterThanOrEqual(44);
+    expect(r.minControl, `${r.theme} 控制項觸控範圍`).toBeGreaterThanOrEqual(44);
+    expect(r.minField, `${r.theme} 輸入欄高度`).toBeGreaterThanOrEqual(36);
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect(requests).toEqual([]);

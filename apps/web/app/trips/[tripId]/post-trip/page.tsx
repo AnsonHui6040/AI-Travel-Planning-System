@@ -78,7 +78,6 @@ export default async function PostTripPage({ params }: { params: Promise<{ tripI
 
       <section aria-label="比較報告">
         <h2>Planned vs Actual 比較報告</h2>
-        <p className="muted">依 {view.daysWithTimeline} 天的 Actual Timeline 計算。旅後記憶提案以這份報告為依據，需由你批准才會寫入記憶。</p>
         {view.tripStatus === "ended" || view.tripStatus === "archived" ? (
           <div className="post-trip-memory">
             <GenerateProposalsForm tripId={tripId} />

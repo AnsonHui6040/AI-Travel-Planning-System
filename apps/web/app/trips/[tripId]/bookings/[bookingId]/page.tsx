@@ -55,9 +55,6 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                     </>
                   ) : null}
                 </dl>
-                <p className="muted">
-                  {b.kind === "lodging" ? "入住與退房日列在當天行程。" : "當天行程視為固定活動，排程時不會與其他項目重疊。"}
-                </p>
               </section>
               {view.canEdit ? (
                 <div className="screen-actions">

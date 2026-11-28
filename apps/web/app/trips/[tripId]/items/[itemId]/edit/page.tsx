@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { canEnterDraft } from "@atps/core";
-import { EDIT_HINTS, viewEditMode } from "../../../../../../lib/edit-mode";
+import { viewEditMode } from "../../../../../../lib/edit-mode";
 import { VERIFICATION_LABELS } from "../../../../../../lib/item-labels";
 import { loadDayDraft } from "../../../../../../lib/server/day-draft";
 import { EditItemForm, ScheduleControls } from "../../item-forms";
@@ -57,7 +57,6 @@ export default async function EditItemPage({ params }: { params: Promise<{ tripI
           <span className="tag">{where}</span>
           <span className="tag">{item.origin === "user" ? "使用者新增" : (VERIFICATION_LABELS[item.verificationStatus] ?? item.verificationStatus)}</span>
         </p>
-        {EDIT_HINTS[mode] ? <p className="muted">{EDIT_HINTS[mode]}</p> : null}
       </header>
       <ScheduleControls
         tripId={tripId}

@@ -50,7 +50,6 @@ export default async function MembersPage({ params }: { params: Promise<{ tripId
       {isOwner ? (
         <section aria-labelledby="invite-heading">
           <h2 id="invite-heading">邀請成員</h2>
-          <p className="muted">把連結傳給對方，對方登入後開啟即可加入。連結 7 天內有效、只能使用一次，可隨時撤銷。移除成員時，會刪除其在此行程的敏感欄位與記憶。</p>
           <InviteButtons tripId={tripId} />
           {view.invitations.length > 0 ? (
             <ul className="invite-list">
@@ -71,9 +70,6 @@ export default async function MembersPage({ params }: { params: Promise<{ tripId
       {isOwner ? (
         <section aria-labelledby="readonly-heading">
           <h2 id="readonly-heading">唯讀連結</h2>
-          <p className="muted">
-            拿到連結的人不必登入即可檢視已排入的行程，不能修改、不能使用 AI。只顯示當事人開啟「提供給 Viewer 與唯讀連結」的敏感欄位。可隨時撤銷。
-          </p>
           <ReadonlyLinkButtons tripId={tripId} />
           {view.readonlyLinks.length > 0 ? (
             <ul className="invite-list">

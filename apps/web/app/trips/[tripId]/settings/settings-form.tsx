@@ -68,7 +68,6 @@ export function TripSettingsForm({
         ) : (
           <p className="muted">確認旅行基線後可以在這裡修改日期。</p>
         )}
-        <p className="muted">日期會同步到旅行基線。縮短日期時，排在移除日期的項目會移回候選清單；行程鎖定後新增的日期可直接加入地點。</p>
         {state ? (
           <p role="status" className={state.ok ? undefined : "error"}>
             {state.message}

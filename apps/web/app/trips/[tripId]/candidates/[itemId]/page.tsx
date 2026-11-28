@@ -43,7 +43,6 @@ export default async function CandidatePage({ params, searchParams }: { params: 
             {segments.length > 0 ? (
               <section aria-labelledby="segments">
                 <h2 id="segments">交通動線比較</h2>
-                <p className="muted">全部為 AI 依官方資料的估算，並加上固定緩衝（每段 10 分鐘，每次轉乘再加 5 分鐘）。出發前請以 Google Maps 確認。</p>
                 {segments.map((s) => (
                   <Segment key={s.id} s={s} />
                 ))}

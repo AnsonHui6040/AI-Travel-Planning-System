@@ -57,7 +57,7 @@ export default async function MorningCheckPage({ params, searchParams }: { param
           </ul>
         ) : null}
         {day && !view.morning ? (
-          <p className="muted">今天還沒有執行 Morning Check。檢查天氣、警報、交通、固定活動、預約、營業、第一段交通、行李、同行者與 Backup。</p>
+          <p className="muted">今天還沒有執行 Morning Check。</p>
         ) : null}
       </section>
       {canRun && day ? (
