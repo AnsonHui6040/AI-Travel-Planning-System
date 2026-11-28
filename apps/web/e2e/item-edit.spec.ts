@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   confirmTripAsAdmin,
   createItem,
+  createUserAsAdmin,
   createTrip,
   listItemsAsAdmin,
   markBaselineConfirmedAsAdmin,
@@ -184,9 +185,10 @@ test("編輯：修改停留、上移下移、移到另一天、移回候選清�
   expect(swapped.find((i) => i.name_zh === "大阪城")?.scheduled_start).not.toBe("09:00:00");
 
   await page.reload();
-  await page.getByLabel("移到").selectOption("2026-12-02");
+  await page.getByRole("combobox", { name: /^日期/ }).selectOption("2026-12-02");
   await page.getByLabel("開始", { exact: true }).first().fill("11:00");
-  await page.getByRole("button", { name: "移動" }).click();
+  await page.getByLabel("結束", { exact: true }).first().fill("");
+  await page.getByRole("button", { name: "改時間" }).click();
   await expect(page.getByRole("status").first()).toContainText("已儲存");
   expect((await listItemsAsAdmin(tripId)).find((i) => i.name_zh === "通天閣")).toMatchObject({ scheduled_date: "2026-12-02", scheduled_start: "11:00:00" });
 
@@ -202,9 +204,13 @@ test("編輯：修改停留、上移下移、移到另一天、移回候選清�
   expect((await listItemsAsAdmin(tripId)).map((i) => i.name_zh)).toEqual(["大阪城"]);
 });
 
-test("鎖定後：同一個編輯畫面送出待批准提案，行程不直接改動", async ({ page, context, baseURL }) => {
-  const owner = await signInAsNewUser(context, baseURL ?? "");
-  const tripId = await planningTrip(owner.userId, "大阪鎖定");
+test("鎖定後（決策 0011）：Companion 的修改成為待批准提案，行程不直接改動", async ({ page, context, baseURL }) => {
+  const companion = await signInAsNewUser(context, baseURL ?? "");
+  const owner = await createUserAsAdmin();
+  const tripId = await createTrip(owner.userId, "大阪鎖定", [{ userId: companion.userId, role: "companion" }]);
+  await saveBaselineAsAdmin(tripId, baseline);
+  await markBaselineConfirmedAsAdmin(tripId);
+  await confirmTripAsAdmin(tripId);
   const item = await createItem(tripId, { name_zh: "海遊館" });
   await scheduleItemAsAdmin(tripId, item, "2026-12-01", "10:00", "11:00");
   await setDayStatusAsAdmin(tripId, "2026-12-01", "approved");

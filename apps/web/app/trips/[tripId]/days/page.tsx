@@ -142,7 +142,6 @@ export default async function DaysPage({ params, searchParams }: { params: Promi
                       tripId={tripId}
                       date={day.date}
                       baseVersion={view.baseVersion}
-                      label={weekday(day.date)}
                       mode={!view.canApprove || day.status !== "draft" ? "hidden" : isDayBlocked(day.issues, day.date) ? "blocked" : "ready"}
                     />
                   ) : null}

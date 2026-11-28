@@ -67,7 +67,8 @@ function TravelLeg({ tripId, from, to, leg, canEdit }: { tripId: string; from: s
   }
   return (
     <li className="travel-row">
-      <details className="travel-details">
+      {/* 儲存後以新的值重新建立（React 在 Server Action 後重設表單，預設值要跟著資料更新） */}
+      <details key={`${leg?.source ?? "none"}-${leg?.mode ?? ""}-${leg?.minutes ?? ""}`} className="travel-details">
         <summary>
           <span className="travel-text">{label}</span>
           <span className="travel-set">{leg?.source === "user" ? "修改" : "設定"}</span>
@@ -366,6 +367,9 @@ export function DayEditor({
                       {shifted ? <span className="tag">順延</span> : null}
                       {over ? <span className="tag risk">排不下</span> : null}
                     </span>
+                    <button className="secondary icon-button" type="button" aria-label={`在${d.name}後面插入`} onClick={() => setInsertAfter(index)}>
+                      ＋
+                    </button>
                     <button className="danger" type="button" aria-label={`刪除${d.name}`} onClick={() => remove(index)}>
                       刪除
                     </button>
@@ -384,9 +388,6 @@ export function DayEditor({
                     </button>
                     <button className="secondary icon-button" type="button" aria-label={`下移${d.name}`} disabled={index === desired.length - 1} onClick={() => move(index, index + 1)}>
                       ↓
-                    </button>
-                    <button className="secondary icon-button" type="button" aria-label={`在${d.name}後面插入`} onClick={() => setInsertAfter(index)}>
-                      ＋
                     </button>
                   </div>
                 </li>,

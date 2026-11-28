@@ -9,13 +9,11 @@ export function ApproveDayForm({
   tripId,
   date,
   baseVersion,
-  label,
   mode,
 }: {
   tripId: string;
   date: string;
   baseVersion: number;
-  label: string;
   // hidden：已批准或沒有權限；blocked：仍有未通過的可行性檢查
   mode: "ready" | "blocked" | "hidden";
 }) {
@@ -28,7 +26,7 @@ export function ApproveDayForm({
       <input type="hidden" name="baseVersion" value={String(baseVersion)} />
       {mode === "ready" ? (
         <button className="primary" type="submit" disabled={pending}>
-          {pending ? "批准中…" : `批准${label}`}
+          {pending ? "批准中…" : "批准這天"}
         </button>
       ) : null}
       {mode === "blocked" ? <p className="muted">這天仍有未通過的可行性檢查，處理後才能批准。</p> : null}

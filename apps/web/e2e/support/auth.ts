@@ -465,3 +465,16 @@ export async function addMemberAsAdmin(tripId: string, userId: string, role: "co
   const result = await adminClient().from("trip_members").insert({ trip_id: tripId, user_id: userId, role });
   if (result.error) throw new Error("加入測試成員失敗");
 }
+
+// 決策 0011：Change Log（versions）與提案的筆數
+export async function countVersionsAsAdmin(tripId: string): Promise<number> {
+  const result = await adminClient().from("versions").select("id", { count: "exact", head: true }).eq("trip_id", tripId);
+  if (result.error) throw new Error("讀取測試版本失敗");
+  return result.count ?? 0;
+}
+
+export async function listProposalsAsAdmin(tripId: string): Promise<Array<{ status: string; change: { operations: unknown[] } }>> {
+  const result = await adminClient().from("proposals").select("status, change").eq("trip_id", tripId);
+  if (result.error) throw new Error("讀取測試提案失敗");
+  return result.data as Array<{ status: string; change: { operations: unknown[] } }>;
+}

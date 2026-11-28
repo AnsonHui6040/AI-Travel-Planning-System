@@ -248,6 +248,14 @@
 .edit-times input {
   display: block;
   width: 100%;
+  padding: 0 0.4rem;
+}
+
+/* 編輯模式需要較寬的清單：1024px 以上左欄放寬 */
+@media (min-width: 1024px) {
+  .split:has(.edit-rows) {
+    grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+  }
 }
 
 .icon-button {
