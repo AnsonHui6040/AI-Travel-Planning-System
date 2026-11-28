@@ -42,6 +42,33 @@ describe("buildDayPack", () => {
     expect(pack).toMatchObject({ format: 1, tripId: input.tripId, date: "2026-12-10", baseVersion: 4, generatedAt: input.generatedAt });
   });
 
+  it("決策 0010 B：當天的預訂（含預約碼，只給成員）與清單離線可讀；沒有時為空陣列", () => {
+    expect(buildDayPack(input)).toMatchObject({ bookings: [], lists: [] });
+    const pack = buildDayPack({
+      ...input,
+      bookings: [
+        { kind: "restaurant", title: "壽司晚餐", start: "19:00", end: "20:30", location: "銀座", confirmation_code: "ZX9QK2" },
+        { kind: "ticket", title: "美術館", start: "10:00", end: null, location: null, confirmation_code: null },
+      ],
+      lists: [
+        {
+          title: "打包",
+          kind: "packing",
+          items: [
+            { text: "雨傘", checked: true, assignee: null },
+            { text: "護照", checked: false, assignee: "小安" },
+          ],
+        },
+      ],
+    });
+    expect(pack.bookings.map((b) => `${b.start} ${b.title}`)).toEqual(["10:00 美術館", "19:00 壽司晚餐"]);
+    expect(pack.bookings[1]).toMatchObject({ confirmationCode: "ZX9QK2", location: "銀座", end: "20:30" });
+    // 未完成的項目排在前面
+    expect(pack.lists).toEqual([
+      { title: "打包", kind: "packing", items: [{ text: "護照", checked: false, assignee: "小安" }, { text: "雨傘", checked: true, assignee: null }] },
+    ]);
+  });
+
   it("最後一站沒有最遲離開時間", () => {
     const pack = buildDayPack({ ...input, fixed: [] });
     expect(pack.entries.at(-1)).toMatchObject({ itemId: "b", leaveBy: null, nextName: null, travelToNextMinutes: null });

@@ -27,6 +27,24 @@ export interface DayPackInput {
   travelMinutes: (fromId: string, toId: string) => number | null;
   backups: ReadonlyArray<{ id: string; name_zh: string; standby: boolean }>;
   photos: ReadonlyArray<{ item_id: string; url: string; credit: string }>;
+  // 決策 0010 B：當天的預訂（行程時區）與行程的清單；只在成員的裝置保存
+  bookings?: ReadonlyArray<{ kind: string; title: string; start: string; end: string | null; location: string | null; confirmation_code: string | null }>;
+  lists?: ReadonlyArray<{ title: string; kind: string; items: ReadonlyArray<{ text: string; checked: boolean; assignee: string | null }> }>;
+}
+
+export interface PackBooking {
+  kind: string;
+  title: string;
+  start: string;
+  end: string | null;
+  location: string | null;
+  confirmationCode: string | null;
+}
+
+export interface PackList {
+  title: string;
+  kind: string;
+  items: Array<{ text: string; checked: boolean; assignee: string | null }>;
 }
 
 export interface PackEntry {
@@ -56,6 +74,9 @@ export interface DayPack {
   // T36：Standby（Morning Check 提升）排在前面
   backups: Array<{ id: string; name: string; standby: boolean }>;
   photos: Array<{ itemId: string; url: string; credit: string }>;
+  // 決策 0010 B（舊的當日包沒有這兩個欄位，讀取時當作空陣列）
+  bookings: PackBooking[];
+  lists: PackList[];
 }
 
 const toMin = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
@@ -114,6 +135,15 @@ export function buildDayPack(input: DayPackInput): DayPack {
       .map((b) => ({ id: b.id, name: b.name_zh, standby: b.standby })),
     // 只保存站內的照片網址（經 /api/photos 同源提供，S-09）
     photos: input.photos.filter((p) => p.url.startsWith("/api/photos/")).map((p) => ({ itemId: p.item_id, url: p.url, credit: p.credit })),
+    bookings: [...(input.bookings ?? [])]
+      .sort((a, b) => a.start.localeCompare(b.start))
+      .map((b) => ({ kind: b.kind, title: b.title, start: b.start, end: b.end, location: b.location, confirmationCode: b.confirmation_code })),
+    // 未完成的項目排在前面
+    lists: (input.lists ?? []).map((l) => ({
+      title: l.title,
+      kind: l.kind,
+      items: [...l.items].sort((a, b) => Number(a.checked) - Number(b.checked)).map((i) => ({ text: i.text, checked: i.checked, assignee: i.assignee })),
+    })),
   };
 }
 
