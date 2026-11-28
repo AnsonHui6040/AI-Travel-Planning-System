@@ -111,6 +111,7 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 | E7 | 待建立 | 無 | TBD | 未驗收 |
 | E8 | `evals/incident/E8.json`（確定性規則） | 不需要（不呼叫 AI；`docs/verification/evals/2026-11-26-E8-incident.md` PASS） | 不適用 | 已驗收 |
 | E9 | `evals/zoning/E9.json` | PASS（`docs/verification/evals/2026-11-24-E9.md`） | TBD | 部分 |
+| E10（決策 0010 I） | `evals/import/E10.json` | PASS（`docs/verification/evals/2026-11-28-E10.md`） | TBD | 部分 |
 
 ## 決策 0010 基本旅遊功能
 
@@ -132,6 +133,12 @@ runner 與判定器：T15（`evals/`）。CI 以錄製回應驗證判定器；�
 | B 當天的預訂是固定活動（Hard Constraint） | B | `packages/core/src/bookings.test.ts`（`withBookings`、草案不重疊、`checkDay` 預約）；`morning-check.test.ts`；`apps/web/lib/server/morning-check-core.test.ts`、`incident-core.test.ts`；E2E「行程」「現在」顯示預訂 | 已驗收 |
 | B 清單（打包、待辦、指定成員、勾選、離線可讀） | B | pgTAP 29；`packages/offline/src/offline.test.ts`；E2E 清單與當日包 | 已驗收 |
 | B 真機：離線時在 iPhone 開啟當日包查看預約碼與清單 | B | `docs/verification/B-bookings.md` B-R1 | TBD |
+| I 貼上文字匯入（以本人的 AI 設定與 key，資料區塊） | I | `packages/ai/src/roles.test.ts`（`importSpec`）；`apps/web/lib/server/import-core.test.ts`；E2E `apps/web/e2e/import.spec.ts`（錄製回應） | 已驗收 |
+| I 全名、電話、電子郵件不送 AI（S-07） | I | `packages/security/src/import-payload.test.ts`；`import-core.test.ts`（送出的 request 不含個資與 key）；評估場景 E10 | 已驗收 |
+| I 輸出經 schema 與輸出檢查，只是預覽（S-01） | I | `packages/schemas/src/import.test.ts`；`packages/core/src/import.test.ts`；回歸測試 `packages/ai/src/injection/import-injection.test.ts`（6 筆） | 已驗收 |
+| I 逐項修改、取消勾選、確認後以本人 session 寫入（預訂、使用者新增的地點；鎖定後為提案） | I | `import-core.test.ts`；E2E 規劃中直接寫入、鎖定後送出提案 | 已驗收 |
+| I 沒有 key、沒有辨識到、無法辨識、速率限制 | I | `import-core.test.ts`；E2E | 已驗收 |
+| I 真機：真實確認信與 iPhone 貼上 | I | `docs/verification/I-import.md` I-R1、I-R2；真 AI 5 次 I-R3 | TBD |
 
 ## 沒有負責 Task 的規則
 
