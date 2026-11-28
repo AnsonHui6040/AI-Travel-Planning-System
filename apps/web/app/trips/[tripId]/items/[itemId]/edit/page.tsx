@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { canEnterDraft } from "@atps/core";
+import { EDIT_HINTS, viewEditMode } from "../../../../../../lib/edit-mode";
 import { VERIFICATION_LABELS } from "../../../../../../lib/item-labels";
 import { loadDayDraft } from "../../../../../../lib/server/day-draft";
 import { EditItemForm, ScheduleControls } from "../../item-forms";
@@ -37,8 +38,7 @@ export default async function EditItemPage({ params }: { params: Promise<{ tripI
   const placed = day ? day.entries.flatMap((e) => (e.kind === "item" ? [e] : [])) : [];
   const index = placed.findIndex((e) => e.item_id === itemId);
   const entry = placed[index];
-  const locked = view.tripStatus === "locked" || view.tripStatus === "in_progress" || (day !== undefined && day.status !== "draft");
-  const mode = locked ? "proposal" : "direct";
+  const mode = viewEditMode(view.tripStatus, day ? [day.status] : [], view.isOwner);
   const short = (date: string) => date.slice(5).replace("-", "/");
   const where = day && entry ? `${short(day.date)} ${entry.start}–${entry.end}` : "候選清單";
   const back = `/trips/${tripId}/items/${itemId}${day ? `?date=${day.date}` : ""}`;
@@ -57,14 +57,14 @@ export default async function EditItemPage({ params }: { params: Promise<{ tripI
           <span className="tag">{where}</span>
           <span className="tag">{item.origin === "user" ? "使用者新增" : (VERIFICATION_LABELS[item.verificationStatus] ?? item.verificationStatus)}</span>
         </p>
-        {mode === "proposal" ? <p className="muted">已批准的行程：修改會成為提案，批准後生效。</p> : null}
+        {EDIT_HINTS[mode] ? <p className="muted">{EDIT_HINTS[mode]}</p> : null}
       </header>
       <ScheduleControls
         tripId={tripId}
         itemId={itemId}
         itemName={item.nameZh}
         dates={view.days.map((d) => d.date)}
-        current={day && entry ? { date: day.date, start: entry.start } : null}
+        current={day && entry ? { date: day.date, start: entry.start, end: entry.end } : null}
         canMoveUp={index > 0}
         canMoveDown={index >= 0 && index < placed.length - 1}
         canSchedule={canEnterDraft(item.verificationStatus) && item.candidateRole === "primary"}
@@ -72,7 +72,7 @@ export default async function EditItemPage({ params }: { params: Promise<{ tripI
       <EditItemForm
         tripId={tripId}
         item={{ id: itemId, nameZh: item.nameZh, type: item.type, stayMinutes: item.stayMinutes, address: item.address, note: item.note }}
-        mode={mode}
+        mode={mode === "proposal" ? "proposal" : "direct"}
       />
     </main>
   );

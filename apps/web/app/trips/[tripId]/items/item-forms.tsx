@@ -175,7 +175,7 @@ export function ScheduleControls({
   itemId: string;
   itemName: string;
   dates: string[];
-  current: { date: string; start: string } | null;
+  current: { date: string; start: string; end: string } | null;
   canMoveUp: boolean;
   canMoveDown: boolean;
   canSchedule: boolean;
@@ -202,8 +202,11 @@ export function ScheduleControls({
             <button key="down" className="secondary" type="submit" name="kind" value="down" disabled={!canMoveDown}>
               下移
             </button>
-            <button key="unschedule" className="ghost" type="submit" name="kind" value="unschedule">
+            <button key="unschedule" className="secondary" type="submit" name="kind" value="unschedule">
               移回候選清單
+            </button>
+            <button key="duplicate" className="secondary" type="submit" name="kind" value="duplicate">
+              複製
             </button>
             <button key="delete" className="danger" type="submit" name="kind" value="delete">
               刪除
@@ -217,9 +220,9 @@ export function ScheduleControls({
           </div>
         )}
         {canSchedule ? (
-          <div className="field-pair move-row">
-            <label>
-              {current ? "移到" : "排入"}
+          <div className="form-grid move-row">
+            <label className="move-date">
+              {current ? "日期" : "排入"}
               <select name="date" defaultValue={current?.date ?? dates[0]}>
                 {dates.map((d) => (
                   <option key={d} value={d}>
@@ -232,8 +235,12 @@ export function ScheduleControls({
               開始
               <input name="start" type="time" step={300} defaultValue={current?.start ?? "10:00"} />
             </label>
+            <label>
+              結束
+              <input name="end" type="time" step={300} defaultValue={current?.end ?? ""} />
+            </label>
             <button key="move" className="secondary" type="submit" name="kind" value="move">
-              {current ? "移動" : "排入"}
+              {current ? "改時間" : "排入"}
             </button>
           </div>
         ) : null}

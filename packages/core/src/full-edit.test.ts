@@ -36,14 +36,12 @@ describe("交通間隔", () => {
 const travel = () => 20;
 
 describe("自動順延", () => {
-  const items = [
-    { itemId: "a", start: "09:00", stayMinutes: 60 },
-    { itemId: "b", start: "10:30", stayMinutes: 60 },
-    { itemId: "c", start: "13:00", stayMinutes: 60 },
-  ];
+  const a = { itemId: "a", start: "09:00", stayMinutes: 60 };
+  const b = { itemId: "b", start: "10:30", stayMinutes: 60 };
+  const c = { itemId: "c", start: "13:00", stayMinutes: 60 };
 
   it("延長第一項：後面重疊的項目往後順延（停留加交通），沒有重疊的保留原時間", () => {
-    const result = shiftDay({ items: [{ ...items[0]!, stayMinutes: 120 }, items[1]!, items[2]!], fixed: [], travel, from: 0, shift: true });
+    const result = shiftDay({ items: [{ ...a, stayMinutes: 120 }, b, c], fixed: [], travel, from: 0, shift: true });
     expect(result.placements).toEqual([
       { itemId: "a", start: "09:00", end: "11:00" },
       { itemId: "b", start: "11:20", end: "12:20" },
@@ -54,14 +52,14 @@ describe("自動順延", () => {
   });
 
   it("不要順延：只改這一項，後面不動（由 checkDay 提示重疊）", () => {
-    const result = shiftDay({ items: [{ ...items[0]!, stayMinutes: 120 }, items[1]!, items[2]!], fixed: [], travel, from: 0, shift: false });
+    const result = shiftDay({ items: [{ ...a, stayMinutes: 120 }, b, c], fixed: [], travel, from: 0, shift: false });
     expect(result.placements[1]).toEqual({ itemId: "b", start: "10:30", end: "11:30" });
     expect(result.moved).toEqual([]);
   });
 
   it("固定活動不移動：順延的項目跳到固定活動之後", () => {
     const result = shiftDay({
-      items: [{ ...items[0]!, stayMinutes: 150 }, items[1]!],
+      items: [{ ...a, stayMinutes: 150 }, b],
       fixed: [{ name: "午餐預約", start: "11:40", end: "12:40" }],
       travel,
       from: 0,
@@ -83,7 +81,7 @@ describe("自動順延", () => {
   });
 
   it("from 之前的項目不重算", () => {
-    const result = shiftDay({ items: [{ itemId: "a", start: "09:00", stayMinutes: 600 }, items[1]!], fixed: [], travel, from: 1, shift: true });
+    const result = shiftDay({ items: [{ itemId: "a", start: "09:00", stayMinutes: 600 }, b], fixed: [], travel, from: 1, shift: true });
     expect(result.placements[1]).toEqual({ itemId: "b", start: "10:30", end: "11:30" });
   });
 });

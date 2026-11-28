@@ -29,9 +29,16 @@
   min-width: 0;
 }
 
+/* 日期一列；開始、結束與按鈕一列（390px 不重疊） */
 .move-row {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
   align-items: end;
+  gap: 0.5rem;
+}
+
+.move-row .move-date {
+  grid-column: 1 / -1;
 }
 
 .schedule-controls {

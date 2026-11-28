@@ -39,16 +39,22 @@ export function pickDay(view: OkView, requested: string | undefined): DayView | 
   );
 }
 
+export function DayChips({ tripId, view, day }: { tripId: string; view: OkView; day: DayView }) {
+  return (
+    <nav aria-label="日期" className="chips">
+      {view.days.map((d) => (
+        <Link key={d.date} href={`/trips/${tripId}/days?date=${d.date}`} aria-current={d.date === day.date ? "page" : undefined}>
+          {shortDate(d.date)}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
 export function DayList({ tripId, view, day, currentItem }: { tripId: string; view: OkView; day: DayView; currentItem: string | null }) {
   return (
     <>
-      <nav aria-label="日期" className="chips">
-        {view.days.map((d) => (
-          <Link key={d.date} href={`/trips/${tripId}/days?date=${d.date}`} aria-current={d.date === day.date ? "page" : undefined}>
-            {shortDate(d.date)}
-          </Link>
-        ))}
-      </nav>
+      <DayChips tripId={tripId} view={view} day={day} />
       <div className="day-head">
         <h2>{weekday(day.date)}</h2>
         <span className="tag">{DAY_STATUS_LABELS[day.status]}</span>
