@@ -32,7 +32,8 @@ export async function loadImportView(tripId: string): Promise<ImportView> {
     tripName: String(trip.name),
     timezone: String(trip.timezone),
     canEdit: member?.role === "owner" || member?.role === "companion",
-    locked: !["baseline", "planning"].includes(String(trip.status)),
+    // 決策 0011：鎖定後只有 Companion 的地點成為提案；Owner 直接套用
+    locked: !["baseline", "planning"].includes(String(trip.status)) && member?.role !== "owner",
     dates,
   };
 }

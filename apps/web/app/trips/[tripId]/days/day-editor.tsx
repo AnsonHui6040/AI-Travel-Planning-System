@@ -60,13 +60,13 @@ function TravelLeg({ tripId, from, to, leg, canEdit }: { tripId: string; from: s
   const label = legText(leg);
   if (!canEdit) {
     return (
-      <li className="travel-row">
+      <li role="none" className="travel-row">
         <span className="travel-text">{label}</span>
       </li>
     );
   }
   return (
-    <li className="travel-row">
+    <li role="none" className="travel-row">
       {/* 儲存後以新的值重新建立（React 在 Server Action 後重設表單，預設值要跟著資料更新） */}
       <details key={`${leg?.source ?? "none"}-${leg?.mode ?? ""}-${leg?.minutes ?? ""}`} className="travel-details">
         <summary>
