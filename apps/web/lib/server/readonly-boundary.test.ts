@@ -67,3 +67,14 @@ describe("唯讀連結頁面的依賴範圍", () => {
     expect(local).toContain("/lib/server/readonly.ts");
   });
 });
+
+// 決策 0010 B：預約碼只有行程成員可見，不出現在唯讀連結（資料庫的 readonly_trip 也不讀取預訂，見 pgTAP 29）
+describe("唯讀連結不讀取預訂", () => {
+  it("頁面與其 import 不讀取預訂資料表、不含預約碼", () => {
+    const { files } = walk(ENTRY);
+    for (const file of files) {
+      const source = readFileSync(file, "utf8");
+      expect(/from\(\s*["']bookings["']\s*\)|confirmation_?[cC]ode/.test(source), file).toBe(false);
+    }
+  });
+});

@@ -127,4 +127,18 @@ describe("startIncidentAction", () => {
     expect(await startIncidentAction(unknown.d, rain)).toEqual({ ok: false, message: "進入 Incident Mode 失敗，請稍後再試" });
     expect(unknown.d.logError).toHaveBeenCalledWith("Incident Mode 寫入失敗");
   });
+
+  it("決策 0010 B：當天的預訂是 Hard Constraint：限制重算範圍；有關聯預訂的項目不可調整", async () => {
+    const ticket = { id: "bk1", kind: "ticket" as const, title: "美術館門票", starts_at: "2026-12-10T16:00:00+09:00", ends_at: "2026-12-10T17:00:00+09:00", timezone: "Asia/Tokyo", location: null, item_id: null };
+    const { d, start } = deps({ loadContext: async () => context({ bookings: [ticket] }) });
+    expect((await startIncidentAction(d, rain)).ok).toBe(true);
+    const [, , snapshot, available] = start.mock.calls[0] ?? [];
+    expect(snapshot).toMatchObject({ snapshot: { nextFixed: { name: "美術館門票", start: "16:00" } } });
+    // 13:00 到 16:00 前 15 分鐘
+    expect(available).toBe(165);
+
+    const linked = { ...ticket, id: "bk2", kind: "other" as const, title: "攝影導覽", starts_at: "2026-12-10T13:00:00+09:00", ends_at: "2026-12-10T15:00:00+09:00", item_id: PHOTO };
+    const hard = deps({ loadContext: async () => context({ bookings: [linked] }) });
+    expect((await startIncidentAction(hard.d, { ...rain, trigger: "attraction_closed", itemId: PHOTO })).message).toBe("受影響的項目不在當天行程中，或是 Hard Constraint");
+  });
 });

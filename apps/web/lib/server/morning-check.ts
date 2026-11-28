@@ -5,6 +5,7 @@ import { availabilitySlot, tripBaselineData } from "@atps/schemas";
 import { createLogger } from "@atps/security";
 import { MorningCheckStoreError, type MorningCheckDeps } from "./morning-check-core";
 import { createSupabaseServerClient, supabaseGuardDeps } from "./supabase";
+import { loadBookingConstraints } from "./bookings";
 
 // T36：Morning Check 以使用者本人的 session 讀取（RLS）並呼叫 complete_morning_check；
 // 天氣以 Open-Meteo 取得（不需 key，座標只送小數第二位，結果不保存）
@@ -88,6 +89,7 @@ export async function morningCheckDeps(): Promise<MorningCheckDeps> {
         firstLegMinutes: null,
         items,
         candidates,
+        bookings: await loadBookingConstraints(session, tripId),
       };
     },
     async fetchWeather(coords, timezone) {

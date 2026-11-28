@@ -1,11 +1,14 @@
 import "server-only";
 import { directionsUrl } from "@atps/data-sources";
+import { bookingLocal, bookingsOn, withBookings } from "@atps/core";
 import { buildDayPack, type DayPack } from "@atps/offline";
 import { segmentPlans, storedMobilityEstimate, tripBaselineData, uuid } from "@atps/schemas";
+import { readChecklists, tripMembers } from "./bookings";
 import { createSupabaseServerClient } from "./supabase";
 
 // T35：當日包的伺服器資料。以使用者 session（RLS）讀取已排入當天的項目、固定活動、交通估算、Backup 與照片，
-// 由 @atps/offline 的 buildDayPack 計算最遲離開時間；瀏覽器把結果存入 IndexedDB 供離線閱讀
+// 由 @atps/offline 的 buildDayPack 計算最遲離開時間；瀏覽器把結果存入 IndexedDB 供離線閱讀。
+// 決策 0010 B：當天的預訂併入固定活動；當日包另含當天的預訂（含預約碼，只在成員的裝置）與行程的清單
 
 const SCHEDULED_STATES = ["approved", "locked", "change_proposed", "modified"];
 
@@ -62,7 +65,41 @@ export async function loadToday(tripId: string, requestedDate: string | undefine
   const ids = dayRows.map((r) => String(r.id));
   const { data: baseline } = await session.from("trip_baselines").select("data").eq("trip_id", tripId).eq("version", 1).maybeSingle();
   const parsedBaseline = baseline ? tripBaselineData.safeParse(baseline.data) : null;
-  const fixedActivities = parsedBaseline?.success ? parsedBaseline.data.fixed_activities.filter((a) => a.date === date) : [];
+  const { data: bookingRows } = await session
+    .from("bookings")
+    .select("id, kind, title, starts_at, ends_at, timezone, location, confirmation_code, item_id")
+    .eq("trip_id", tripId)
+    .order("starts_at")
+    .limit(300);
+  const bookings = (bookingRows ?? []).map((b) => ({
+    id: String(b.id),
+    kind: b.kind as "flight" | "lodging" | "restaurant" | "ticket" | "transport" | "other",
+    title: String(b.title),
+    starts_at: String(b.starts_at),
+    ends_at: b.ends_at ? String(b.ends_at) : null,
+    timezone: String(b.timezone),
+    location: b.location ? String(b.location) : null,
+    item_id: b.item_id ? String(b.item_id) : null,
+    confirmation_code: b.confirmation_code ? String(b.confirmation_code) : null,
+  }));
+  const scheduledOn = new Map((rows ?? []).map((r) => [String(r.id), String(r.scheduled_date)]));
+  const merged = parsedBaseline?.success ? withBookings(parsedBaseline.data, bookings, (itemId) => scheduledOn.get(itemId) ?? null) : null;
+  const fixedActivities = merged ? merged.fixed_activities.filter((a) => a.date === date) : [];
+  const todaysBookings = bookingsOn(bookings, date, timezone).map((b) => {
+    const start = bookingLocal(b.starts_at, timezone);
+    const end = b.ends_at ? bookingLocal(b.ends_at, timezone) : null;
+    return {
+      kind: b.kind,
+      title: b.title,
+      // 住宿在退房日以退房時間列出
+      start: start.date === date ? start.time : (end?.time ?? start.time),
+      end: end && end.date === date && start.date === date ? end.time : null,
+      location: b.location,
+      confirmation_code: b.confirmation_code,
+    };
+  });
+  const [lists, members] = await Promise.all([readChecklists(session, tripId), tripMembers(session, tripId)]);
+  const memberName = new Map(members.map((m) => [m.userId, m.name]));
   const fixed = fixedActivities.map((a) => ({ name: a.name, start: a.start, end: a.end ?? a.start }));
   const { data: segmentRows } = ids.length > 0 ? await session.from("mobility_segments").select("from_item_id, to_item_id, estimates, plans").eq("trip_id", tripId).in("from_item_id", ids) : { data: [] };
   const segments = new Map<string, number>();
@@ -109,6 +146,12 @@ export async function loadToday(tripId: string, requestedDate: string | undefine
     travelMinutes: (from, to) => segments.get(`${from}>${to}`) ?? null,
     backups: (backups ?? []).map((b) => ({ id: String(b.id), name_zh: String(b.name_zh), standby: b.standby === true })),
     photos: (photos ?? []).map((p) => ({ item_id: String(p.item_id), url: `/api/photos/${String(p.storage_path)}`, credit: String(p.author) })),
+    bookings: todaysBookings,
+    lists: lists.map((l) => ({
+      title: l.title,
+      kind: l.kind,
+      items: l.items.map((i) => ({ text: i.text, checked: i.checked, assignee: i.assignee ? (memberName.get(i.assignee) ?? null) : null })),
+    })),
   });
   const { data: day } = await session.from("days").select("status").eq("trip_id", tripId).eq("date", date).maybeSingle();
   const { data: check } = await session

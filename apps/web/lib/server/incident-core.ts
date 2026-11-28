@@ -1,4 +1,4 @@
-import { planIncident, type IncidentItem, type IncidentPlan, type IncidentTrigger, type StoredMobilityEstimate } from "@atps/core";
+import { bookedItemIds, planIncident, withBookings, type BookingConstraint, type IncidentItem, type IncidentPlan, type IncidentTrigger, type StoredMobilityEstimate } from "@atps/core";
 import { isoDate, uuid, type TripBaselineData } from "@atps/schemas";
 import { z } from "zod";
 
@@ -22,6 +22,8 @@ export interface IncidentContext {
   segments: ReadonlyMap<string, readonly StoredMobilityEstimate[]>;
   // 當天 Morning Check 的天氣說明；沒有時為 null
   weather: string | null;
+  // 決策 0010 B：行程的預訂（不含預約碼）；當天的預訂與有關聯預訂的項目是 Hard Constraint
+  bookings?: BookingConstraint[];
 }
 
 export interface IncidentDeps {
@@ -112,6 +114,12 @@ export async function startIncidentAction(deps: IncidentDeps, raw: Record<string
   const dates = tripDates(context.baseline);
   if (!dates.includes(f.date)) return { ok: false, message: "日期不在行程內" };
 
+  const bookings = context.bookings ?? [];
+  const booked = bookedItemIds(bookings);
+  const scheduled = new Map(context.items.filter((i) => i.scheduled_date).map((i) => [i.id, i.scheduled_date]));
+  const baseline = withBookings(context.baseline, bookings, (itemId) => scheduled.get(itemId) ?? null);
+  const items = context.items.map((i) => (booked.has(i.id) ? { ...i, hard: true } : i));
+
   let plan: IncidentPlan;
   try {
     plan = planIncident({
@@ -120,8 +128,8 @@ export async function startIncidentAction(deps: IncidentDeps, raw: Record<string
       timezone: context.timezone,
       now: deps.now(),
       trigger,
-      items: context.items,
-      fixedActivities: context.baseline.fixed_activities.map((a) => ({ name: a.name, date: a.date, start: a.start, end: a.end ?? null })),
+      items,
+      fixedActivities: baseline.fixed_activities.map((a) => ({ name: a.name, date: a.date, start: a.start, end: a.end ?? null })),
       location: f.lat !== undefined && f.lng !== undefined ? { lat: f.lat, lng: f.lng } : null,
       companions: f.companions,
       luggage: f.luggage,
